@@ -10,3 +10,4 @@ class RegistroAdmin(admin.ModelAdmin):
 class PerfilUsuarioAdmin(admin.ModelAdmin):
     list_display = ('usuario', 'rol')
     list_filter = ('rol',)
+    
