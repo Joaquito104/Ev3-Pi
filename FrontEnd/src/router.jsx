@@ -11,14 +11,12 @@ import NoAutorizado from "./pages/NoAutorizado";
 
 import Navbar from "./components/layout/Navbar";
 import Footer from "./components/layout/Footer";
-import ThemeToggle from "./components/common/ThemeToggle";
 
 import ProtectedRoute from "./auth/ProtectedRoute";
 import { AuthContext } from "./App";
 
 const LayoutWrapper = ({ children }) => (
   <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}>
-    <ThemeToggle />
     <Navbar />
     <div style={{ flex: 1 }}>{children}</div>
     <Footer />

@@ -22,20 +22,22 @@ export default function TaxManagement() {
   }
 
   return (
-    <div style={{ padding: 24, background: bg, color: text, minHeight: 'calc(100vh - 56px)' }}>
-      <h1 style={{ marginTop: 0 }}>Panel de gestión tributaria</h1>
-      <p style={{ color: muted }}>Consulta y gestiona obligaciones fiscales por año.</p>
+    <div style={{ padding: 24, background: bg, color: text, minHeight: 'calc(100vh - 56px)', display: 'flex', justifyContent: 'center' }}>
+      <div style={{ maxWidth: 600, textAlign: 'center' }}>
+        <h1 style={{ marginTop: 0 }}>Panel de gestión tributaria</h1>
+        <p style={{ color: muted }}>Consulta y gestiona obligaciones fiscales por año.</p>
 
-      <div style={{ display: 'flex', gap: 12, alignItems: 'center', marginTop: 12, background: card, padding: 16, borderRadius: 6, border: `1px solid ${border}`, width: 'fit-content' }}>
+      <div style={{ display: 'flex', gap: 12, alignItems: 'center', marginTop: 12, background: card, padding: 16, borderRadius: 6, border: `1px solid ${border}`, justifyContent: 'center', margin: '12px auto 0' }}>
         <label style={{ color: text }}>Año:</label>
-        <input type="number" value={year} onChange={(e) => setYear(Number(e.target.value))} style={{ width: 120, padding: 8, borderRadius: 4, border: `1px solid ${border}`, background: dark ? '#1f2937' : '#fff', color: text }} />
+        <input type="number" value={year} onChange={(e) => setYear(Number(e.target.value))} style={{ Swidth: 120, padding: 8, borderRadius: 4, border: `1px solid ${border}`, background: dark ? '#1f2937' : '#fff', color: text }} />
         <button onClick={computeSummary} style={{ padding: '8px 16px', borderRadius: 4, border: `1px solid ${border}`, background: '#3b82f6', color: '#fff', cursor: 'pointer', fontWeight: '600' }}>Calcular resumen</button>
       </div>
 
-      <div style={{ marginTop: 16, background: card, padding: 16, borderRadius: 6, border: `1px solid ${border}` }}>
+      <div style={{ marginTop: 16, background: card, padding: 16, borderRadius: 6, border: `1px solid ${border}`, textAlign: 'center' }}>
         <h3 style={{ marginTop: 0 }}>Resumen {year}</h3>
         <p style={{ color: muted }}>Activos reportados: <strong style={{ color: text }}>$\{summary.assets}</strong></p>
         <p style={{ color: muted }}>Impuesto estimado: <strong style={{ color: text }}>$\{summary.taxes}</strong></p>
+      </div>
       </div>
     </div>
   );

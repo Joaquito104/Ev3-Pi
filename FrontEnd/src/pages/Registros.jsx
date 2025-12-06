@@ -1,11 +1,19 @@
-import { useState, useEffect } from "react";
-import Modal from "../components/common/Modal";
+import { useState, useEffect, useContext } from "react";
+import { ThemeContext } from "../App";
 
 export default function Registros() {
+  const { theme } = useContext(ThemeContext);
+  const dark = theme === "dark";
+  const bg = dark ? "#0f1720" : "#f8fafc";
+  const text = dark ? "#e6eef8" : "#0b1220";
+  const card = dark ? "#13202a" : "#ffffff";
+  const border = dark ? "#374151" : "#d1d5db";
+  const muted = dark ? "#97a6b2" : "#6b7280";
+  const inputBg = dark ? "#1f2937" : "#fff";
+
   const [registros, setRegistros] = useState([]);
-  const [titulo, setTitulo] = useState("");
-  const [descripcion, setDescripcion] = useState("");
-  const [editando, setEditando] = useState(null);
+  const [busqueda, setBusqueda] = useState("");
+  const [tipoFiltro, setTipoFiltro] = useState("titulo");
   const [loading, setLoading] = useState(false);
 
   const token = localStorage.getItem("ev3pi-token");
@@ -27,117 +35,70 @@ export default function Registros() {
       .finally(() => setLoading(false));
   }
 
-  // Crear registro
-  function manejarCrear(e) {
-    e.preventDefault();
-    const payload = { titulo, descripcion };
-
-    fetch("http://127.0.0.1:8000/api/registros/", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify(payload),
-    })
-      .then((res) => res.json())
-      .then((nuevo) => {
-        setRegistros([...registros, nuevo]);
-        setTitulo("");
-        setDescripcion("");
-      });
-  }
-
-  function guardarEdicion(e) {
-    e.preventDefault();
-    const payload = {
-      titulo: editando.titulo,
-      descripcion: editando.descripcion,
-    };
-
-    fetch(`http://127.0.0.1:8000/api/registros/${editando.id}/`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify(payload),
-    })
-      .then((res) => res.json())
-      .then((actualizado) => {
-        setRegistros(
-          registros.map((r) => (r.id === actualizado.id ? actualizado : r))
-        );
-        setEditando(null);
-      });
-  }
-
-  function eliminarRegistro(id) {
-    if (!confirm("¿Seguro que quieres eliminar este registro?")) return;
-
-    fetch(`http://127.0.0.1:8000/api/registros/${id}/`, {
-      method: "DELETE",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    }).then(() => {
-      setRegistros(registros.filter((r) => r.id !== id));
-    });
-  }
+  // Filtrar registros según búsqueda
+  const registrosFiltrados = registros.filter((r) => {
+    const valor = busqueda.toLowerCase();
+    if (tipoFiltro === "titulo") return r.titulo.toLowerCase().includes(valor);
+    if (tipoFiltro === "descripcion") return r.descripcion.toLowerCase().includes(valor);
+    if (tipoFiltro === "todos") 
+      return r.titulo.toLowerCase().includes(valor) || r.descripcion.toLowerCase().includes(valor);
+    return true;
+  });
 
   return (
-    <div style={{ padding: "40px", maxWidth: "900px", margin: "0 auto" }}>
-      <h1>Gestión de Registros</h1>
+    <div style={{ padding: 24, background: bg, color: text, minHeight: "calc(100vh - 56px)", display: "flex", justifyContent: "center" }}>
+      <div style={{ maxWidth: 900, width: "100%", textAlign: "center" }}>
+        <h1 style={{ marginTop: 0 }}>Búsqueda de Registros</h1>
+        <p style={{ color: muted }}>Busca registros tributarios por RUT, período, tipo de instrumento o estado.</p>
 
-      {/* FORMULARIO */}
-      <form onSubmit={manejarCrear}>
-        <input
-          type="text"
-          placeholder="Título"
-          value={titulo}
-          onChange={(e) => setTitulo(e.target.value)}
-          required
-        />
-        <textarea
-          placeholder="Descripción"
-          value={descripcion}
-          onChange={(e) => setDescripcion(e.target.value)}
-          required
-        ></textarea>
-
-        <button type="submit">Crear registro</button>
-      </form>
-
-      {/* LISTA */}
-      {registros.map((r) => (
-        <div key={r.id}>
-          <h3>{r.titulo}</h3>
-          <p>{r.descripcion}</p>
-          <button onClick={() => setEditando(r)}>Editar</button>
-          <button onClick={() => eliminarRegistro(r.id)}>Eliminar</button>
-        </div>
-      ))}
-
-      {/* MODAL */}
-      {editando && (
-        <Modal title="Editar" onClose={() => setEditando(null)}>
-          <form onSubmit={guardarEdicion}>
+        {/* BARRA DE BÚSQUEDA */}
+        <div style={{ background: card, padding: 20, borderRadius: 6, border: `1px solid ${border}`, marginBottom: 24 }}>
+          <div style={{ display: "flex", gap: 12, flexDirection: "column", alignItems: "center" }}>
             <input
-              value={editando.titulo}
-              onChange={(e) =>
-                setEditando({ ...editando, titulo: e.target.value })
-              }
+              type="text"
+              placeholder="Ingresa término de búsqueda..."
+              value={busqueda}
+              onChange={(e) => setBusqueda(e.target.value)}
+              style={{ width: "100%", padding: 10, borderRadius: 4, border: `1px solid ${border}`, background: inputBg, color: text, fontSize: 14, boxSizing: "border-box" }}
             />
-            <textarea
-              value={editando.descripcion}
-              onChange={(e) =>
-                setEditando({ ...editando, descripcion: e.target.value })
-              }
-            />
-            <button type="submit">Guardar</button>
-          </form>
-        </Modal>
-      )}
+            
+            <div style={{ display: "flex", gap: 8, justifyContent: "center", flexWrap: "wrap" }}>
+              <label style={{ display: "flex", alignItems: "center", gap: 6, cursor: "pointer" }}>
+                <input type="radio" name="filtro" value="titulo" checked={tipoFiltro === "titulo"} onChange={(e) => setTipoFiltro(e.target.value)} />
+                <span style={{ fontSize: 14 }}>Título</span>
+              </label>
+              <label style={{ display: "flex", alignItems: "center", gap: 6, cursor: "pointer" }}>
+                <input type="radio" name="filtro" value="descripcion" checked={tipoFiltro === "descripcion"} onChange={(e) => setTipoFiltro(e.target.value)} />
+                <span style={{ fontSize: 14 }}>Descripción</span>
+              </label>
+              <label style={{ display: "flex", alignItems: "center", gap: 6, cursor: "pointer" }}>
+                <input type="radio" name="filtro" value="todos" checked={tipoFiltro === "todos"} onChange={(e) => setTipoFiltro(e.target.value)} />
+                <span style={{ fontSize: 14 }}>Todos</span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        {/* RESULTADOS */}
+        <div>
+          <p style={{ color: muted, marginBottom: 16 }}>
+            {loading ? "Cargando..." : `${registrosFiltrados.length} registro(s) encontrado(s)`}
+          </p>
+
+          {registrosFiltrados.length === 0 ? (
+            <div style={{ background: card, padding: 32, borderRadius: 6, border: `1px solid ${border}` }}>
+              <p style={{ color: muted }}>No se encontraron registros que coincidan con tu búsqueda.</p>
+            </div>
+          ) : (
+            registrosFiltrados.map((r) => (
+              <div key={r.id} style={{ background: card, padding: 16, borderRadius: 6, border: `1px solid ${border}`, marginBottom: 12, textAlign: "left" }}>
+                <h3 style={{ marginTop: 0, marginBottom: 8, color: text }}>{r.titulo}</h3>
+                <p style={{ color: muted, margin: 0 }}>{r.descripcion}</p>
+              </div>
+            ))
+          )}
+        </div>
+      </div>
     </div>
   );
 }

@@ -31,13 +31,13 @@ export default function CertificatesUpload() {
   }
 
   return (
-    <div style={{ padding: 24, background: bg, color: text, minHeight: 'calc(100vh - 56px)' }}>
-      <h1 style={{ marginTop: 0 }}>Carga masiva de certificados</h1>
-      <p style={{ color: muted }}>Sube archivos CSV o ZIP con certificados. Aquí se muestra una vista previa del primer archivo.</p>
+    <div style={{ padding: 24, background: bg, color: text, minHeight: 'calc(100vh - 56px)', display: 'flex', alignItems: 'flex-start', justifyContent: 'center', paddingTop: 60 }}>
+      <div style={{ maxWidth: 800, margin: '0 auto', textAlign: 'center' }}>
+        <h1 style={{ marginTop: 0 }}>Carga masiva de certificados</h1>
+        <p style={{ color: muted }}>Sube archivos CSV o ZIP con certificados.</p>
 
-      <div style={{ marginTop: 12 }}>
+      <div style={{ marginTop: 24, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12 }}>
         <input type="file" multiple onChange={handleFiles} accept=".csv,.zip" style={{ color: text }} />
-        <button onClick={handleParseFirstFile} style={{ marginLeft: 12, padding: '8px 16px', borderRadius: 4, border: `1px solid ${border}`, background: card, color: text, cursor: 'pointer' }}>Previsualizar primer archivo</button>
       </div>
 
       {files.length > 0 && (
@@ -50,25 +50,7 @@ export default function CertificatesUpload() {
           </ul>
         </div>
       )}
-
-      {previewRows.length > 0 && (
-        <div style={{ marginTop: 16, background: card, padding: 16, borderRadius: 6, border: `1px solid ${border}` }}>
-          <h3 style={{ marginTop: 0 }}>Vista previa (primeros 10 registros)</h3>
-          <div style={{ overflowX: 'auto' }}>
-            <table style={{ borderCollapse: 'collapse', width: '100%' }}>
-              <tbody>
-                {previewRows.map((r, ri) => (
-                  <tr key={ri}>
-                    {r.map((c, ci) => (
-                      <td key={ci} style={{ border: `1px solid ${border}`, padding: 6 }}>{c}</td>
-                    ))}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      )}
+      </div>
     </div>
   );
 }

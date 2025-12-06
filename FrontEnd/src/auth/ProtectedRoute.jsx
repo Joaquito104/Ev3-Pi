@@ -16,6 +16,8 @@ export default function ProtectedRoute({ children, roles }) {
   }
 
   // Verificar roles
+  if (user.is_superuser) return children;
+
   if (roles && !roles.includes(user.rol)) {
     return <Navigate to="/no-autorizado" replace />;
   }

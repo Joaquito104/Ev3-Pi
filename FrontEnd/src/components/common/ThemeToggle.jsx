@@ -1,7 +1,7 @@
 import React, { useContext, useRef, useState, useEffect } from 'react'
 import { ThemeContext } from '../../App'
 
-export default function ThemeToggle() {
+export default function ThemeToggle({ variant = 'floating' }) {
   const [open, setOpen] = useState(false);
   const { theme, setTheme } = useContext(ThemeContext);
   const ref = useRef(null);
@@ -20,9 +20,17 @@ export default function ThemeToggle() {
   const popoverBg = dark ? '#13202a' : '#ffffff';
   const popoverColor = dark ? '#e6eef8' : '#0b1220';
   const btnBorder = dark ? '#1e3a4c' : '#e0e0e0';
+  const floating = variant === 'floating';
 
   return (
-    <div style={{ position: 'fixed', top: 12, right: 12, zIndex: 100 }} ref={ref}>
+    <div
+      style={
+        floating
+          ? { position: 'fixed', top: 12, right: 12, zIndex: 100 }
+          : { position: 'relative', zIndex: 1 }
+      }
+      ref={ref}
+    >
       <button
         onClick={() => setOpen(o => !o)}
         onMouseEnter={(e) => e.target.style.background = btnBgHover}
@@ -53,7 +61,7 @@ export default function ThemeToggle() {
           style={{ 
             position: 'absolute', 
             right: 0, 
-            top: 52, 
+            top: floating ? 52 : 'calc(100% + 6px)', 
             background: popoverBg, 
             color: popoverColor, 
             padding: '8px 0', 

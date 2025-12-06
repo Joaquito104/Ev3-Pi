@@ -72,7 +72,8 @@ export default function AuditPanel() {
 
   return (
     <div style={{ padding: 24, background: bg, color: text, minHeight: 'calc(100vh - 56px)' }}>
-      <h1 style={{ marginTop: 0 }}>Panel de auditoría</h1>
+      <div style={{ maxWidth: 1400, margin: '0 auto' }}>
+        <h1 style={{ marginTop: 0 }}>Panel de auditoría</h1>
 
       {/* DIV 1: Estadísticas y Gráficos */}
       <div style={{ background: card, padding: 20, borderRadius: 8, marginBottom: 24, boxShadow: dark ? 'none' : '0 1px 3px rgba(0,0,0,0.1)', border: `1px solid ${border}` }}>
@@ -183,6 +184,7 @@ export default function AuditPanel() {
             <button onClick={() => setPage(p => Math.min(pages, p + 1))} disabled={page === pages} style={{ padding: '8px 12px', borderRadius: 4, border: `1px solid ${border}`, background: page === pages ? inputBg : card, color: text, cursor: page === pages ? 'not-allowed' : 'pointer' }}>Siguiente</button>
           </div>
         </div>
+      </div>
       </div>
     </div>
   );

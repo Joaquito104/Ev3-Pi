@@ -50,11 +50,11 @@ build/
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 
-# Env del frontend
+# Env del frontend (ignorar archivos con credenciales, mantener .env.example)
 .env
-.env.*
+.env.local
+.env.*.local
 !.env.example
-
 
 # ==============================
 #           BACKEND (DJANGO)
@@ -70,8 +70,15 @@ venv/
 env/
 *.pyvenv
 
+# Migraciones intermedias (mantener solo 0001_initial.py)
+Backend/src/migrations/0002_*.py
+Backend/src/migrations/0003_*.py
+Backend/src/migrations/0004_*.py
+Backend/src/migrations/0005_*.py
+
 # Base de datos SQLite
 *.sqlite3
+*.db
 
 # Archivos de medios
 media/
@@ -80,15 +87,23 @@ staticfiles/
 # Django static collect
 static/
 
-# Secretos
-*.env
+# Archivos de secretos y credenciales (ignorar .env, mantener .env.example)
+Backend/.env
+Backend/.env.local
+Backend/.env.*.local
+!Backend/.env.example
+
+# Claves privadas
 *.key
 *.pem
+*.p12
 
-# Reportes
+# Reportes y cobertura de tests
 *.coverage
 coverage/
 htmlcov/
+.coverage
+.coverage.*
 
 # ==============================
 #       OTRAS CONFIGURACIONES
@@ -109,3 +124,10 @@ web_modules/
 !.yarn/releases
 !.yarn/sdks
 !.yarn/versions
+
+# Otros archivos sensibles
+.DS_Store
+.env.prod
+.env.production
+*.secrets
+config/secrets/

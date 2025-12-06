@@ -14,7 +14,7 @@ export default function NoAutorizado() {
       }}
     >
       <h1 style={{ fontSize: "32px", fontWeight: 700, marginBottom: "10px" }}>
-        🚫 Acceso no autorizado
+        Acceso no autorizado
       </h1>
 
       <p style={{ maxWidth: "500px", fontSize: "16px", opacity: 0.8 }}>
@@ -22,7 +22,7 @@ export default function NoAutorizado() {
         Si crees que es un error, contacta al administrador del sistema.
       </p>
 
-      {/* 🔵 BOTÓN VOLVER */}
+      {/*  BOTÓN VOLVER */}
       <Link
         to="/"
         style={{

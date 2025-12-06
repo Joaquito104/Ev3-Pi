@@ -6,11 +6,19 @@ class PermisoRegistro(BasePermission):
     """
 
     def has_permission(self, request, view):
+        # Superusuarios siempre pasan
+        if request.user and request.user.is_superuser:
+            return True
+
         return bool(request.user and request.user.is_authenticated)
 
     def has_object_permission(self, request, view, obj):
         perfil = getattr(request.user, "perfil", None)
         rol = getattr(perfil, "rol", None)
+
+        # Superusuarios sin restricciones
+        if request.user.is_superuser:
+            return True
 
         # AUDITOR -> solo lectura
         if rol == "AUDITOR":

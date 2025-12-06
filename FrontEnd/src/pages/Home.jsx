@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import ThemeToggle from '../components/common/ThemeToggle'
 import Navbar from '../components/layout/Navbar'
 import Footer from '../components/layout/Footer'
 
@@ -35,7 +34,6 @@ const Home = () => {
 
   return (
     <div style={{ minHeight: '100vh', background: bg, color: text, transition: 'background 200ms, color 200ms', display: 'flex', flexDirection: 'column' }}>
-      <ThemeToggle />
       <Navbar />
       
       <main style={{ flex: 1, padding: '48px 24px', maxWidth: 1200, margin: '0 auto', width: '100%', fontFamily: 'Inter, Arial, sans-serif' }}>

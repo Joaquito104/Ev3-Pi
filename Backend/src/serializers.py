@@ -10,7 +10,8 @@ class RegistroSerializer(serializers.ModelSerializer):
 
 class UserSerializer(serializers.ModelSerializer):
     rol = serializers.CharField(source='perfil.rol', read_only=True)  # ← bien
+    is_superuser = serializers.BooleanField(read_only=True)
 
     class Meta:
         model = User
-        fields = ['id', 'username', 'first_name', 'last_name', 'rol']
+        fields = ['id', 'username', 'first_name', 'last_name', 'rol', 'is_superuser']

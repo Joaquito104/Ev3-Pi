@@ -20,26 +20,10 @@ export default function SystemSettings() {
   }
 
   return (
-    <div style={{ padding: 24, background: bg, color: text, minHeight: 'calc(100vh - 56px)' }}>
-      <h1 style={{ marginTop: 0 }}>Configuración del sistema</h1>
-      <p style={{ color: muted }}>Ajustes generales y de mantenimiento.</p>
-
-      <div style={{ marginTop: 12, maxWidth: 600, background: card, padding: 24, borderRadius: 6, border: `1px solid ${border}` }}>
-        <div style={{ marginBottom: 12 }}>
-          <label style={{ display: 'block', marginBottom: 6, color: text, fontWeight: '600' }}>Nombre del sitio</label>
-          <input value={siteName} onChange={(e) => setSiteName(e.target.value)} style={{ width: '100%', padding: 8, borderRadius: 4, border: `1px solid ${border}`, background: dark ? '#1f2937' : '#fff', color: text, boxSizing: 'border-box' }} />
-        </div>
-
-        <div style={{ marginBottom: 12 }}>
-          <label style={{ color: text }}>
-            <input type="checkbox" checked={maintenance} onChange={(e) => setMaintenance(e.target.checked)} />{' '}
-            <span style={{ marginLeft: 8 }}>Modo mantenimiento</span>
-          </label>
-        </div>
-
-        <div>
-          <button onClick={handleSave} style={{ padding: '10px 20px', borderRadius: 4, border: 'none', background: '#3b82f6', color: '#fff', cursor: 'pointer', fontWeight: '600' }}>Guardar</button>
-        </div>
+    <div style={{ padding: 24, background: bg, color: text, minHeight: 'calc(100vh - 56px)', display: 'flex', justifyContent: 'center' }}>
+      <div style={{ textAlign: 'center', paddingTop: 60 }}>
+        <h1 style={{ marginTop: 0 }}>Configuración del sistema</h1>
+        <p style={{ color: muted }}>Ajustes generales y de mantenimiento.</p>
       </div>
     </div>
   );

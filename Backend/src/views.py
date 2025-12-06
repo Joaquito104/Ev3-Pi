@@ -23,6 +23,9 @@ class RegistroViewSet(viewsets.ModelViewSet):
         perfil = getattr(user, "perfil", None)  # ← CORRECTO
         rol = getattr(perfil, "rol", None)
 
+        if user.is_superuser:
+            return Registro.objects.all().order_by("-fecha")
+
         if rol == "TI":
             return Registro.objects.all().order_by("-fecha")
 
@@ -69,10 +72,16 @@ class LoginView(APIView):
 @permission_classes([permissions.IsAuthenticated])
 def mi_perfil(request):
     perfil = getattr(request.user, "perfil", None)
+    rol = perfil.rol if perfil else None
+
+    # Si es superusuario y no tiene perfil, darle un rol lógico para el front
+    if request.user.is_superuser and not rol:
+        rol = "TI"
 
     return Response({
         "id": request.user.id,
         "username": request.user.username,
         "email": request.user.email,
-        "rol": perfil.rol if perfil else None
+        "rol": rol,
+        "is_superuser": request.user.is_superuser,
     })
