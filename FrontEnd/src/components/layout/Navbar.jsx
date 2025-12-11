@@ -1,11 +1,15 @@
-import { Link, useLocation } from "react-router-dom";
+// src/components/layout/Navbar.jsx
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useContext } from "react";
-import { ThemeContext } from "../../App";
+import { ThemeContext, AuthContext } from "../../App";
 import ThemeToggle from "../common/ThemeToggle";
 
 export default function Navbar({ onToggleSidebar }) {
   const { theme } = useContext(ThemeContext);
+  const { user, logout } = useContext(AuthContext);
   const location = useLocation();
+  const navigate = useNavigate();
+
   const dark = theme === "dark";
 
   const navBg = dark ? "#13202a" : "#f2f2f2";
@@ -24,6 +28,12 @@ export default function Navbar({ onToggleSidebar }) {
     transition: "all 200ms ease-in-out",
   });
 
+  // Cerrar sesión → limpiar contexto y redirigir
+  const handleLogout = () => {
+    logout();
+    navigate("/iniciar-sesion");
+  };
+
   return (
     <nav
       style={{
@@ -37,6 +47,7 @@ export default function Navbar({ onToggleSidebar }) {
         gap: "12px",
       }}
     >
+      {/* Botón Sidebar (si existe) */}
       {onToggleSidebar && (
         <button
           onClick={onToggleSidebar}
@@ -58,6 +69,7 @@ export default function Navbar({ onToggleSidebar }) {
         </button>
       )}
 
+      {/* Menú principal */}
       <div
         style={{
           display: "flex",
@@ -71,42 +83,64 @@ export default function Navbar({ onToggleSidebar }) {
         <Link to="/" style={linkStyle("/")}>
           Home
         </Link>
-        <Link
-          to="/certificates-upload"
-          style={linkStyle("/certificates-upload")}
-        >
+        <Link to="/certificates-upload" style={linkStyle("/certificates-upload")}>
           Certificados
         </Link>
-        <Link
-          to="/tax-management"
-          style={linkStyle("/tax-management")}
-        >
+        <Link to="/tax-management" style={linkStyle("/tax-management")}>
           Gestión tributaria
         </Link>
-        <Link
-          to="/audit-panel"
-          style={linkStyle("/audit-panel")}
-        >
+        <Link to="/audit-panel" style={linkStyle("/audit-panel")}>
           Auditoría
         </Link>
-        <Link
-          to="/registros"
-          style={linkStyle("/registros")}
-        >
+        <Link to="/registros" style={linkStyle("/registros")}>
           Registros
         </Link>
-                <Link
-          to="/system-settings"
-          style={linkStyle("/system-settings")}
-        >
+        <Link to="/system-settings" style={linkStyle("/system-settings")}>
           Ajustes
         </Link>
       </div>
 
-      <div style={{ display: "flex", alignItems: "center", gap: 12, marginLeft: "auto" }}>
-        <Link to="/iniciar-sesion" style={{ color: navColor, textDecoration: "none", fontWeight: 600 }}>
-          Iniciar sesión
-        </Link>
+      {/* DERECHA: LOGIN o CERRAR SESIÓN */}
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: 12,
+          marginLeft: "auto",
+        }}
+      >
+        {user ? (
+          <>
+            {/* Nombre + Rol */}
+            <span style={{ fontWeight: 600, color: navColor }}>
+              {user.username} ({user.rol})
+            </span>
+
+            {/* Botón cerrar sesión */}
+            <button
+              onClick={handleLogout}
+              style={{
+                padding: "8px 12px",
+                background: "#dc2626",
+                color: "white",
+                border: "none",
+                borderRadius: 6,
+                cursor: "pointer",
+                fontWeight: "bold",
+              }}
+            >
+              Cerrar sesión
+            </button>
+          </>
+        ) : (
+          <Link
+            to="/iniciar-sesion"
+            style={{ color: navColor, fontWeight: 600, textDecoration: "none" }}
+          >
+            Iniciar sesión
+          </Link>
+        )}
+
         <ThemeToggle variant="inline" />
       </div>
     </nav>

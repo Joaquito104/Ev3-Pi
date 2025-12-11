@@ -1,3 +1,4 @@
+// src/pages/Login.jsx
 import { useContext, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import Input from "../components/common/Input";
@@ -24,35 +25,7 @@ const Login = () => {
     setError(null);
 
     try {
-      // LOGIN OFICIAL JWT
-      const response = await fetch("http://127.0.0.1:8000/api/token/", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          username: form.username,
-          password: form.password,
-        }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        setError("Credenciales incorrectas");
-        return;
-      }
-
-      // Guardar token
-      localStorage.setItem("ev3pi-token", data.access);
-
-      // Obtener perfil
-      const perfilResp = await fetch("http://127.0.0.1:8000/api/perfil/", {
-        headers: {
-          Authorization: `Bearer ${data.access}`,
-        },
-      });
-
-      const perfil = await perfilResp.json();
-      login(data.access, perfil); // Guardar en contexto
+      const perfil = await login(form.username, form.password);
 
       // Redirección por rol
       switch (perfil.rol) {
@@ -71,8 +44,12 @@ const Login = () => {
         default:
           navigate("/");
       }
-    } catch (error) {
-      setError("Error de conexión con el servidor");
+    } catch (err) {
+      if (err.message === "CREDENCIALES") {
+        setError("Credenciales incorrectas");
+      } else {
+        setError("Error de conexión con el servidor");
+      }
     }
   };
 

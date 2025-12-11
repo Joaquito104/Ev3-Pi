@@ -1,81 +1,89 @@
-import React, { createContext, useEffect, useState } from "react";
-import Router from "./router";
+// src/App.jsx
+import { createContext, useEffect, useState } from "react";
 import { BrowserRouter } from "react-router-dom";
+import Router from "./router";
 
-// Contextos
 export const ThemeContext = createContext();
 export const AuthContext = createContext();
 
 export default function App() {
-  // -------------------------
-  //  THEME
-  // -------------------------
-  const [theme, setTheme] = useState(() => {
-    try {
-      return localStorage.getItem('ev3pi-theme') || 'light';
-    } catch (e) {
-      return 'light';
-    }
-  });
+  const [theme, setTheme] = useState(
+    () => localStorage.getItem("ev3pi-theme") || "light"
+  );
 
   useEffect(() => {
-    try {
-      localStorage.setItem('ev3pi-theme', theme);
-    } catch (e) {}
-
-    if (theme === "dark") document.documentElement.classList.add("theme-dark");
-    else document.documentElement.classList.remove("theme-dark");
+    localStorage.setItem("ev3pi-theme", theme);
   }, [theme]);
 
-  // -------------------------
-  //  AUTH
-  // -------------------------
-  const [user, setUser] = useState(null); // contiene: id, username, rol
+  const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Cargar token y datos del usuario al inicio
+  // AUTOLOGIN
   useEffect(() => {
     const token = localStorage.getItem("ev3pi-token");
-
     if (!token) {
       setLoading(false);
       return;
     }
 
-    // Llamar backend para obtener perfil
     fetch("http://127.0.0.1:8000/api/perfil/", {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+      headers: { Authorization: `Bearer ${token}` },
     })
-      .then(async (res) => {
-        if (!res.ok) throw new Error("Token inválido");
-        const data = await res.json();
-        setUser(data);
+      .then((res) => (res.ok ? res.json() : Promise.reject()))
+      .then((perfil) => {
+        const userData = {
+          id: perfil.id,
+          username: perfil.username,
+          rol: perfil.rol,
+          is_superuser: perfil.is_superuser,
+        };
+        setUser(userData);
       })
       .catch(() => {
-        // Si el token expiró → limpiar
         localStorage.removeItem("ev3pi-token");
         setUser(null);
       })
       .finally(() => setLoading(false));
   }, []);
 
-  // Función login
-  function login(token, userData) {
-    localStorage.setItem("ev3pi-token", token);
-    setUser(userData);
-  }
+  // LOGIN OFICIAL
+  const login = async (username, password) => {
+    const resp = await fetch("http://127.0.0.1:8000/api/token/", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username, password }),
+    });
 
-  // Función logout
-  function logout() {
+    if (!resp.ok) throw new Error("CREDENCIALES");
+
+    const data = await resp.json();
+    localStorage.setItem("ev3pi-token", data.access);
+
+    const perfilResp = await fetch("http://127.0.0.1:8000/api/perfil/", {
+      headers: { Authorization: `Bearer ${data.access}` },
+    });
+
+    const perfil = await perfilResp.json();
+
+    const userData = {
+      id: perfil.id,
+      username: perfil.username,
+      rol: perfil.rol,
+      is_superuser: perfil.is_superuser,
+    };
+
+    setUser(userData);
+    return userData;
+  };
+
+  const logout = () => {
     localStorage.removeItem("ev3pi-token");
     setUser(null);
-  }
+  };
 
   return (
     <ThemeContext.Provider value={{ theme, setTheme }}>
-      <AuthContext.Provider value={{ user, setUser, login, logout, loading }}>
+      <AuthContext.Provider value={{ user, loading, login, logout }}>
         <BrowserRouter>
           <Router />
         </BrowserRouter>
