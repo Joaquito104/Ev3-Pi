@@ -69,6 +69,7 @@ __pycache__/
 venv/
 env/
 *.pyvenv
+Backend/ven/
 
 # Migraciones intermedias (mantener solo 0001_initial.py)
 Backend/src/migrations/0002_*.py
@@ -131,3 +132,5 @@ web_modules/
 .env.production
 *.secrets
 config/secrets/
+debug*.py
+*.dump

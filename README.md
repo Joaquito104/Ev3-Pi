@@ -16,27 +16,113 @@ Sistema integral de gestión tributaria y certificados digitales con autenticaci
 
 #### 1. Backend (Django)
 
-```bash
-# Navegar al directorio backend
-cd Backend
+Sigue estos pasos en Windows para iniciar el backend (comandos listos para copiar/pegar).
 
-# Crear y activar entorno virtual
-python -m venv venv
-source venv/Scripts/activate  # En Windows: venv\Scripts\activate
+1) Abrir la carpeta y activar el virtualenv
 
-# Instalar dependencias desde requirements.txt
-pip install -r requirements.txt
+PowerShell:
 
-# Configurar variables de entorno
-# Asegúrate de que Backend/.env existe con las credenciales de PostgreSQL
-
-# Ejecutar migraciones
-python manage.py migrate
-
-# Iniciar servidor Django
-python manage.py runserver
-# Servidor disponible en: http://127.0.0.1:8000
+```powershell
+cd 'C:\Users\ESTEBAN\Desktop\Ev3-Pi\Backend'
+.\ven\Scripts\Activate.ps1
 ```
+
+cmd.exe:
+
+```cmd
+cd C:\Users\ESTEBAN\Desktop\Ev3-Pi\Backend
+.\ven\Scripts\activate.bat
+```
+
+Si no existe `ven`, créalo y actívalo:
+
+```powershell
+python -m venv ven
+.\ven\Scripts\Activate.ps1
+```
+
+2) Instalar dependencias
+
+```powershell
+pip install -r requirements.txt
+```
+
+3) Crear `Backend/.env` a partir de la plantilla
+
+Usa `Backend/.env.example` como plantilla. Crea `Backend/.env` y pega (ajusta valores):
+
+```
+SECRET_KEY=YOUR_SECRET_KEY
+DEBUG=True
+DB_NAME=test
+DB_USER=test
+PASSWORD=YOUR_DB_PASSWORD
+DB_HOST=127.0.0.1
+DB_PORT=5432
+PGCLIENTENCODING=UTF8
+ALLOWED_HOSTS=localhost,127.0.0.1
+```
+
+IMPORTANTE: no dejes espacios al final de las líneas (p. ej. `DB_HOST=127.0.0.1 `). Un espacio final rompe la resolución del host.
+
+4) Iniciar PostgreSQL si no está corriendo (opcional)
+
+Si tienes PostgreSQL instalado localmente (ejemplo: PostgreSQL 18):
+
+```powershell
+& 'C:\Program Files\PostgreSQL\18\bin\pg_ctl.exe' start -D 'C:\Program Files\PostgreSQL\18\data' -w
+```
+
+Comprobar que escucha en 5432:
+
+```powershell
+netstat -ano | Select-String ":5432"
+```
+
+Alternativa: usar Docker (rápido para pruebas):
+
+```powershell
+docker run --name ev3pi-postgres -e POSTGRES_PASSWORD=postgres -e POSTGRES_USER=postgres -e POSTGRES_DB=postgres -p 5432:5432 -d postgres:15
+```
+
+5) Crear base de datos y usuario (si hace falta)
+
+Si tienes la contraseña del superuser `postgres`:
+
+```powershell
+& 'C:\Program Files\PostgreSQL\18\bin\psql.exe' -h 127.0.0.1 -U postgres -c "CREATE USER test WITH PASSWORD '1234';"
+& 'C:\Program Files\PostgreSQL\18\bin\psql.exe' -h 127.0.0.1 -U postgres -c "CREATE DATABASE test OWNER test ENCODING 'UTF8' TEMPLATE template0;"
+& 'C:\Program Files\PostgreSQL\18\bin\psql.exe' -h 127.0.0.1 -U postgres -c "GRANT ALL PRIVILEGES ON DATABASE test TO test;"
+```
+
+Si NO conoces la contraseña `postgres`, existe un método temporal (hacer backup de `pg_hba.conf`, permitir `trust` en localhost, crear la DB/usuario y restaurar el archivo). Pide que lo haga por ti y lo ejecuto.
+
+6) Ejecutar migraciones y crear superusuario
+
+```powershell
+& .\ven\Scripts\python.exe manage.py migrate
+& .\ven\Scripts\python.exe manage.py createsuperuser
+```
+
+7) Arrancar el servidor
+
+```powershell
+& .\ven\Scripts\python.exe manage.py runserver 127.0.0.1:8000
+```
+
+Abrir en navegador: http://127.0.0.1:8000/
+
+8) Solución de problemas rápidos
+
+- "could not translate host name '127.0.0.1 '" → revisar `.env` y quitar espacios finales.
+- UnicodeDecodeError (psycopg2) → asegurarse de tener `PGCLIENTENCODING=UTF8` en `.env` y comprobar `server_encoding`:
+
+```powershell
+& 'C:\Program Files\PostgreSQL\18\bin\psql.exe' -h 127.0.0.1 -U postgres -c "SHOW server_encoding;"
+```
+
+Si la DB no está en UTF8, lo más sencillo es crear una base nueva con ENCODING='UTF8' para desarrollo o realizar un dump/restore con conversión.
+
 
 #### 2. Frontend (React)
 

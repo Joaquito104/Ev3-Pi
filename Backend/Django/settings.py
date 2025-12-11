@@ -82,12 +82,28 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': os.getenv('DB_NAME'),
-        'USER': os.getenv('USER'),
+        # Prefer explicit DB_USER to avoid colliding with OS-level USER env on Windows
+        'USER': os.getenv('DB_USER', os.getenv('USER')),
         'PASSWORD': os.getenv('PASSWORD'),
         'HOST': os.getenv('DB_HOST', 'localhost'),
         'PORT': os.getenv('DB_PORT', '5432'),
     }
 }
+
+# --- DEBUG: print DB params (temporary, remove after diagnosis) ---
+try:
+    _db_debug = {k: os.getenv(k) for k in ('DB_NAME','DB_USER','USER','PASSWORD','DB_HOST','DB_PORT')}
+    # print reprs so bytes/encodings are visible in logs
+    print('DEBUG DB ENV VARS:')
+    for k, v in _db_debug.items():
+        print(f"  {k}: {repr(v)}")
+        if v is not None:
+            try:
+                print('    utf8 bytes:', list(v.encode('utf-8'))[:120])
+            except Exception as _e:
+                print('    encode error:', _e)
+except Exception:
+    pass
 
 # ----------------------------------------------------
 # PASSWORD VALIDATION
