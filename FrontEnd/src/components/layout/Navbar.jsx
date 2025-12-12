@@ -1,4 +1,3 @@
-// src/components/layout/Navbar.jsx
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useContext } from "react";
 import { ThemeContext, AuthContext } from "../../App";
@@ -11,10 +10,11 @@ export default function Navbar({ onToggleSidebar }) {
   const navigate = useNavigate();
 
   const dark = theme === "dark";
-
   const navBg = dark ? "#13202a" : "#f2f2f2";
   const navColor = dark ? "#e6eef8" : "#0b1220";
   const activeBg = dark ? "#1e3a4c" : "#e0e0e0";
+  const btnBg = dark ? "#0b1220" : "#111827";
+  const btnColor = "#ffffff";
 
   const isActive = (path) => location.pathname === path;
 
@@ -22,16 +22,22 @@ export default function Navbar({ onToggleSidebar }) {
     color: navColor,
     textDecoration: "none",
     padding: "8px 12px",
-    borderRadius: 4,
+    borderRadius: 6,
     background: isActive(path) ? activeBg : "transparent",
-    fontWeight: isActive(path) ? 600 : 400,
+    fontWeight: isActive(path) ? 700 : 500,
     transition: "all 200ms ease-in-out",
   });
 
-  // Cerrar sesión → limpiar contexto y redirigir
+  // ✅ Mostrar links SOLO si el rol tiene permiso (para que “se note” el RBAC)
+  const canSee = (allowedRoles = []) => {
+    if (!user) return false;
+    if (user.is_superuser) return true;
+    return allowedRoles.includes(user.rol);
+  };
+
   const handleLogout = () => {
     logout();
-    navigate("/iniciar-sesion");
+    navigate("/iniciar-sesion", { replace: true });
   };
 
   return (
@@ -42,106 +48,100 @@ export default function Navbar({ onToggleSidebar }) {
         color: navColor,
         display: "flex",
         alignItems: "center",
-        justifyContent: "flex-start",
-        boxShadow: "0 2px 8px rgba(2,6,23,0.08)",
         gap: "12px",
+        boxShadow: "0 2px 8px rgba(2,6,23,0.08)",
+        position: "sticky",
+        top: 0,
+        zIndex: 50,
       }}
     >
-      {/* Botón Sidebar (si existe) */}
       {onToggleSidebar && (
         <button
           onClick={onToggleSidebar}
           aria-label="Toggle sidebar"
           title="Toggle sidebar"
           style={{
-            position: "absolute",
-            left: 12,
             width: 40,
             height: 40,
-            borderRadius: 8,
+            borderRadius: 10,
             border: "none",
             background: "transparent",
             cursor: "pointer",
             fontSize: 20,
+            color: navColor,
           }}
         >
           ☰
         </button>
       )}
 
-      {/* Menú principal */}
-      <div
-        style={{
-          display: "flex",
-          gap: 16,
-          alignItems: "center",
-          flexWrap: "wrap",
-          flex: 1,
-          justifyContent: "center",
-        }}
-      >
-        <Link to="/" style={linkStyle("/")}>
-          Home
-        </Link>
-        <Link to="/certificates-upload" style={linkStyle("/certificates-upload")}>
-          Certificados
-        </Link>
-        <Link to="/tax-management" style={linkStyle("/tax-management")}>
-          Gestión tributaria
-        </Link>
-        <Link to="/audit-panel" style={linkStyle("/audit-panel")}>
-          Auditoría
-        </Link>
-        <Link to="/registros" style={linkStyle("/registros")}>
-          Registros
-        </Link>
-        <Link to="/system-settings" style={linkStyle("/system-settings")}>
-          Ajustes
-        </Link>
+      <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap", flex: 1 }}>
+        <Link to="/" style={linkStyle("/")}>Home</Link>
+
+        {canSee(["CORREDOR", "TI"]) && (
+          <Link to="/certificates-upload" style={linkStyle("/certificates-upload")}>
+            Certificados
+          </Link>
+        )}
+
+        {canSee(["ANALISTA", "AUDITOR", "TI"]) && (
+          <Link to="/tax-management" style={linkStyle("/tax-management")}>
+            Gestión tributaria
+          </Link>
+        )}
+
+        {canSee(["AUDITOR", "TI"]) && (
+          <Link to="/audit-panel" style={linkStyle("/audit-panel")}>
+            Auditoría
+          </Link>
+        )}
+
+        {canSee(["CORREDOR", "ANALISTA", "AUDITOR", "TI"]) && (
+          <Link to="/registros" style={linkStyle("/registros")}>
+            Registros
+          </Link>
+        )}
+
+        {canSee(["TI"]) && (
+          <Link to="/system-settings" style={linkStyle("/system-settings")}>
+            Ajustes
+          </Link>
+        )}
       </div>
 
-      {/* DERECHA: LOGIN o CERRAR SESIÓN */}
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: 12,
-          marginLeft: "auto",
-        }}
-      >
-        {user ? (
+      <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+        <ThemeToggle variant="inline" />
+
+        {!user ? (
+          <Link
+            to="/iniciar-sesion"
+            style={{ color: navColor, textDecoration: "none", fontWeight: 700 }}
+          >
+            Iniciar sesión
+          </Link>
+        ) : (
           <>
-            {/* Nombre + Rol */}
-            <span style={{ fontWeight: 600, color: navColor }}>
-              {user.username} ({user.rol})
+            <span style={{ fontSize: 13, opacity: 0.9 }}>
+              {user.username} — <b>{user.is_superuser ? "SUPER" : user.rol}</b>
             </span>
 
-            {/* Botón cerrar sesión */}
             <button
               onClick={handleLogout}
               style={{
-                padding: "8px 12px",
-                background: "#dc2626",
-                color: "white",
+                background: btnBg,
+                color: btnColor,
                 border: "none",
-                borderRadius: 6,
+                padding: "8px 12px",
+                borderRadius: 8,
                 cursor: "pointer",
-                fontWeight: "bold",
+                fontWeight: 700,
               }}
+              title="Cerrar sesión"
             >
               Cerrar sesión
             </button>
           </>
-        ) : (
-          <Link
-            to="/iniciar-sesion"
-            style={{ color: navColor, fontWeight: 600, textDecoration: "none" }}
-          >
-            Iniciar sesión
-          </Link>
         )}
-
-        <ThemeToggle variant="inline" />
       </div>
     </nav>
   );

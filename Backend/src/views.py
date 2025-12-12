@@ -10,41 +10,48 @@ from .serializers import RegistroSerializer, UserSerializer
 from .permissions import PermisoRegistro
 
 
-# ------------------------------------
-#            REGISTROS
-# ------------------------------------
+# ======================================================
+#                  REGISTROS (RBAC)
+# ======================================================
 class RegistroViewSet(viewsets.ModelViewSet):
-    queryset = Registro.objects.all().order_by("-fecha")
+    """
+    CRUD de Registros con control RBAC completo.
+    """
     serializer_class = RegistroSerializer
     permission_classes = [permissions.IsAuthenticated, PermisoRegistro]
 
     def get_queryset(self):
         user = self.request.user
-        perfil = getattr(user, "perfil", None)  # ← CORRECTO
+        perfil = getattr(user, "perfil", None)
         rol = getattr(perfil, "rol", None)
 
+        # Admin global
         if user.is_superuser:
             return Registro.objects.all().order_by("-fecha")
 
-        if rol == "TI":
+        # Administrador TI, Analista y Auditor → ven todo
+        if rol in ("TI", "ANALISTA", "AUDITOR"):
             return Registro.objects.all().order_by("-fecha")
 
-        if rol in ("ANALISTA", "AUDITOR"):
-            return Registro.objects.all().order_by("-fecha")
-
+        # Corredor → solo sus registros
         if rol == "CORREDOR":
             return Registro.objects.filter(usuario=user).order_by("-fecha")
 
         return Registro.objects.none()
 
     def perform_create(self, serializer):
+        # El usuario autenticado queda como dueño del registro
         serializer.save(usuario=self.request.user)
 
 
-# ------------------------------------
-#               LOGIN
-# ------------------------------------
+# ======================================================
+#                    LOGIN (JWT)
+# ======================================================
 class LoginView(APIView):
+    """
+    Login manual (opcional).
+    Normalmente se usa api/token/, pero se deja para pruebas.
+    """
     permission_classes = [permissions.AllowAny]
 
     def post(self, request):
@@ -65,16 +72,20 @@ class LoginView(APIView):
         })
 
 
-# ------------------------------------
-#           PERFIL DE USUARIO
-# ------------------------------------
+# ======================================================
+#               PERFIL DEL USUARIO
+# ======================================================
 @api_view(["GET"])
 @permission_classes([permissions.IsAuthenticated])
 def mi_perfil(request):
+    """
+    Endpoint clave para RBAC frontend.
+    Retorna rol y si es superusuario.
+    """
     perfil = getattr(request.user, "perfil", None)
     rol = perfil.rol if perfil else None
 
-    # Si es superusuario y no tiene perfil, darle un rol lógico para el front
+    # Superusuario sin perfil explícito
     if request.user.is_superuser and not rol:
         rol = "TI"
 

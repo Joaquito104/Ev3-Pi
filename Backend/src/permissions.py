@@ -1,40 +1,74 @@
 from rest_framework.permissions import BasePermission, SAFE_METHODS
+from .rbac import ROLES
+
 
 class PermisoRegistro(BasePermission):
     """
-    Controla quién puede ver/editar registros según rol.
+    Permisos específicos para el modelo Registro
+    Basado estrictamente en la matriz RBAC del proyecto.
     """
 
     def has_permission(self, request, view):
-        # Superusuarios siempre pasan
-        if request.user and request.user.is_superuser:
+        # Usuario debe estar autenticado
+        if not request.user or not request.user.is_authenticated:
+            return False
+
+        # Admin global pasa siempre
+        if request.user.is_superuser:
             return True
 
-        return bool(request.user and request.user.is_authenticated)
+        return True  # El detalle se controla por objeto
+
 
     def has_object_permission(self, request, view, obj):
         perfil = getattr(request.user, "perfil", None)
         rol = getattr(perfil, "rol", None)
 
-        # Superusuarios sin restricciones
+        # Admin global
         if request.user.is_superuser:
             return True
 
-        # AUDITOR -> solo lectura
-        if rol == "AUDITOR":
+        # ----- AUDITOR -----
+        if rol == ROLES["AUDITOR"]:
+            # Solo lectura
             return request.method in SAFE_METHODS
 
-        # ANALISTA o TI -> todo permitido
-        if rol in ("ANALISTA", "TI"):
+        # ----- ANALISTA -----
+        if rol == ROLES["ANALISTA"]:
+            # Puede ver, crear, editar
             return True
 
-        # CORREDOR:
-        if rol == "CORREDOR":
-            # Puede ver solo los suyos y solo lectura
+        # ----- ADMIN TI -----
+        if rol == ROLES["TI"]:
+            # Acceso total por política
+            return True
+
+        # ----- CORREDOR -----
+        if rol == ROLES["CORREDOR"]:
+            # Solo lectura y solo sus registros
             if request.method in SAFE_METHODS and obj.usuario == request.user:
                 return True
-            # (si quieres permitir que cree nuevos, se controla en view)
             return False
 
-        # Por defecto, nada
         return False
+
+
+class TieneRol(BasePermission):
+    """
+    Permiso genérico para vistas por rol (RBAC puro)
+    """
+
+    def has_permission(self, request, view):
+        if not request.user or not request.user.is_authenticated:
+            return False
+
+        # Admin global
+        if request.user.is_superuser:
+            return True
+
+        perfil = getattr(request.user, "perfil", None)
+        if not perfil:
+            return False
+
+        roles_permitidos = getattr(view, "roles_permitidos", [])
+        return perfil.rol in roles_permitidos

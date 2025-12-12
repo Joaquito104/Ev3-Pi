@@ -23,17 +23,21 @@ ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
 # APPS
 # ----------------------------------------------------
 INSTALLED_APPS = [
-    'corsheaders',
-    'rest_framework',
-    'src',
+    "django.contrib.admin",
+    "django.contrib.auth",
+    "django.contrib.contenttypes",
+    "django.contrib.sessions",
+    "django.contrib.messages",
+    "django.contrib.staticfiles",
 
-    'django.contrib.admin',
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.messages',
-    'django.contrib.staticfiles',
+    # Apps externas
+    "rest_framework",
+    "corsheaders",
+
+    # TU APP (SOLO UNA VEZ)
+    "src.apps.SrcConfig",
 ]
+
 
 # ----------------------------------------------------
 # MIDDLEWARE

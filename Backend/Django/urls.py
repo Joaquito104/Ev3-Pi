@@ -1,35 +1,52 @@
-"""
-URL configuration for Django project.
-
-The `urlpatterns` list routes URLs to views. For more information please see:
-    https://docs.djangoproject.com/en/5.2/topics/http/urls/
-Examples:
-Function views
-    1. Add an import:  from my_app import views
-    2. Add a URL to urlpatterns:  path('', views.home, name='home')
-Class-based views
-    1. Add an import:  from other_app.views import Home
-    2. Add a URL to urlpatterns:  path('', Home.as_view(), name='home')
-Including another URLconf
-    1. Import the include() function: from django.urls import include, path
-    2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
-"""
 from django.contrib import admin
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from src.views import RegistroViewSet
-from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
-from src.views import mi_perfil
+from rest_framework_simplejwt.views import (
+    TokenObtainPairView,
+    TokenRefreshView,
+)
 
+# ViewSets
+from src.views.registros import RegistroViewSet
+
+# Vistas API
+from src.views.auth import mi_perfil
+from src.views.certificados import CargaCertificadosView
+from src.views.validacion import BandejaValidacionView
+from src.views.calificaciones import CalificacionView
+from src.views.auditoria import AuditoriaView
+from src.views.reglas_negocio import ReglasNegocioView
+
+# Router principal
 router = DefaultRouter()
-router.register(r'registros', RegistroViewSet, basename='registros')
+router.register(r"registros", RegistroViewSet, basename="registros")
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
+    # Admin Django
+    path("admin/", admin.site.urls),
 
-    # JWT LOGIN
-    path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
-    path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),path('api/perfil/', mi_perfil),
-    # API principal
-    path('api/', include(router.urls)),
+    # =========================
+    # AUTENTICACIÓN (JWT)
+    # =========================
+    path("api/token/", TokenObtainPairView.as_view(), name="token_obtain_pair"),
+    path("api/token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
+
+    # =========================
+    # PERFIL USUARIO
+    # =========================
+    path("api/perfil/", mi_perfil, name="mi_perfil"),
+
+    # =========================
+    # MÓDULOS CON RBAC
+    # =========================
+    path("api/certificados/", CargaCertificadosView.as_view(), name="certificados"),
+    path("api/validacion/", BandejaValidacionView.as_view(), name="validacion"),
+    path("api/calificaciones/", CalificacionView.as_view(), name="calificaciones"),
+    path("api/auditoria/", AuditoriaView.as_view(), name="auditoria"),
+    path("api/reglas-negocio/", ReglasNegocioView.as_view(), name="reglas_negocio"),
+
+    # =========================
+    # API PRINCIPAL (ViewSets)
+    # =========================
+    path("api/", include(router.urls)),
 ]
