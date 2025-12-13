@@ -339,8 +339,14 @@ Ev3-Pi/
 │   │   ├── urls.py
 │   │   └── wsgi.py
 │   ├── src/
-│   │   ├── models.py (Registros, PerfilUsuario)
+│   │   ├── models.py (Registros, PerfilUsuario, ReglaNegocio)
 │   │   ├── views.py (ViewSets y endpoints)
+│   │   ├── views/ (Vistas organizadas por módulo)
+│   │   │   ├── auth.py (Autenticación)
+│   │   │   ├── registros.py (Gestión registros)
+│   │   │   ├── usuarios.py (CRUD usuarios)
+│   │   │   ├── reglas_negocio.py (CRUD reglas)
+│   │   │   └── auditoria.py (Auditoría)
 │   │   ├── serializers.py (Serialización JSON)
 │   │   ├── permissions.py (Control de permisos)
 │   │   └── admin.py
@@ -372,7 +378,7 @@ Ev3-Pi/
 │   │   │   ├── TaxManagement.jsx (Centrado)
 │   │   │   ├── AuditPanel.jsx (Centrado)
 │   │   │   ├── Registros.jsx (Búsqueda)
-│   │   │   ├── SystemSettings.jsx (Centrado)
+│   │   │   ├── AdministracionNuam.jsx (Panel Admin TI)
 │   │   │   └── NoAutorizado.jsx
 │   │   └── hooks/
 │   │       └── useForm.js
@@ -396,6 +402,8 @@ Ev3-Pi/
 - CORS configurado para desarrollo
 - Migraciones automáticas
 - Admin panel integrado
+- **CRUD completo de Usuarios** (crear, editar, eliminar usuarios con roles)
+- **CRUD completo de Reglas de Negocio** (versionado automático al editar)
 
 ### Frontend
 - Sistema de autenticación con localStorage
@@ -405,6 +413,11 @@ Ev3-Pi/
 - Búsqueda de registros tributarios
 - Páginas centradas y responsive
 - Modal reutilizable
+- **Panel de Administración Nuam** (solo superusuarios)
+  - Gestión de Usuarios con tabla interactiva
+  - Gestión de Reglas de Negocio con tabla interactiva
+  - Formularios de crear/editar integrados
+  - Botones Edit/Delete en cada elemento
 
 ### Seguridad
 - Variables sensibles en `.env`
@@ -440,9 +453,20 @@ La funcionalidad principal es la búsqueda de registros disponible para todos lo
 - `PUT /api/registros/{id}/` - Editar registro
 - `DELETE /api/registros/{id}/` - Eliminar registro
 
-### Usuarios
+### Usuarios (CRUD completo - Solo TI/Superusuarios)
 - `GET /api/perfil/` - Obtener perfil del usuario actual
-- `GET /api/usuarios/` - Listar usuarios (solo admin)
+- `GET /api/usuarios/` - Listar todos los usuarios
+- `POST /api/usuarios/` - Crear nuevo usuario con rol
+- `GET /api/usuarios/{id}/` - Obtener detalle de usuario
+- `PUT /api/usuarios/{id}/` - Actualizar usuario y rol
+- `DELETE /api/usuarios/{id}/` - Eliminar usuario
+
+### Reglas de Negocio (CRUD completo - Solo TI/Superusuarios)
+- `GET /api/reglas-negocio/` - Listar todas las reglas
+- `POST /api/reglas-negocio/` - Crear nueva regla
+- `GET /api/reglas-negocio/{id}/` - Obtener detalle de regla
+- `PUT /api/reglas-negocio/{id}/` - Actualizar regla (auto-incrementa versión)
+- `DELETE /api/reglas-negocio/{id}/` - Eliminar regla
 
 ---
 
@@ -482,4 +506,41 @@ Para más información, revisar la documentación de:
 
 ---
 
-**Última actualización**: 6 de diciembre de 2025
+**Última actualización**: 13 de diciembre de 2025
+
+## Cambios Recientes (13/12/2025)
+
+### Backend
+- ✅ Implementado CRUD completo para **Usuarios** (`/api/usuarios/`)
+  - Crear usuarios con asignación de rol automática
+  - Editar usuarios y actualizar perfil/rol
+  - Eliminar usuarios (User + PerfilUsuario)
+  - Vista de detalle individual por ID
+  
+- ✅ Implementado CRUD completo para **Reglas de Negocio** (`/api/reglas-negocio/`)
+  - Crear reglas con condición y acción
+  - Editar reglas con versionado automático
+  - Eliminar reglas
+  - Vista de detalle individual por ID
+
+- ✅ Rutas actualizadas en [Backend/Django/urls.py](Backend/Django/urls.py)
+- ✅ Nuevas vistas en [Backend/src/views/usuarios.py](Backend/src/views/usuarios.py)
+- ✅ Vistas extendidas en [Backend/src/views/reglas_negocio.py](Backend/src/views/reglas_negocio.py)
+
+### Frontend
+- ✅ Implementado panel **Administración Nuam** en [FrontEnd/src/pages/AdministracionNuam.jsx](FrontEnd/src/pages/AdministracionNuam.jsx)
+  - Interfaz con pestañas (Reglas de Negocio | Gestión de Usuarios)
+  - Formularios de crear/editar para ambas entidades
+  - Tablas interactivas con botones Edit/Delete
+  - Confirmación antes de eliminar
+  - Actualización en tiempo real desde PostgreSQL
+
+- ✅ Navbar actualizado: "Administración Nuam" visible solo para superusuarios
+- ✅ Rutas actualizadas en [FrontEnd/src/router.jsx](FrontEnd/src/router.jsx)
+
+### Base de Datos
+- Todos los cambios CRUD persisten en PostgreSQL
+- Auto-incremento de versión en Reglas de Negocio al editar
+- Cascada de eliminación: User → PerfilUsuario
+
+---

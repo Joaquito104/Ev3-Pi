@@ -5,7 +5,7 @@ import Login from "./pages/Login";
 import CertificatesUpload from "./pages/CertificatesUpload";
 import TaxManagement from "./pages/TaxManagement";
 import AuditPanel from "./pages/AuditPanel";
-import SystemSettings from "./pages/SystemSettings";
+import AdministracionNuam from "./pages/AdministracionNuam";
 import Registros from "./pages/Registros";
 import NoAutorizado from "./pages/NoAutorizado";
 
@@ -85,7 +85,7 @@ export default function Router() {
         element={
           <ProtectedRoute roles={["TI"]}>
             <LayoutWrapper>
-              <SystemSettings />
+                <AdministracionNuam />
             </LayoutWrapper>
           </ProtectedRoute>
         }

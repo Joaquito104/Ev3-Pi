@@ -102,9 +102,9 @@ export default function Navbar({ onToggleSidebar }) {
           </Link>
         )}
 
-        {canSee(["TI"]) && (
+        {user?.is_superuser && (
           <Link to="/system-settings" style={linkStyle("/system-settings")}>
-            Ajustes
+            Administración Nuam
           </Link>
         )}
       </div>

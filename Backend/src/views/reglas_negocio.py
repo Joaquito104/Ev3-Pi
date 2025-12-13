@@ -1,6 +1,8 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
+from rest_framework import status
+from django.db import transaction
 
 from src.models import ReglaNegocio
 from src.permissions import TieneRol
@@ -20,6 +22,9 @@ class ReglasNegocioView(APIView):
             {
                 "id": r.id,
                 "nombre": r.nombre,
+                "descripcion": r.descripcion,
+                "condicion": r.condicion,
+                "accion": r.accion,
                 "version": r.version,
                 "estado": r.estado,
                 "creado_por": r.creado_por.username,
@@ -29,14 +34,101 @@ class ReglasNegocioView(APIView):
         return Response(data)
 
     def post(self, request):
+        nombre = request.data.get("nombre")
+        descripcion = request.data.get("descripcion")
+        condicion = request.data.get("condicion")
+        accion = request.data.get("accion")
+        estado = request.data.get("estado", "REVISION")
+        
+        if not all([nombre, descripcion, condicion, accion]):
+            return Response(
+                {"detail": "Todos los campos son requeridos"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
         regla = ReglaNegocio.objects.create(
-            nombre=request.data.get("nombre"),
-            descripcion=request.data.get("descripcion"),
-            condicion=request.data.get("condicion"),
-            accion=request.data.get("accion"),
+            nombre=nombre,
+            descripcion=descripcion,
+            condicion=condicion,
+            accion=accion,
+            estado=estado,
             creado_por=request.user,
         )
         return Response({
             "detail": "Regla creada",
             "id": regla.id
+        }, status=status.HTTP_201_CREATED)
+
+
+class ReglaNegocioDetailView(APIView):
+    """
+    Detalle, actualización y eliminación de regla de negocio específica
+    """
+    permission_classes = [IsAuthenticated, TieneRol]
+    roles_permitidos = ["TI", "ADMIN"]
+
+    def get(self, request, pk):
+        """Obtener detalle de una regla"""
+        try:
+            regla = ReglaNegocio.objects.get(pk=pk)
+            return Response({
+                "id": regla.id,
+                "nombre": regla.nombre,
+                "descripcion": regla.descripcion,
+                "condicion": regla.condicion,
+                "accion": regla.accion,
+                "version": regla.version,
+                "estado": regla.estado,
+                "creado_por": regla.creado_por.username,
+            })
+        except ReglaNegocio.DoesNotExist:
+            return Response(
+                {"detail": "Regla no encontrada"},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+    @transaction.atomic
+    def put(self, request, pk):
+        """Actualizar regla de negocio"""
+        try:
+            regla = ReglaNegocio.objects.get(pk=pk)
+        except ReglaNegocio.DoesNotExist:
+            return Response(
+                {"detail": "Regla no encontrada"},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        
+        # Actualizar campos
+        regla.nombre = request.data.get("nombre", regla.nombre)
+        regla.descripcion = request.data.get("descripcion", regla.descripcion)
+        regla.condicion = request.data.get("condicion", regla.condicion)
+        regla.accion = request.data.get("accion", regla.accion)
+        regla.estado = request.data.get("estado", regla.estado)
+        
+        # Incrementar versión si cambió algo sustancial
+        if "condicion" in request.data or "accion" in request.data:
+            regla.version += 1
+        
+        regla.save()
+        
+        return Response({
+            "detail": "Regla actualizada exitosamente",
+            "id": regla.id,
+            "version": regla.version
         })
+
+    def delete(self, request, pk):
+        """Eliminar regla de negocio"""
+        try:
+            regla = ReglaNegocio.objects.get(pk=pk)
+            nombre = regla.nombre
+            regla.delete()
+            
+            return Response({
+                "detail": f"Regla '{nombre}' eliminada exitosamente"
+            })
+        except ReglaNegocio.DoesNotExist:
+            return Response(
+                {"detail": "Regla no encontrada"},
+                status=status.HTTP_404_NOT_FOUND
+            )

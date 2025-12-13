@@ -15,7 +15,8 @@ from src.views.certificados import CargaCertificadosView
 from src.views.validacion import BandejaValidacionView
 from src.views.calificaciones import CalificacionView
 from src.views.auditoria import AuditoriaView
-from src.views.reglas_negocio import ReglasNegocioView
+from src.views.reglas_negocio import ReglasNegocioView, ReglaNegocioDetailView
+from src.views.usuarios import UsuariosView, UsuarioDetailView
 
 # Router principal
 router = DefaultRouter()
@@ -44,6 +45,9 @@ urlpatterns = [
     path("api/calificaciones/", CalificacionView.as_view(), name="calificaciones"),
     path("api/auditoria/", AuditoriaView.as_view(), name="auditoria"),
     path("api/reglas-negocio/", ReglasNegocioView.as_view(), name="reglas_negocio"),
+    path("api/reglas-negocio/<int:pk>/", ReglaNegocioDetailView.as_view(), name="regla_negocio_detail"),
+    path("api/usuarios/", UsuariosView.as_view(), name="usuarios"),
+    path("api/usuarios/<int:pk>/", UsuarioDetailView.as_view(), name="usuario_detail"),
 
     # =========================
     # API PRINCIPAL (ViewSets)
