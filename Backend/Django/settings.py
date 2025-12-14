@@ -161,3 +161,21 @@ SIMPLE_JWT = {
     "BLACKLIST_AFTER_ROTATION": False,
     "UPDATE_LAST_LOGIN": True,
 }
+
+# ----------------------------------------------------
+# MONGODB CONFIG (para Calificaciones)
+# ----------------------------------------------------
+MONGODB_CONFIG = {
+    'host': os.getenv('MONGODB_HOST', 'localhost'),
+    'port': int(os.getenv('MONGODB_PORT', 27017)),
+    'db_name': os.getenv('MONGODB_DB', 'nuam_calificaciones'),
+    'username': os.getenv('MONGODB_USER', ''),
+    'password': os.getenv('MONGODB_PASSWORD', ''),
+    'auth_source': os.getenv('MONGODB_AUTH_SOURCE', 'admin'),
+    'auth_mechanism': os.getenv('MONGODB_AUTH_MECHANISM', 'SCRAM-SHA-256'),
+    'use_tls': os.getenv('MONGODB_TLS', 'False') == 'True',
+    'tls_allow_invalid': os.getenv('MONGODB_TLS_ALLOW_INVALID', 'False') == 'True',
+    'tls_ca_file': os.getenv('MONGODB_TLS_CA_FILE', ''),
+    'kms_local_key': os.getenv('MONGODB_KMS_LOCAL_KEY', ''),
+    'uri': os.getenv('MONGODB_URI', ''),
+}

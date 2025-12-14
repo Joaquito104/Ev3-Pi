@@ -15,6 +15,7 @@ export default function Navbar({ onToggleSidebar }) {
   const activeBg = dark ? "#1e3a4c" : "#e0e0e0";
   const btnBg = dark ? "#0b1220" : "#111827";
   const btnColor = "#ffffff";
+  const danger = "#ef4444";
 
   const isActive = (path) => location.pathname === path;
 
@@ -75,33 +76,38 @@ export default function Navbar({ onToggleSidebar }) {
       <div style={{ display: "flex", gap: 10, flexWrap: "wrap", flex: 1 }}>
         <Link to="/" style={linkStyle("/")}>Home</Link>
 
-        {canSee(["CORREDOR", "TI"]) && (
+        {user && canSee(["CORREDOR", "TI"]) && (
+          <Link to="/corredor-dashboard" style={linkStyle("/corredor-dashboard")}>
+            📊 Dashboard
+          </Link>
+        )}
+
+        {user && canSee(["CORREDOR", "TI"]) && (
           <Link to="/certificates-upload" style={linkStyle("/certificates-upload")}>
             Certificados
           </Link>
         )}
 
-        {canSee(["ANALISTA", "AUDITOR", "TI"]) && (
+        {user && canSee(["ANALISTA", "AUDITOR", "TI"]) && (
           <Link to="/tax-management" style={linkStyle("/tax-management")}>
             Gestión tributaria
           </Link>
         )}
 
-        {/* ✅ VALIDACIÓN — SOLO AUDITOR / TI */}
-        {canSee(["AUDITOR", "TI"]) && (
+        {user && canSee(["AUDITOR", "TI"]) && (
           <Link to="/validacion" style={linkStyle("/validacion")}>
             Validación
           </Link>
         )}
 
         {/* ✅ AUDITORÍA */}
-        {canSee(["AUDITOR", "TI"]) && (
+        {user && canSee(["AUDITOR", "TI"]) && (
           <Link to="/audit-panel" style={linkStyle("/audit-panel")}>
             Auditoría
           </Link>
         )}
 
-        {canSee(["CORREDOR", "ANALISTA", "AUDITOR", "TI"]) && (
+        {user && canSee(["CORREDOR", "ANALISTA", "AUDITOR", "TI"]) && (
           <Link to="/registros" style={linkStyle("/registros")}>
             Registros
           </Link>
@@ -110,6 +116,17 @@ export default function Navbar({ onToggleSidebar }) {
         {user?.is_superuser && (
           <Link to="/system-settings" style={linkStyle("/system-settings")}>
             Administración Nuam
+          </Link>
+        )}
+
+        {user?.is_superuser && (
+          <Link to="/admin-global" style={{
+            ...linkStyle("/admin-global"),
+            background: isActive("/admin-global") ? "#991b1b" : danger,
+            color: "#fff",
+            fontWeight: 700,
+          }}>
+            🚨 Admin Global
           </Link>
         )}
       </div>

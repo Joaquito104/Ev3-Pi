@@ -13,6 +13,12 @@ export default function App() {
 
   useEffect(() => {
     localStorage.setItem("ev3pi-theme", theme);
+    // Aplicar clase 'dark' al HTML para Tailwind
+    if (theme === "dark") {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+    }
   }, [theme]);
 
   const [user, setUser] = useState(null);

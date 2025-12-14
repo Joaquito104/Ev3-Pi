@@ -117,6 +117,42 @@ class ReglaNegocio(models.Model):
 
 
 # ===============================
+# HISTORIAL DE VERSIONES DE REGLAS
+# ===============================
+class HistorialReglaNegocio(models.Model):
+    """Guarda snapshot completo de cada versión de regla"""
+    regla_actual = models.ForeignKey(
+        ReglaNegocio,
+        on_delete=models.CASCADE,
+        related_name="historial_versiones"
+    )
+    
+    # Snapshot de datos en esa versión
+    nombre = models.CharField(max_length=150)
+    descripcion = models.TextField()
+    condicion = models.TextField()
+    accion = models.TextField()
+    version = models.IntegerField()
+    estado = models.CharField(max_length=20)
+    
+    # Metadata del cambio
+    modificado_por = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name="versiones_reglas"
+    )
+    fecha_snapshot = models.DateTimeField(auto_now_add=True)
+    comentario = models.TextField(blank=True, help_text="Razón del cambio")
+    
+    class Meta:
+        ordering = ['-version']
+    
+    def __str__(self):
+        return f"{self.nombre} v{self.version} (snapshot {self.fecha_snapshot.strftime('%Y-%m-%d %H:%M')})"
+
+
+# ===============================
 # AUDITORÍA (ÚNICA Y FINAL)
 # ===============================
 class Auditoria(models.Model):

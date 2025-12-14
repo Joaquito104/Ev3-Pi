@@ -14,12 +14,16 @@ export default function AdministracionNuam() {
   const warning = "#f59e0b";
   const danger = "#ef4444";
 
-  const [activeTab, setActiveTab] = useState("reglas"); // reglas | usuarios
+  const [activeTab, setActiveTab] = useState("reglas"); // reglas | usuarios | historial
   const [reglas, setReglas] = useState([]);
   const [usuarios, setUsuarios] = useState([]);
+  const [historial, setHistorial] = useState([]);
+  const [reglaSeleccionada, setReglaSeleccionada] = useState(null);
   const [loading, setLoading] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [showUserForm, setShowUserForm] = useState(false);
+  const [showDiff, setShowDiff] = useState(false);
+  const [diffData, setDiffData] = useState(null);
   const [editingRegla, setEditingRegla] = useState(null);
   const [editingUser, setEditingUser] = useState(null);
   const [formData, setFormData] = useState({
@@ -45,8 +49,10 @@ export default function AdministracionNuam() {
       cargarReglas();
     } else if (activeTab === "usuarios") {
       cargarUsuarios();
+    } else if (activeTab === "historial" && reglaSeleccionada) {
+      cargarHistorial(reglaSeleccionada.id);
     }
-  }, [activeTab]);
+  }, [activeTab, reglaSeleccionada]);
 
   const cargarReglas = async () => {
     setLoading(true);
@@ -255,6 +261,85 @@ export default function AdministracionNuam() {
     }
   };
 
+  // =================== FUNCIONES DE HISTORIAL ===================
+  
+  const cargarHistorial = async (reglaId) => {
+    setLoading(true);
+    try {
+      const res = await fetch(`http://127.0.0.1:8000/api/reglas-negocio/${reglaId}/historial/`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setHistorial(data.historial || []);
+      }
+    } catch (error) {
+      console.error("Error cargando historial:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleVerHistorial = (regla) => {
+    setReglaSeleccionada(regla);
+    setActiveTab("historial");
+  };
+
+  const handleRollback = async (reglaId, version) => {
+    const comentario = prompt(`¿Razón del rollback a versión ${version}?`, "Rollback manual");
+    if (!comentario) return;
+
+    setLoading(true);
+    try {
+      const res = await fetch(`http://127.0.0.1:8000/api/reglas-negocio/${reglaId}/rollback/`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ version, comentario }),
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        alert(`Rollback exitoso. Nueva versión: ${data.nueva_version}`);
+        cargarHistorial(reglaId);
+        cargarReglas();
+      } else {
+        const error = await res.json();
+        alert(error.detail || "Error en rollback");
+      }
+    } catch (error) {
+      console.error("Error:", error);
+      alert("Error de conexión");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCompararVersiones = async (reglaId, v1, v2) => {
+    setLoading(true);
+    try {
+      const res = await fetch(
+        `http://127.0.0.1:8000/api/reglas-negocio/${reglaId}/comparar/?v1=${v1}&v2=${v2}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      
+      if (res.ok) {
+        const data = await res.json();
+        setDiffData(data);
+        setShowDiff(true);
+      } else {
+        alert("Error comparando versiones");
+      }
+    } catch (error) {
+      console.error("Error:", error);
+      alert("Error de conexión");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const getEstadoColor = (estado) => {
     switch (estado) {
       case "ACTIVA":
@@ -329,6 +414,27 @@ export default function AdministracionNuam() {
             }}
           >
             Gestión de Usuarios
+          </button>
+          <button
+            onClick={() => {
+              if (!reglaSeleccionada) {
+                alert("Selecciona una regla primero desde 'Reglas de Negocio'");
+                return;
+              }
+              setActiveTab("historial");
+            }}
+            style={{
+              background: activeTab === "historial" ? accent : "transparent",
+              color: activeTab === "historial" ? "#fff" : text,
+              border: "none",
+              padding: "12px 24px",
+              borderRadius: "8px 8px 0 0",
+              cursor: "pointer",
+              fontWeight: 600,
+              fontSize: 14,
+            }}
+          >
+            Historial {reglaSeleccionada && `(${reglaSeleccionada.nombre})`}
           </button>
         </div>
 
@@ -588,6 +694,21 @@ export default function AdministracionNuam() {
                       <span style={getEstadoBadge(regla.estado)}>{regla.estado}</span>
                     </div>
                     <div style={{ display: "flex", gap: 8, alignItems: "start" }}>
+                      <button
+                        onClick={() => handleVerHistorial(regla)}
+                        style={{
+                          background: accent,
+                          color: "#fff",
+                          border: "none",
+                          padding: "6px 12px",
+                          borderRadius: 6,
+                          cursor: "pointer",
+                          fontSize: 12,
+                          fontWeight: 600,
+                        }}
+                      >
+                        Ver historial
+                      </button>
                       <button
                         onClick={() => handleEditRegla(regla)}
                         style={{
@@ -960,6 +1081,232 @@ export default function AdministracionNuam() {
                 </div>
               )}
             </div>
+          </div>
+        )}
+
+        {/* CONTENIDO DE HISTORIAL */}
+        {activeTab === "historial" && reglaSeleccionada && (
+          <div>
+            <div style={{ marginBottom: 24, display: "flex", gap: 12, alignItems: "center" }}>
+              <button
+                onClick={() => setActiveTab("reglas")}
+                style={{
+                  background: "transparent",
+                  border: `1px solid ${border}`,
+                  color: text,
+                  padding: "8px 16px",
+                  borderRadius: 6,
+                  cursor: "pointer",
+                  fontSize: 14,
+                }}
+              >
+                ← Volver a reglas
+              </button>
+              <h2 style={{ margin: 0 }}>
+                Historial de {reglaSeleccionada.nombre} (v{reglaSeleccionada.version})
+              </h2>
+            </div>
+
+            {/* LISTADO DE VERSIONES */}
+            <div
+              style={{
+                background: card,
+                padding: 24,
+                borderRadius: 8,
+                border: `1px solid ${border}`,
+              }}
+            >
+              {loading && <p style={{ color: muted }}>Cargando historial...</p>}
+
+              {!loading && historial.length === 0 && (
+                <p style={{ color: muted }}>No hay historial disponible.</p>
+              )}
+
+              {!loading && historial.length > 0 && (
+                <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+                  {historial.map((snapshot, idx) => (
+                    <div
+                      key={snapshot.id}
+                      style={{
+                        background: dark ? "#1f2937" : "#f9fafb",
+                        padding: 16,
+                        borderRadius: 8,
+                        border: `1px solid ${border}`,
+                      }}
+                    >
+                      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
+                        <div>
+                          <h3 style={{ margin: "0 0 4px 0", fontSize: 16 }}>
+                            Versión {snapshot.version}
+                            {snapshot.version === reglaSeleccionada.version && (
+                              <span style={{ color: success, marginLeft: 8, fontSize: 12 }}>
+                                (Actual)
+                              </span>
+                            )}
+                          </h3>
+                          <p style={{ margin: "4px 0", fontSize: 12, color: muted }}>
+                            {snapshot.fecha_snapshot} • Por {snapshot.modificado_por}
+                          </p>
+                          {snapshot.comentario && (
+                            <p style={{ margin: "4px 0", fontSize: 12, fontStyle: "italic", color: muted }}>
+                              "{snapshot.comentario}"
+                            </p>
+                          )}
+                        </div>
+
+                        <div style={{ display: "flex", gap: 8 }}>
+                          {idx < historial.length - 1 && (
+                            <button
+                              onClick={() => handleCompararVersiones(
+                                reglaSeleccionada.id,
+                                snapshot.version,
+                                historial[idx + 1].version
+                              )}
+                              style={{
+                                background: accent,
+                                color: "#fff",
+                                border: "none",
+                                padding: "6px 12px",
+                                borderRadius: 6,
+                                cursor: "pointer",
+                                fontSize: 12,
+                                fontWeight: 600,
+                              }}
+                            >
+                              Comparar ↓
+                            </button>
+                          )}
+
+                          {snapshot.version !== reglaSeleccionada.version && (
+                            <button
+                              onClick={() => handleRollback(reglaSeleccionada.id, snapshot.version)}
+                              style={{
+                                background: warning,
+                                color: "#fff",
+                                border: "none",
+                                padding: "6px 12px",
+                                borderRadius: 6,
+                                cursor: "pointer",
+                                fontSize: 12,
+                                fontWeight: 600,
+                              }}
+                            >
+                              Restaurar
+                            </button>
+                          )}
+                        </div>
+                      </div>
+
+                      <div style={{ fontSize: 13, color: muted }}>
+                        <p style={{ margin: "4px 0" }}>
+                          <strong>Estado:</strong>{" "}
+                          <span style={getEstadoBadge(snapshot.estado)}>{snapshot.estado}</span>
+                        </p>
+                        <p style={{ margin: "4px 0" }}>
+                          <strong>Condición:</strong> {snapshot.condicion.substring(0, 60)}...
+                        </p>
+                        <p style={{ margin: "4px 0" }}>
+                          <strong>Acción:</strong> {snapshot.accion.substring(0, 60)}...
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* MODAL DE DIFF */}
+            {showDiff && diffData && (
+              <div
+                style={{
+                  position: "fixed",
+                  top: 0,
+                  left: 0,
+                  width: "100%",
+                  height: "100%",
+                  background: "rgba(0,0,0,0.5)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  zIndex: 1000,
+                }}
+                onClick={() => setShowDiff(false)}
+              >
+                <div
+                  style={{
+                    background: card,
+                    padding: 32,
+                    borderRadius: 12,
+                    maxWidth: 900,
+                    maxHeight: "80vh",
+                    overflow: "auto",
+                    color: text,
+                  }}
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <h2 style={{ marginTop: 0 }}>
+                    Comparación v{diffData.version_1.version} vs v{diffData.version_2.version}
+                  </h2>
+
+                  {["nombre", "descripcion", "condicion", "accion", "estado"].map((campo) => (
+                    <div key={campo} style={{ marginBottom: 24 }}>
+                      <h3 style={{ textTransform: "capitalize", fontSize: 14, marginBottom: 8 }}>
+                        {campo}{" "}
+                        {diffData.cambios[campo] && (
+                          <span style={{ color: warning, fontSize: 12 }}>● Cambió</span>
+                        )}
+                      </h3>
+                      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+                        <div
+                          style={{
+                            background: dark ? "#1f2937" : "#f3f4f6",
+                            padding: 12,
+                            borderRadius: 6,
+                            fontSize: 13,
+                            fontFamily: campo === "condicion" || campo === "accion" ? "monospace" : "inherit",
+                          }}
+                        >
+                          <div style={{ fontWeight: 600, marginBottom: 4, color: muted }}>
+                            v{diffData.version_1.version}
+                          </div>
+                          {diffData.version_1[campo]}
+                        </div>
+                        <div
+                          style={{
+                            background: dark ? "#1f2937" : "#f3f4f6",
+                            padding: 12,
+                            borderRadius: 6,
+                            fontSize: 13,
+                            fontFamily: campo === "condicion" || campo === "accion" ? "monospace" : "inherit",
+                          }}
+                        >
+                          <div style={{ fontWeight: 600, marginBottom: 4, color: muted }}>
+                            v{diffData.version_2.version}
+                          </div>
+                          {diffData.version_2[campo]}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+
+                  <button
+                    onClick={() => setShowDiff(false)}
+                    style={{
+                      background: accent,
+                      color: "#fff",
+                      border: "none",
+                      padding: "10px 20px",
+                      borderRadius: 8,
+                      cursor: "pointer",
+                      fontWeight: 600,
+                      marginTop: 16,
+                    }}
+                  >
+                    Cerrar
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         )}
       </div>

@@ -6,7 +6,9 @@ import TaxManagement from "./pages/TaxManagement";
 import AuditPanel from "./pages/AuditPanel";
 import AdministracionNuam from "./pages/AdministracionNuam";
 import Registros from "./pages/Registros";
-import BandejaValidacion from "./pages/BandejaValidacion";
+import ValidationInbox from "./pages/ValidationInbox";
+import CorredorDashboard from "./pages/CorredorDashboard";
+import AdminGlobal from "./pages/AdminGlobal";
 import NoAutorizado from "./pages/NoAutorizado";
 
 import Navbar from "./components/layout/Navbar";
@@ -54,6 +56,18 @@ export default function Router() {
         }
       />
 
+      {/* CORREDOR DASHBOARD */}
+      <Route
+        path="/corredor-dashboard"
+        element={
+          <ProtectedRoute roles={["CORREDOR", "TI"]}>
+            <LayoutWrapper>
+              <CorredorDashboard />
+            </LayoutWrapper>
+          </ProtectedRoute>
+        }
+      />
+
       {/* GESTIÓN TRIBUTARIA */}
       <Route
         path="/tax-management"
@@ -66,13 +80,13 @@ export default function Router() {
         }
       />
 
-      {/* ✅ VALIDACIÓN — SOLO AUDITOR / TI */}
+      {/* VALIDACIÓN — SOLO AUDITOR / TI */}
       <Route
         path="/validacion"
         element={
           <ProtectedRoute roles={["AUDITOR", "TI"]}>
             <LayoutWrapper>
-              <BandejaValidacion />
+              <ValidationInbox />
             </LayoutWrapper>
           </ProtectedRoute>
         }
@@ -97,6 +111,18 @@ export default function Router() {
           <ProtectedRoute roles={["TI"]}>
             <LayoutWrapper>
               <AdministracionNuam />
+            </LayoutWrapper>
+          </ProtectedRoute>
+        }
+      />
+
+      {/* ADMIN GLOBAL — SOLO SUPERUSUARIOS */}
+      <Route
+        path="/admin-global"
+        element={
+          <ProtectedRoute roles={["TI"]} requireSuperuser={true}>
+            <LayoutWrapper>
+              <AdminGlobal />
             </LayoutWrapper>
           </ProtectedRoute>
         }

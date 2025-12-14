@@ -4,7 +4,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
 from django.db import transaction
 
-from src.models import ReglaNegocio
+from src.models import ReglaNegocio, HistorialReglaNegocio, Auditoria
 from src.permissions import TieneRol
 
 
@@ -54,6 +54,30 @@ class ReglasNegocioView(APIView):
             estado=estado,
             creado_por=request.user,
         )
+        
+        # Crear primer snapshot en historial
+        HistorialReglaNegocio.objects.create(
+            regla_actual=regla,
+            nombre=regla.nombre,
+            descripcion=regla.descripcion,
+            condicion=regla.condicion,
+            accion=regla.accion,
+            version=regla.version,
+            estado=regla.estado,
+            modificado_por=request.user,
+            comentario="Versión inicial"
+        )
+        
+        # Auditoría de creación
+        Auditoria.objects.create(
+            usuario=request.user,
+            rol=getattr(request.user.perfil, 'rol', 'ADMIN'),
+            accion="CREATE",
+            modelo="ReglaNegocio",
+            objeto_id=regla.id,
+            descripcion=f"Creada regla '{regla.nombre}' v{regla.version}"
+        )
+        
         return Response({
             "detail": "Regla creada",
             "id": regla.id
@@ -98,6 +122,19 @@ class ReglaNegocioDetailView(APIView):
                 status=status.HTTP_404_NOT_FOUND
             )
         
+        # Guardar snapshot del estado anterior
+        HistorialReglaNegocio.objects.create(
+            regla_actual=regla,
+            nombre=regla.nombre,
+            descripcion=regla.descripcion,
+            condicion=regla.condicion,
+            accion=regla.accion,
+            version=regla.version,
+            estado=regla.estado,
+            modificado_por=request.user,
+            comentario=request.data.get("comentario", "Actualización")
+        )
+        
         # Actualizar campos
         regla.nombre = request.data.get("nombre", regla.nombre)
         regla.descripcion = request.data.get("descripcion", regla.descripcion)
@@ -111,6 +148,16 @@ class ReglaNegocioDetailView(APIView):
         
         regla.save()
         
+        # Auditoría de actualización
+        Auditoria.objects.create(
+            usuario=request.user,
+            rol=getattr(request.user.perfil, 'rol', 'ADMIN'),
+            accion="UPDATE",
+            modelo="ReglaNegocio",
+            objeto_id=regla.id,
+            descripcion=f"Actualizada regla '{regla.nombre}' a v{regla.version}"
+        )
+        
         return Response({
             "detail": "Regla actualizada exitosamente",
             "id": regla.id,
@@ -122,6 +169,18 @@ class ReglaNegocioDetailView(APIView):
         try:
             regla = ReglaNegocio.objects.get(pk=pk)
             nombre = regla.nombre
+            version = regla.version
+            
+            # Auditoría antes de eliminar
+            Auditoria.objects.create(
+                usuario=request.user,
+                rol=getattr(request.user.perfil, 'rol', 'ADMIN'),
+                accion="DELETE",
+                modelo="ReglaNegocio",
+                objeto_id=regla.id,
+                descripcion=f"Eliminada regla '{nombre}' v{version}"
+            )
+            
             regla.delete()
             
             return Response({

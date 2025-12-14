@@ -97,14 +97,43 @@ Si tienes la contraseña del superuser `postgres`:
 
 Si NO conoces la contraseña `postgres`, existe un método temporal (hacer backup de `pg_hba.conf`, permitir `trust` en localhost, crear la DB/usuario y restaurar el archivo). Pide que lo haga por ti y lo ejecuto.
 
-6) Ejecutar migraciones y crear superusuario
+6) Ejecutar migraciones
 
 ```powershell
 & .\ven\Scripts\python.exe manage.py migrate
-& .\ven\Scripts\python.exe manage.py createsuperuser
 ```
 
-7) Arrancar el servidor
+7) **Crear Administrador Global (Superusuario)**
+
+⚠️ **IMPORTANTE**: El administrador global tiene acceso TOTAL al sistema. Usar solo para emergencias.
+
+```powershell
+& .\ven\Scripts\python.exe manage.py crear_superusuario_global --username admin_global --email admin@nuam.cl --password TuPasswordSegura123!
+```
+
+O usando variable de entorno:
+
+```powershell
+$env:ADMIN_PASSWORD="TuPasswordSegura123!"
+& .\ven\Scripts\python.exe manage.py crear_superusuario_global
+```
+
+**Funciones del Administrador Global:**
+- Acceso completo a Django Admin (`/admin/`)
+- Panel de emergencia en frontend (`/admin-global`)
+- Resetear contraseñas de usuarios
+- Bloquear/desbloquear cuentas
+- Ver auditoría completa del sistema
+- Purgar datos (operación crítica)
+- Todas sus acciones quedan auditadas con rol SUPERADMIN
+
+8) Crear usuarios de prueba (opcional)
+
+```powershell
+& .\ven\Scripts\python.exe manage.py cargar_datos_iniciales
+```
+
+9) Arrancar el servidor
 
 ```powershell
 & .\ven\Scripts\python.exe manage.py runserver 127.0.0.1:8000
@@ -205,6 +234,7 @@ npm install
 | react-dom | ^19.2.0 | Renderizado en DOM |
 | react-router-dom | ^7.10.0 | Enrutamiento SPA |
 | recharts | ^3.5.1 | Gráficos y visualización |
+| axios | ^1.7.9 | Cliente HTTP para llamadas API |
 
 ### Frontend - Dependencias de Desarrollo
 
@@ -218,6 +248,9 @@ npm install
 | @types/react | ^19.2.5 | Tipos TypeScript para React |
 | @types/react-dom | ^19.2.3 | Tipos TypeScript para React DOM |
 | babel-plugin-react-compiler | ^1.0.0 | Compilador React optimizado |
+| tailwindcss | ^3.4.1 | Framework CSS utilitario |
+| postcss | ^8.5.6 | Procesador CSS |
+| autoprefixer | ^10.4.22 | Prefijos CSS automáticos |
 
 ### Frontend - Scripts NPM
 
@@ -305,11 +338,180 @@ Seguridad:
 - No puede modificar registros
 
 #### 4. Administrador TI
-- Administrar usuarios
-- Definir parámetros técnicos
-- Gestionar roles y MFA
-- Supervisar integraciones
-- No puede acceder a datos tributarios
+
+**Rol funcional:** Responsable de la administración técnica y operativa del sistema.
+
+**Funciones principales:**
+- Gestionar usuarios y asignar roles (✅ CRUD completo)
+- Crear, editar y administrar reglas de negocio (✅ CRUD completo)
+- Configurar parámetros del sistema
+- Supervisar el funcionamiento general
+- No puede acceder a datos tributarios sin auditoría
+
+**Estado de implementación:**
+
+✅ **Completado:**
+- Gestión completa de usuarios (crear, editar, eliminar, asignar roles)
+- Gestión completa de reglas de negocio (CRUD con versionado básico)
+- Acceso exclusivo a panel de administración (/system-settings)
+- Seguridad aplicada por JWT y RBAC
+- Interfaz frontend dedicada (Administración NUAM)
+- Auto-incremento de versión al editar reglas
+
+⏳ **Pendiente:**
+- Versionado avanzado de reglas de negocio (historial completo)
+- Historial de cambios de reglas con diff
+- Activación automática de reglas en procesos de validación
+- Auditoría específica sobre cambios de configuración del sistema
+- Rollback de reglas a versiones anteriores
+
+#### 5. Administrador Global (Superusuario)
+
+**⚠️ ROL DE EMERGENCIA - USO RESTRINGIDO**
+
+**Propósito:** Recuperación ante incidentes críticos y operaciones de contingencia del sistema.
+
+**Funciones principales:**
+- Acceso completo a Django Admin
+- Resetear contraseñas de cualquier usuario
+- Bloquear/desbloquear cuentas de usuario
+- Supervisión de seguridad y auditoría completa
+- Gestión de usuarios, roles y configuraciones críticas
+- Purga de datos (operación extremadamente crítica)
+- Bypass completo de RBAC
+
+**Estado de implementación:**
+
+✅ **Completado:**
+- Comando de creación automática (`crear_superusuario_global`)
+- Acceso total mediante `is_superuser` de Django
+- Panel dedicado en frontend (`/admin-global`)
+- Endpoints de operaciones críticas:
+  - `/api/admin-global/estado/` - Dashboard del sistema
+  - `/api/admin-global/reset-password/` - Reset de contraseñas
+  - `/api/admin-global/bloquear-usuario/` - Bloqueo/desbloqueo
+  - `/api/admin-global/auditoria/` - Auditoría completa
+  - `/api/admin-global/purgar-datos/` - Purga de datos
+- Auditoría especial con rol SUPERADMIN
+- Separación clara del resto de roles
+- Interfaz con advertencias visuales (rojo)
+
+**Procedimientos de contingencia:**
+
+1. **Creación del superusuario:**
+   ```bash
+   python manage.py crear_superusuario_global --password SecurePass123!
+   ```
+
+2. **Acceso de emergencia:**
+   - Frontend: http://localhost:5174/admin-global
+   - Django Admin: http://127.0.0.1:8000/admin/
+
+3. **Reset de contraseña de usuario bloqueado:**
+   - Acceder a panel Admin Global
+   - Tab "Operaciones Críticas"
+   - Usar botón "Resetear contraseña"
+   - Proporcionar ID del usuario y nueva contraseña
+   - Acción queda auditada
+
+4. **Bloqueo de cuenta comprometida:**
+   - Acceder a panel Admin Global
+   - Tab "Operaciones Críticas"
+   - Usar botón "Bloquear usuario"
+   - Proporcionar motivo del bloqueo
+   - Usuario no podrá iniciar sesión
+
+5. **Auditoría de incidentes:**
+   - Tab "Auditoría Global"
+   - Filtrar por usuario, acción, modelo
+   - Revisar últimas 24h/7días/30días
+   - Todas las acciones del superusuario quedan registradas
+
+**⚠️ Restricciones de uso:**
+- Solo para emergencias y contingencias
+- Cambiar contraseña inmediatamente tras creación
+- No usar para operaciones rutinarias
+- Documentar cada uso en bitácora externa
+- Todas las acciones quedan auditadas permanentemente
+
+---
+
+## Procedimientos de Contingencia
+
+### Escenario 1: Usuario Admin TI bloqueado
+
+**Síntomas:** El administrador TI no puede iniciar sesión.
+
+**Solución:**
+1. Acceder con Administrador Global
+2. Navegar a `/admin-global` → "Operaciones Críticas"
+3. Usar "Desbloquear usuario" con el ID del Admin TI
+4. Verificar en auditoría la causa del bloqueo
+
+**Comando alternativo:**
+```bash
+python manage.py shell
+from django.contrib.auth.models import User
+user = User.objects.get(username='ti_admin')
+user.is_active = True
+user.save()
+```
+
+### Escenario 2: Contraseña olvidada por usuario crítico
+
+**Síntomas:** Usuario con rol importante no puede acceder.
+
+**Solución:**
+1. Verificar identidad del usuario fuera del sistema
+2. Acceder con Administrador Global a `/admin-global`
+3. Tab "Operaciones Críticas" → "Resetear contraseña"
+4. Proporcionar ID del usuario y contraseña temporal
+5. Informar al usuario la contraseña temporal
+6. Usuario debe cambiarla en primer acceso
+
+### Escenario 3: Actividad sospechosa detectada
+
+**Síntomas:** Auditoría muestra acciones inusuales.
+
+**Solución:**
+1. Acceder con Administrador Global
+2. Tab "Auditoría Global" → Filtrar por usuario sospechoso
+3. Revisar todas las acciones recientes
+4. Si se confirma compromiso: Tab "Operaciones Críticas" → "Bloquear usuario"
+5. Resetear contraseña del usuario afectado
+6. Documentar incidente en sistema externo
+
+### Escenario 4: Purga de auditoría (mantenimiento)
+
+**Síntomas:** Base de datos creciendo excesivamente.
+
+**⚠️ OPERACIÓN CRÍTICA - Solo con autorización**
+
+**Solución:**
+1. Hacer backup completo de la base de datos
+2. Acceder con Administrador Global
+3. Usar endpoint `/api/admin-global/purgar-datos/`
+4. Confirmar con texto exacto: `PURGAR_DEFINITIVAMENTE`
+5. Especificar días a mantener (ej: 90)
+6. Verificar logs tras purga
+
+### Escenario 5: Pérdida de acceso de todos los administradores
+
+**Síntomas:** Ningún administrador puede acceder al sistema.
+
+**Solución de emergencia:**
+```bash
+# Acceder al servidor backend
+cd Backend
+.\ven\Scripts\Activate.ps1
+
+# Crear nuevo superusuario de emergencia
+python manage.py crear_superusuario_global --username emergencia --password EmergPass2025!
+
+# Acceder con nuevas credenciales a /admin-global
+# Revisar auditoría para identificar causa
+# Restaurar accesos normales
+```
 
 ---
 
@@ -467,6 +669,16 @@ La funcionalidad principal es la búsqueda de registros disponible para todos lo
 - `GET /api/reglas-negocio/{id}/` - Obtener detalle de regla
 - `PUT /api/reglas-negocio/{id}/` - Actualizar regla (auto-incrementa versión)
 - `DELETE /api/reglas-negocio/{id}/` - Eliminar regla
+- `GET /api/reglas-negocio/{id}/historial/` - Ver historial de versiones
+- `POST /api/reglas-negocio/{id}/rollback/` - Restaurar versión anterior
+- `GET /api/reglas-negocio/{id}/comparar/?v1=X&v2=Y` - Comparar dos versiones
+
+### Admin Global (Solo Superusuarios - Emergencias)
+- `GET /api/admin-global/estado/` - Dashboard con métricas del sistema
+- `POST /api/admin-global/reset-password/` - Resetear contraseña de usuario
+- `POST /api/admin-global/bloquear-usuario/` - Bloquear/desbloquear cuenta
+- `GET /api/admin-global/auditoria/` - Auditoría completa con filtros
+- `POST /api/admin-global/purgar-datos/` - Purga masiva de datos (CRÍTICO)
 
 ---
 
@@ -506,41 +718,78 @@ Para más información, revisar la documentación de:
 
 ---
 
-**Última actualización**: 13 de diciembre de 2025
+**Última actualización**: 14 de diciembre de 2025
 
-## Cambios Recientes (13/12/2025)
+## Cambios Recientes (14/12/2025)
+
+### Backend - MongoDB & Django
+- ✅ **Corrección de errores MongoDB Authentication**
+  - Implementado manejo de `OperationFailure` en [Backend/src/mongodb_utils.py](Backend/src/mongodb_utils.py)
+  - Fallback automático a conexión sin credenciales para localhost
+  - Validación con `ping()` para detectar errores de autenticación anticipadamente
+  - Soluciona 500 errors al crear índices en MongoDB
+
+- ✅ **Corrección de rutas conflictivas en Django**
+  - Reordenadas rutas en [Backend/Django/urls.py](Backend/Django/urls.py)
+  - Ruta `/calificaciones-corredor/estadisticas/` ahora procesada ANTES de `<str:calificacion_id>`
+  - Evita que "estadisticas" sea interpretado como ID inválido (error 400)
+
+### Frontend - Tailwind CSS & Modo Oscuro
+- ✅ **Instalación de Tailwind CSS v3.4.1**
+  - Configurado [FrontEnd/tailwind.config.js](FrontEnd/tailwind.config.js) con `darkMode: 'class'`
+  - Configurado [FrontEnd/postcss.config.js](FrontEnd/postcss.config.js)
+  - Actualizado [FrontEnd/src/index.css](FrontEnd/src/index.css) con directivas Tailwind
+
+- ✅ **Sistema de Modo Oscuro Funcional**
+  - Actualizado [App.jsx](FrontEnd/src/App.jsx) para aplicar clase `dark` al HTML
+  - Sincronización de tema con localStorage
+  - Componentes responden automáticamente al cambio de tema
+
+- ✅ **Estilización de Páginas Principales**
+  - [CorredorDashboard.jsx](FrontEnd/src/pages/CorredorDashboard.jsx)
+    - Header con botón refrescar y subir certificado
+    - Tarjetas de estadísticas con gradientes en dark mode
+    - Filtros temáticos y tabla de certificados
+    - Badges de estado con paleta oscura
+    - Soporte completo para modo oscuro
+
+  - [CertificatesUpload.jsx](FrontEnd/src/pages/CertificatesUpload.jsx)
+    - 4 modos de carga: Manual, PDF, CSV, Excel
+    - Inputs de archivo con validaciones específicas
+    - Botones de modo con estados visuales
+    - Estilos responsive con modo oscuro
+
+  - [Registros.jsx](FrontEnd/src/pages/Registros.jsx)
+    - Conversión completa a Tailwind CSS
+    - Tarjetas de registros con hover effects
+    - Botones de acción (editar, eliminar, crear, enviar)
+    - Badges de estado con colores temáticos
+    - Estado de carga con spinner
+
+  - [AuditPanel.jsx](FrontEnd/src/pages/AuditPanel.jsx)
+    - Tabla de validación con estilos oscuros
+    - Header descriptivo con botón refrescar
+    - Badges de estado para calificaciones
+    - Estado vacío con ícono
+    - Manejo visual de errores
+
+### Características Implementadas
+✅ Modo oscuro funcional en todas las páginas principales  
+✅ Degradados y sombras adaptadas al tema  
+✅ Badges de estado con paleta coherente  
+✅ Hover effects y transiciones suaves  
+✅ Manejo de estados de carga y error  
+✅ Resolución completa de conflictos de rutas Django  
+✅ Solución de autenticación MongoDB para localhost  
+✅ Framework CSS completo con Tailwind v3
+
+### Cambios Recientes (13/12/2025)
 
 ### Backend
 - ✅ Implementado CRUD completo para **Usuarios** (`/api/usuarios/`)
-  - Crear usuarios con asignación de rol automática
-  - Editar usuarios y actualizar perfil/rol
-  - Eliminar usuarios (User + PerfilUsuario)
-  - Vista de detalle individual por ID
-  
 - ✅ Implementado CRUD completo para **Reglas de Negocio** (`/api/reglas-negocio/`)
-  - Crear reglas con condición y acción
-  - Editar reglas con versionado automático
-  - Eliminar reglas
-  - Vista de detalle individual por ID
-
-- ✅ Rutas actualizadas en [Backend/Django/urls.py](Backend/Django/urls.py)
-- ✅ Nuevas vistas en [Backend/src/views/usuarios.py](Backend/src/views/usuarios.py)
-- ✅ Vistas extendidas en [Backend/src/views/reglas_negocio.py](Backend/src/views/reglas_negocio.py)
 
 ### Frontend
-- ✅ Implementado panel **Administración Nuam** en [FrontEnd/src/pages/AdministracionNuam.jsx](FrontEnd/src/pages/AdministracionNuam.jsx)
-  - Interfaz con pestañas (Reglas de Negocio | Gestión de Usuarios)
-  - Formularios de crear/editar para ambas entidades
-  - Tablas interactivas con botones Edit/Delete
-  - Confirmación antes de eliminar
-  - Actualización en tiempo real desde PostgreSQL
-
-- ✅ Navbar actualizado: "Administración Nuam" visible solo para superusuarios
-- ✅ Rutas actualizadas en [FrontEnd/src/router.jsx](FrontEnd/src/router.jsx)
-
-### Base de Datos
-- Todos los cambios CRUD persisten en PostgreSQL
-- Auto-incremento de versión en Reglas de Negocio al editar
-- Cascada de eliminación: User → PerfilUsuario
+- ✅ Implementado panel **Administración Nuam**
 
 ---

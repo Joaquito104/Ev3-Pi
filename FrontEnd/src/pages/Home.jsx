@@ -1,24 +1,12 @@
-import React, { useEffect, useState } from 'react'
+import React, { useContext } from 'react'
 import { Link } from 'react-router-dom'
 import Navbar from '../components/layout/Navbar'
 import Footer from '../components/layout/Footer'
+import { ThemeContext } from '../App'
 
 const Home = () => {
-  const [dark, setDark] = useState(() => {
-    try {
-      return document.documentElement.classList.contains('theme-dark')
-    } catch (e) {
-      return false
-    }
-  })
-
-  useEffect(() => {
-    const obs = new MutationObserver(() => {
-      setDark(document.documentElement.classList.contains('theme-dark'))
-    })
-    obs.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] })
-    return () => obs.disconnect()
-  }, [])
+  const { theme } = useContext(ThemeContext)
+  const dark = theme === 'dark'
 
   const bg = dark ? '#0f1720' : '#f8fafc'
   const text = dark ? '#e6eef8' : '#0b1220'
