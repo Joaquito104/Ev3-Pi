@@ -11,7 +11,7 @@ from src.views.perfil_completo import (
     GestionSolicitudesRolView,
 )
 from src.views.feedback import FeedbackView
-from src.views.auth import mi_perfil, registrar_usuario
+from src.views.auth import mi_perfil, registrar_usuario, RegistroView, VerificarEmailView, ReenviarVerificacionView
 from rest_framework.routers import DefaultRouter
 from rest_framework_simplejwt.views import (
     TokenObtainPairView,
@@ -82,6 +82,11 @@ urlpatterns = [
     path("api/token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
     path("api/perfil/", mi_perfil, name="mi_perfil"),
     path("api/registro/", registrar_usuario),
+    
+    # NUEVO SISTEMA DE REGISTRO
+    path("api/registro-completo/", RegistroView.as_view()),
+    path("api/verificar-email/", VerificarEmailView.as_view()),
+    path("api/reenviar-verificacion/", ReenviarVerificacionView.as_view()),
     
     # ---------- PERFIL COMPLETO ----------
     path("api/perfil-completo/", PerfilCompletoView.as_view()),

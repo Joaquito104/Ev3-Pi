@@ -1,5 +1,23 @@
 from django.contrib.auth.models import User
 from django.db import models
+import secrets
+from datetime import timedelta
+from django.utils import timezone
+
+# ===============================
+# PAÍSES Y VALIDACIONES
+# ===============================
+PAISES_CHOICES = [
+    ('CHILE', 'Chile'),
+    ('COLOMBIA', 'Colombia'),
+    ('PERU', 'Perú'),
+]
+
+PREFIJOS_TELEFONICOS = {
+    'CHILE': '+56',
+    'COLOMBIA': '+57',
+    'PERU': '+51',
+}
 
 # ===============================
 # REGISTROS
@@ -87,9 +105,12 @@ class PerfilUsuario(models.Model):
     
     # Control de cambio de rol
     cambio_rol_solicitado = models.BooleanField(default=False)
+    
+    # Ubicación
+    pais = models.CharField(max_length=20, choices=PAISES_CHOICES, default='CHILE')
 
     def __str__(self):
-        return f"{self.usuario.username} ({self.rol})"
+        return f"{self.usuario.username} ({self.rol}) - {self.pais}"
 
 
 # ===============================
@@ -364,3 +385,38 @@ class SolicitudCambioRol(models.Model):
     
     def __str__(self):
         return f"{self.usuario.username}: {self.rol_actual} → {self.rol_solicitado} ({self.estado})"
+
+
+# ===============================
+# VERIFICACIÓN DE EMAIL
+# ===============================
+class VerificacionEmail(models.Model):
+    """
+    Token de verificación para nuevos usuarios
+    Se crea al registrarse, se valida al confirmar email
+    """
+    usuario = models.OneToOneField(
+        User,
+        on_delete=models.CASCADE,
+        related_name="verificacion_email"
+    )
+    token = models.CharField(max_length=64, unique=True)
+    email_a_verificar = models.EmailField()
+    fecha_creacion = models.DateTimeField(auto_now_add=True)
+    verificado = models.BooleanField(default=False)
+    fecha_verificacion = models.DateTimeField(null=True, blank=True)
+    
+    def es_valido(self):
+        """Token válido solo por 24 horas"""
+        if self.verificado:
+            return False
+        expiracion = self.fecha_creacion + timedelta(hours=24)
+        return timezone.now() < expiracion
+    
+    @classmethod
+    def generar_token(cls):
+        """Generar token único de 64 caracteres"""
+        return secrets.token_urlsafe(48)
+    
+    def __str__(self):
+        return f"Verificación - {self.usuario.username} ({self.email_a_verificar})"

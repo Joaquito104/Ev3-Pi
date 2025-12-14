@@ -3,6 +3,7 @@ import { Routes, Route } from "react-router-dom";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Registro from "./pages/Registro";
+import VerificarEmail from "./pages/VerificarEmail";
 import Perfil from "./pages/Perfil";
 import Feedback from "./pages/Feedback";
 import NoAutorizado from "./pages/NoAutorizado";
@@ -41,6 +42,7 @@ export default function Router() {
       <Route path="/" element={<Home />} />
       <Route path="/iniciar-sesion" element={<Login />} />
       <Route path="/registro" element={<Registro />} />
+      <Route path="/verificar-email" element={<VerificarEmail />} />
       <Route path="/no-autorizado" element={<NoAutorizado />} />
 
       {/* ===== DASHBOARDS POR ROL ===== */}
