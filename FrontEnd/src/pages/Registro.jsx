@@ -210,37 +210,34 @@ export default function Registro() {
               />
             </div>
 
-            {/* País */}
+            {/* Teléfono con selector de país */}
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                País
+                Teléfono
               </label>
-              <select
-                name="pais"
-                value={formData.pais}
-                onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                {PAISES.map(p => (
-                  <option key={p.code} value={p.code}>{p.name}</option>
-                ))}
-              </select>
-            </div>
-
-            {/* Teléfono */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Teléfono ({paisSeleccionado?.prefijo})
-              </label>
-              <input
-                type="tel"
-                name="telefono"
-                value={formData.telefono}
-                onChange={handleChange}
-                placeholder="912345678"
-                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Sin prefijo</p>
+              <div className="flex gap-2">
+                <select
+                  name="pais"
+                  value={formData.pais}
+                  onChange={handleChange}
+                  className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium min-w-max"
+                >
+                  {PAISES.map(p => (
+                    <option key={p.code} value={p.code}>
+                      {p.prefijo} {p.name.substring(0, 3)}
+                    </option>
+                  ))}
+                </select>
+                <input
+                  type="tel"
+                  name="telefono"
+                  value={formData.telefono}
+                  onChange={handleChange}
+                  placeholder="912345678"
+                  className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Ingresa sin prefijo</p>
             </div>
 
             {/* Rol */}

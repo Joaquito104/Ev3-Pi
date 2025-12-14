@@ -4,12 +4,24 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.views import APIView
 from django.contrib.auth.models import User
+from django.contrib.auth import authenticate
 from django.utils import timezone
 from django.db import transaction
+from rest_framework_simplejwt.tokens import RefreshToken
+import pyotp
+import redis
+import json
 
 from src.serializers import RegistroUsuarioSerializer
 from src.models import PerfilUsuario, VerificacionEmail, PAISES_CHOICES, CorreoAdicional, Auditoria
 from src.utils_registro import validar_telefonico, enviar_email_verificacion, enviar_email_rol_asignado
+
+# Redis para almacenar códigos MFA temporales
+try:
+    r = redis.Redis(host='localhost', port=6379, db=0, decode_responses=True)
+    r.ping()
+except:
+    r = None  # Sin Redis, MFA temporal en memoria
 
 
 @api_view(["GET"])
@@ -346,3 +358,195 @@ class ReenviarVerificacionView(APIView):
                 {"detail": "Error al enviar email"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
+
+class LoginMFAView(APIView):
+    """
+    Login con MFA en 2 pasos:
+    1. POST con username/password → Retorna session_id (temporal)
+    2. POST con session_id y codigo_mfa → Retorna access/refresh tokens
+    """
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        """
+        Step 1: Validar credenciales y verificar si MFA está habilitado
+        Step 2: Validar código TOTP
+        """
+        step = request.data.get('step')
+        
+        if step == 1:
+            return self._login_step1(request)
+        elif step == 2:
+            return self._login_step2(request)
+        else:
+            return Response(
+                {"detail": "step debe ser 1 o 2"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+    def _login_step1(self, request):
+        """Validar credenciales y crear sesión temporal"""
+        username = request.data.get('username', '').strip()
+        password = request.data.get('password', '').strip()
+
+        if not username or not password:
+            return Response(
+                {"detail": "Username y password requeridos"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        user = authenticate(username=username, password=password)
+        if not user:
+            return Response(
+                {"detail": "Credenciales inválidas"},
+                status=status.HTTP_401_UNAUTHORIZED
+            )
+
+        # Registrar intento de login
+        Auditoria.objects.create(
+            usuario=user,
+            accion="LOGIN",
+            modelo="User",
+            objeto_id=user.id,
+            ip_address=self._obtener_ip(request),
+            descripcion="Intento de login"
+        )
+
+        # Verificar si MFA está habilitado
+        perfil = getattr(user, 'perfil', None)
+        mfa_habilitado = perfil and perfil.mfa_habilitado if perfil else False
+
+        if not mfa_habilitado:
+            # Sin MFA, generar tokens directamente
+            refresh = RefreshToken.for_user(user)
+            return Response({
+                "access": str(refresh.access_token),
+                "refresh": str(refresh.token),
+                "mfa_requerido": False,
+                "usuario": {
+                    "id": user.id,
+                    "username": user.username,
+                    "email": user.email,
+                    "rol": perfil.rol if perfil else None,
+                }
+            }, status=status.HTTP_200_OK)
+
+        # Con MFA, crear sesión temporal
+        session_id = self._crear_sesion_mfa(user)
+        return Response({
+            "mfa_requerido": True,
+            "session_id": session_id,
+            "detail": "Ingresa tu código de autenticación"
+        }, status=status.HTTP_202_ACCEPTED)
+
+    def _login_step2(self, request):
+        """Validar código TOTP y generar tokens"""
+        session_id = request.data.get('session_id', '').strip()
+        codigo = request.data.get('codigo', '').strip()
+
+        if not session_id or not codigo:
+            return Response(
+                {"detail": "session_id y codigo requeridos"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Recuperar usuario de sesión temporal
+        user_id = self._obtener_usuario_sesion(session_id)
+        if not user_id:
+            return Response(
+                {"detail": "Sesión expirada o inválida"},
+                status=status.HTTP_401_UNAUTHORIZED
+            )
+
+        try:
+            user = User.objects.get(id=user_id)
+        except User.DoesNotExist:
+            return Response(
+                {"detail": "Usuario no encontrado"},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        # Validar código TOTP
+        perfil = getattr(user, 'perfil', None)
+        if not perfil or not perfil.mfa_secret:
+            return Response(
+                {"detail": "MFA no configurado"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        totp = pyotp.TOTP(perfil.mfa_secret)
+        if not totp.verify(codigo):
+            return Response(
+                {"detail": "Código de autenticación inválido"},
+                status=status.HTTP_401_UNAUTHORIZED
+            )
+
+        # Registrar login exitoso
+        Auditoria.objects.create(
+            usuario=user,
+            accion="LOGIN",
+            modelo="User",
+            objeto_id=user.id,
+            ip_address=self._obtener_ip(request),
+            descripcion="Login exitoso con MFA"
+        )
+
+        # Limpiar sesión temporal
+        self._eliminar_sesion_mfa(session_id)
+
+        # Generar tokens
+        refresh = RefreshToken.for_user(user)
+        return Response({
+            "access": str(refresh.access_token),
+            "refresh": str(refresh.token),
+            "usuario": {
+                "id": user.id,
+                "username": user.username,
+                "email": user.email,
+                "rol": perfil.rol if perfil else None,
+            }
+        }, status=status.HTTP_200_OK)
+
+    def _crear_sesion_mfa(self, user):
+        """Crear sesión temporal para MFA (5 minutos)"""
+        import uuid
+        session_id = str(uuid.uuid4())
+        
+        if r:
+            r.setex(f"mfa_session:{session_id}", 300, str(user.id))
+        else:
+            # Fallback en memoria (solo en dev)
+            if not hasattr(self, '_mfa_sessions'):
+                self._mfa_sessions = {}
+            self._mfa_sessions[session_id] = {'user_id': user.id, 'expires': timezone.now() + timezone.timedelta(minutes=5)}
+        
+        return session_id
+
+    def _obtener_usuario_sesion(self, session_id):
+        """Obtener ID de usuario de sesión temporal"""
+        if r:
+            user_id = r.get(f"mfa_session:{session_id}")
+            return int(user_id) if user_id else None
+        else:
+            if hasattr(self, '_mfa_sessions') and session_id in self._mfa_sessions:
+                session = self._mfa_sessions[session_id]
+                if session['expires'] > timezone.now():
+                    return session['user_id']
+            return None
+
+    def _eliminar_sesion_mfa(self, session_id):
+        """Eliminar sesión temporal"""
+        if r:
+            r.delete(f"mfa_session:{session_id}")
+        else:
+            if hasattr(self, '_mfa_sessions') and session_id in self._mfa_sessions:
+                del self._mfa_sessions[session_id]
+
+    def _obtener_ip(self, request):
+        """Obtener IP del cliente"""
+        x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+        if x_forwarded_for:
+            ip = x_forwarded_for.split(',')[0]
+        else:
+            ip = request.META.get('REMOTE_ADDR')
+        return ip

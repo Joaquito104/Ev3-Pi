@@ -11,7 +11,8 @@ from src.views.perfil_completo import (
     GestionSolicitudesRolView,
 )
 from src.views.feedback import FeedbackView
-from src.views.auth import mi_perfil, registrar_usuario, RegistroView, VerificarEmailView, ReenviarVerificacionView
+from src.views.auth import mi_perfil, registrar_usuario, RegistroView, VerificarEmailView, ReenviarVerificacionView, LoginMFAView
+from src.views.jwt_auth import LogoutView, RefreshTokenView, TokenStatsView
 from rest_framework.routers import DefaultRouter
 from rest_framework_simplejwt.views import (
     TokenObtainPairView,
@@ -45,6 +46,7 @@ from src.views.calificaciones_mongo import (
     DocumentosMongoView,
     CalificacionCargaMasivaCSVView,
 )
+from src.views.calificaciones_update import CalificacionCorredorUpdateView
 from src.views.auditoria import AuditoriaView, AuditoriaEstadisticasView
 from src.views.reglas_negocio import ReglasNegocioView, ReglaNegocioDetailView
 from src.views.historial_reglas import HistorialReglaView, RollbackReglaView, CompararVersionesView
@@ -79,7 +81,10 @@ urlpatterns = [
 
     # ---------- AUTH ----------
     path("api/token/", TokenObtainPairView.as_view(), name="token_obtain_pair"),
-    path("api/token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
+    path("api/token/refresh/", RefreshTokenView.as_view(), name="token_refresh"),
+    path("api/login-mfa/", LoginMFAView.as_view(), name="login_mfa"),
+    path("api/logout/", LogoutView.as_view(), name="logout"),
+    path("api/token-stats/", TokenStatsView.as_view(), name="token_stats"),
     path("api/perfil/", mi_perfil, name="mi_perfil"),
     path("api/registro/", registrar_usuario),
     
@@ -113,6 +118,7 @@ urlpatterns = [
     path("api/calificaciones-corredor/", CalificacionCorredorView.as_view()),
     path("api/calificaciones-corredor/estadisticas/", CalificacionEstadisticasView.as_view()),
     path("api/calificaciones-corredor/<str:calificacion_id>/", CalificacionCorredorDetailView.as_view()),
+    path("api/calificaciones-corredor/<str:calificacion_id>/actualizar/", CalificacionCorredorUpdateView.as_view()),
     
     # CALIFICACIONES MONGODB (Analista)
     path("api/calificaciones-analista/", CalificacionAnalistaView.as_view()),

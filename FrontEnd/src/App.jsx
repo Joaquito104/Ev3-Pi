@@ -2,6 +2,8 @@
 import { createContext, useEffect, useState } from "react";
 import { BrowserRouter } from "react-router-dom";
 import Router from "./router";
+import { useTokenManagement, setupAxiosInterceptors } from "./hooks/useTokenManagement";
+import axios from "axios";
 
 export const ThemeContext = createContext();
 export const AuthContext = createContext();
@@ -23,19 +25,37 @@ export default function App() {
 
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const tokenMgmt = useTokenManagement();
 
-  // AUTOLOGIN
+  // Setup de interceptors de axios
   useEffect(() => {
-    const token = localStorage.getItem("ev3pi-token");
-    if (!token) {
+    setupAxiosInterceptors(tokenMgmt.refreshAccessToken);
+  }, [tokenMgmt]);
+
+  // AUTOLOGIN con nuevo sistema de tokens
+  useEffect(() => {
+    const accessToken = localStorage.getItem("access_token");
+    if (!accessToken) {
       setLoading(false);
       return;
     }
 
     fetch("http://127.0.0.1:8000/api/perfil/", {
-      headers: { Authorization: `Bearer ${token}` },
+      headers: { Authorization: `Bearer ${accessToken}` },
     })
-      .then((res) => (res.ok ? res.json() : Promise.reject()))
+      .then((res) => {
+        if (res.ok) return res.json();
+        // Si 401, intentar refresh
+        if (res.status === 401) {
+          return tokenMgmt.refreshAccessToken().then(() => {
+            const newToken = localStorage.getItem("access_token");
+            return fetch("http://127.0.0.1:8000/api/perfil/", {
+              headers: { Authorization: `Bearer ${newToken}` },
+            }).then(r => r.json());
+          });
+        }
+        return Promise.reject();
+      })
       .then((perfil) => {
         const userData = {
           id: perfil.id,
@@ -46,7 +66,8 @@ export default function App() {
         setUser(userData);
       })
       .catch(() => {
-        localStorage.removeItem("ev3pi-token");
+        localStorage.removeItem("access_token");
+        localStorage.removeItem("refresh_token");
         setUser(null);
       })
       .finally(() => setLoading(false));
@@ -63,7 +84,7 @@ export default function App() {
     if (!resp.ok) throw new Error("CREDENCIALES");
 
     const data = await resp.json();
-    localStorage.setItem("ev3pi-token", data.access);
+    tokenMgmt.setTokens(data.access, data.refresh);
 
     const perfilResp = await fetch("http://127.0.0.1:8000/api/perfil/", {
       headers: { Authorization: `Bearer ${data.access}` },
@@ -82,8 +103,8 @@ export default function App() {
     return userData;
   };
 
-  const logout = () => {
-    localStorage.removeItem("ev3pi-token");
+  const logout = async () => {
+    await tokenMgmt.logout();
     setUser(null);
   };
 

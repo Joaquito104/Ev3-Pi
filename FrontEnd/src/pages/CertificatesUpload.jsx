@@ -1,6 +1,7 @@
 import { useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { ThemeContext } from "../App";
+import CertificateDragDrop from "../components/CertificateDragDrop";
 import axios from "axios";
 
 const API_BASE_URL = "http://127.0.0.1:8000/api";
@@ -8,7 +9,7 @@ const API_BASE_URL = "http://127.0.0.1:8000/api";
 export default function CertificatesUpload() {
   const { theme } = useContext(ThemeContext);
   const navigate = useNavigate();
-  const [modo, setModo] = useState("manual"); // manual | pdf | csv | excel
+  const [modo, setModo] = useState("dragdrop"); // dragdrop | manual
   const [formData, setFormData] = useState({
     registro_id: "",
     rut: "",
@@ -47,79 +48,57 @@ export default function CertificatesUpload() {
     setMessage(null);
 
     try {
-      const token = localStorage.getItem("ev3pi-token");
+      const token = localStorage.getItem("access_token");
       const headers = { Authorization: `Bearer ${token}` };
-      if (modo === "csv" || modo === "excel") {
-        const esExcel = modo === "excel";
-        const archivo = esExcel ? archivoCsv : archivoCsv;
-        if (!archivo) {
-          setMessage({ type: "error", text: esExcel ? "Debes adjuntar un Excel" : "Debes adjuntar un CSV" });
-          return;
-        }
-        const fd = new FormData();
-        fd.append("archivo", archivo);
-        if (formData.registro_id) fd.append("registro_id", formData.registro_id);
 
-        const res = await axios.post(`${API_BASE_URL}/calificaciones-csv/`, fd, {
+      // Modo manual - crear certificado con datos
+      let documentos = [];
+      if (archivoPdf) {
+        const fd = new FormData();
+        fd.append("archivo", archivoPdf);
+        fd.append("registro_id", formData.registro_id);
+        fd.append("tipo", "CERTIFICADO");
+
+        const docRes = await axios.post(`${API_BASE_URL}/certificados-upload/`, fd, {
           headers: { ...headers, "Content-Type": "multipart/form-data" },
         });
-        setMessage({
-          type: "success",
-          text: `${esExcel ? "Excel" : "CSV"} procesado: ${res.data.creadas} creadas, ${res.data.errores.length} errores`
-        });
-        setArchivoCsv(null);
-      } else {
-        // Manual o PDF (PDF obligatorio si se elige modo pdf)
-        let documentos = [];
-        if (archivoPdf) {
-          const fd = new FormData();
-          fd.append("archivo", archivoPdf);
-          fd.append("registro_id", formData.registro_id);
-          fd.append("tipo_documento", "CERTIFICADO_PDF");
-          const docRes = await axios.post(`${API_BASE_URL}/documentos/`, fd, {
-            headers: { ...headers, "Content-Type": "multipart/form-data" },
-          });
-          documentos.push(docRes.data.id);
-        } else if (modo === "pdf") {
-          setMessage({ type: "error", text: "Adjunta un PDF para este modo" });
-          return;
-        }
-
-        const payload = {
-          ...formData,
-          monto: parseFloat(formData.monto) || 0,
-          documentos,
-        };
-
-        await axios.post(
-          `${API_BASE_URL}/calificaciones-corredor/`,
-          payload,
-          { headers }
-        );
-
-        setMessage({ type: "success", text: "✅ Calificación creada como BORRADOR" });
-        setFormData({
-          registro_id: "",
-          rut: "",
-          tipo_certificado: "AFP",
-          periodo: "",
-          monto: "",
-          detalles: {
-            institucion: "",
-            observaciones: ""
-          }
-        });
-        setArchivoPdf(null);
-
-        setTimeout(() => {
-          navigate("/corredor-dashboard");
-        }, 1500);
+        documentos.push(docRes.data.id);
       }
+
+      const payload = {
+        ...formData,
+        monto: parseFloat(formData.monto) || 0,
+        documentos,
+      };
+
+      await axios.post(
+        `${API_BASE_URL}/calificaciones-corredor/`,
+        payload,
+        { headers }
+      );
+
+      setMessage({ type: "success", text: "✅ Certificado creado como BORRADOR" });
+      setFormData({
+        registro_id: "",
+        rut: "",
+        tipo_certificado: "AFP",
+        periodo: "",
+        monto: "",
+        detalles: {
+          institucion: "",
+          observaciones: ""
+        }
+      });
+      setArchivoPdf(null);
+
+      setTimeout(() => {
+        navigate("/dashboard");
+      }, 1500);
     } catch (error) {
       console.error("Error al crear certificado:", error);
       setMessage({
         type: "error",
-        text: error.response?.data?.error || "❌ Error al crear el certificado"
+        text: error.response?.data?.detail || "❌ Error al crear el certificado"
       });
     } finally {
       setUploading(false);
@@ -165,10 +144,8 @@ export default function CertificatesUpload() {
 
         <div className="flex flex-wrap gap-3 mb-4">
           {[
-            { key: "manual", label: "Ingreso manual" },
-            { key: "pdf", label: "PDF" },
-            { key: "csv", label: "CSV" },
-            { key: "excel", label: "Excel" },
+            { key: "dragdrop", label: "📂 Arrastra & Suelta" },
+            { key: "manual", label: "✏️ Ingreso Manual" },
           ].map((op) => (
             <button
               key={op.key}
@@ -188,8 +165,16 @@ export default function CertificatesUpload() {
         </div>
 
         <div className={`p-6 rounded-lg shadow ${theme === "dark" ? "bg-gray-800" : "bg-white"}`}>
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {/* RUT */}
+          {modo === "dragdrop" ? (
+            <>
+              <h2 className="text-xl font-semibold mb-4">Subida rápida de Certificados</h2>
+              <CertificateDragDrop onUploadComplete={() => {
+                setTimeout(() => navigate("/dashboard"), 2000);
+              }} />
+            </>
+          ) : (
+            <form onSubmit={handleSubmit} className="space-y-6">
+            {/* ID Registro */}
             <div>
               <label
                 htmlFor="registro_id"
@@ -215,7 +200,7 @@ export default function CertificatesUpload() {
               />
             </div>
 
-              {(modo === "manual" || modo === "pdf") && (
+              {modo === "manual" && (
                 <div className="grid grid-cols-1 gap-6">
                   <div>
                     <label
@@ -467,22 +452,23 @@ export default function CertificatesUpload() {
                 Cancelar
               </button>
             </div>
-          </form>
+            </form>
 
-          {/* Información */}
-          <div className={`mt-6 p-4 rounded border ${
-            theme === "dark" ? "bg-gray-700 border-gray-600" : "bg-blue-50 border-blue-200"
-          }`}>
-            <h3 className="font-semibold mb-2">ℹ️ Información:</h3>
-            <ul className={`list-disc list-inside text-sm space-y-1 ${
-              theme === "dark" ? "text-gray-300" : "text-gray-700"
+            {/* Información */}
+            <div className={`mt-6 p-4 rounded border ${
+              theme === "dark" ? "bg-gray-700 border-gray-600" : "bg-blue-50 border-blue-200"
             }`}>
-              <li>El certificado se creará en estado BORRADOR</li>
-              <li>Los campos marcados con * son obligatorios</li>
-              <li>El RUT debe tener formato chileno válido: XX.XXX.XXX-X</li>
-              <li>El período debe ser del formato YYYY-MM (ej: 2024-01)</li>
-            </ul>
-          </div>
+              <h3 className="font-semibold mb-2">ℹ️ Información:</h3>
+              <ul className={`list-disc list-inside text-sm space-y-1 ${
+                theme === "dark" ? "text-gray-300" : "text-gray-700"
+              }`}>
+                <li>El certificado se creará en estado BORRADOR</li>
+                <li>Los campos marcados con * son obligatorios</li>
+                <li>El RUT debe tener formato chileno válido: XX.XXX.XXX-X</li>
+                <li>El período debe ser del formato YYYY-MM (ej: 2024-01)</li>
+              </ul>
+            </div>
+          )}
         </div>
       </div>
     </div>

@@ -28,6 +28,7 @@ INSTALLED_APPS = [
     "django.contrib.contenttypes",
     "django.contrib.sessions",
     "django.contrib.messages",
+    "rest_framework_simplejwt",
     "django.contrib.staticfiles",
 
     # Apps externas
@@ -161,11 +162,13 @@ REST_FRAMEWORK = {
 # SIMPLE JWT CONFIG
 # ----------------------------------------------------
 SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=60),
-    "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
-    "ROTATE_REFRESH_TOKENS": False,
-    "BLACKLIST_AFTER_ROTATION": False,
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=15),  # Acceso corto para seguridad
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=7),     # Refresh válido 7 días
+    "ROTATE_REFRESH_TOKENS": True,                   # Rotar token en cada refresh
+    "BLACKLIST_AFTER_ROTATION": True,                # Blacklist del token viejo
     "UPDATE_LAST_LOGIN": True,
+    "ALGORITHM": "HS256",
+    "SIGNING_KEY": os.getenv('SECRET_KEY'),
 }
 
 # ----------------------------------------------------
