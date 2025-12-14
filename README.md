@@ -920,7 +920,174 @@ Rutas protegidas correctamente por permisos
 
 ---
 
-## Actualización 15/12/2025
+## Actualización 15/12/2025 - Perfil Completo + MFA
+
+### 🎯 Sistema de Perfil de Usuario Completo
+
+#### 1. Modelos Extendidos
+
+**PerfilUsuario (ampliado)**
+- `foto_perfil`: ImageField para subida de foto (upload_to="perfiles/%Y/%m/")
+- `biografia`: TextField para descripción personal
+- `telefono`: CharField(20) para contacto
+- `mfa_habilitado`: Boolean para MFA
+- `mfa_secret`: CharField(32) para TOTP secret (pyotp)
+- `cambio_rol_solicitado`: Boolean (solo 1 vez por usuario)
+
+**CorreoAdicional (nuevo modelo)**
+- `usuario`: FK a User
+- `email`: EmailField único per usuario
+- `verificado`: Boolean (para validación futura)
+- `principal`: Boolean (para marcar email principal)
+- `fecha_agregado`: DateTimeField
+- Meta: unique_together['usuario', 'email'], ordering por principal + fecha
+
+**SolicitudCambioRol (nuevo modelo)**
+- `usuario`: FK a User
+- `rol_actual`: CharField (guardado para historial)
+- `rol_solicitado`: CharField con choices
+- `justificacion`: TextField (mínimo 50 caracteres requeridos)
+- `estado`: PENDIENTE | APROBADA | RECHAZADA
+- `fecha_solicitud`, `fecha_respuesta`: DateTimeField
+- `respondido_por`: FK a User (admin que aprueba/rechaza)
+- `comentario_admin`: TextField (motivo de rechazo)
+- Meta: ordering por -fecha_solicitud
+
+#### 2. Vistas API Backend
+
+Archivo: `Backend/src/views/perfil_completo.py`
+
+**PerfilUsuarioView (GET/PUT)**
+- GET: Obtener perfil completo con correos, estado MFA, solicitudes
+- PUT: Actualizar nombre, apellido, biografía, teléfono, foto (multipart/form-data)
+- Validación: foto máximo 5MB
+- Auto-auditoría de cambios
+
+**CorreoAdicionalView (GET/POST/DELETE)**
+- GET: Listar correos adicionales
+- POST: Agregar nuevo correo (validación de duplicados)
+- DELETE: Eliminar (no permite eliminar principal)
+- Auto-auditoría
+
+**SolicitudCambioRolView (GET/POST)**
+- GET: Ver solicitud actual e historial
+- POST: Crear solicitud (solo 1 vez por usuario)
+- Validación: justificación mínimo 50 caracteres
+- Bloquea si rol_solicitado == rol_actual
+- Marca flag `cambio_rol_solicitado = True` después de primera solicitud
+
+**MFAConfigView (GET/POST/PUT/DELETE)**
+- GET: Ver estado MFA
+- POST: Generar secret + código QR (base64)
+- PUT: Verificar código e INSIMPLIFICAR MFA
+- DELETE: Deshabilitar MFA (requiere código válido)
+- Usa `pyotp.TOTP` con valid_window=1 (30 segundos)
+- Retorna QR code en base64 para renderear en frontend
+
+**GestionSolicitudesRolView (GET/PATCH)**
+- Solo TI/ADMIN
+- GET: Listar solicitudes por estado
+- PATCH: Aprobar/rechazar solicitud (solo PENDIENTE)
+- Al APROBAR: actualiza rol en PerfilUsuario
+- Auto-auditoría con acción RESOLUCION
+- Metadata con rol_anterior y rol_nuevo
+
+#### 3. Rutas API
+```
+GET    /api/perfil-completo/                  # Ver perfil
+PUT    /api/perfil-completo/                  # Editar perfil
+
+GET    /api/correos-adicionales/              # Listar correos
+POST   /api/correos-adicionales/              # Agregar correo
+DELETE /api/correos-adicionales/              # Eliminar correo
+
+GET    /api/solicitud-cambio-rol/             # Ver solicitud
+POST   /api/solicitud-cambio-rol/             # Crear solicitud
+
+GET    /api/mfa-config/                       # Estado MFA
+POST   /api/mfa-config/                       # Generar QR
+PUT    /api/mfa-config/                       # Activar MFA
+DELETE /api/mfa-config/                       # Deshabilitar MFA
+
+GET    /api/admin/solicitudes-rol/            # Listar (TI/ADMIN)
+PATCH  /api/admin/solicitudes-rol/<id>/       # Aprobar/rechazar
+```
+
+#### 4. Página de Perfil Frontend
+
+Archivo: `FrontEnd/src/pages/Perfil.jsx`
+
+**Tabs:**
+1. **📋 Información**
+   - Mostrar: email, teléfono, biografía
+   - Botón "Editar" → modo edición inline
+   - Subida de foto con preview
+   - Validación cliente (5MB max)
+
+2. **📧 Correos Adicionales**
+   - Lista de correos con estado (verificado/pendiente, principal)
+   - Input para agregar nuevo correo
+   - Botón 🗑️ para eliminar (no principal)
+   - Validación duplicados
+
+3. **🔐 MFA (Autenticación Multi-Factor)**
+   - Estado: habilitado/deshabilitado
+   - Si deshabilitado:
+     * Botón "Habilitar" → generar QR
+     * Mostrar QR + secret
+     * Input de 6 dígitos para verificar
+     * Botón "Verificar y Activar"
+   - Si habilitado:
+     * Mostrar ✅ MFA Habilitado
+     * Botón rojo "Deshabilitar" (requiere código)
+
+4. **🔄 Cambio de Rol**
+   - Warning: ⚠️ Solo puedes solicitar 1 vez
+   - Estados:
+     * Si ya solicitó: mostrar solicitud pendiente con estado
+     * Si rechazada: mostrar comentario admin
+     * Si puede solicitar:
+       - Select de roles (excepto rol actual)
+       - Textarea justificación (min 50 chars)
+       - Contador de caracteres
+       - Botón "Enviar" (disabled si < 50 chars)
+   - Mostrar historial de solicitudes
+
+**Header con foto**:
+- Avatar circular con borde azul
+- Botón 📷 para cambiar foto (solo en modo edición)
+
+#### 5. Navbar Modificado
+
+Archivo: `FrontEnd/src/components/layout/Navbar.jsx`
+
+**Cambios:**
+- Quitar "Mi Perfil" de nav links principales
+- Mostrar solo nombre de usuario: `👤 {username} ▼`
+- Dropdown al hacer click:
+  * ⚙️ Configuración de Perfil → link a /perfil
+  * 👤 Mi Perfil → link a /perfil
+  * 🚪 Cerrar Sesión → logout()
+- Dropdown cierra al hacer click en opción
+- Estilos: hover effect en items
+
+#### 6. Dependencias Agregadas
+
+Instaladas en Backend:
+- `pyotp==2.9.0`: TOTP para MFA
+- `qrcode==8.0`: Generación de códigos QR
+- `Pillow==11.1.0`: Procesamiento de imágenes (foto perfil)
+
+#### 7. Migraciones
+
+`0012_perfilusuario_biografia_and_more.py`:
+- Agrega 6 campos a PerfilUsuario
+- Crea modelo CorreoAdicional
+- Crea modelo SolicitudCambioRol
+
+---
+
+## Actualización 15/12/2025 (Primera Parte)
 
 ### 🎯 Módulo de Certificados Digitales Completo
 
