@@ -920,6 +920,195 @@ Rutas protegidas correctamente por permisos
 
 ---
 
+## Actualización 15/12/2025 - Sistema Crítico de Registro con Email Verificado
+
+### 🎯 Registro Completo con Verificación de Email
+
+#### 1. Modelos
+
+**VerificacionEmail (nuevo)**
+- `usuario`: OneToOne FK a User
+- `token`: CharField(64) único, generado con secrets.token_urlsafe()
+- `email_a_verificar`: EmailField 
+- `fecha_creacion`: DateTimeField
+- `verificado`: Boolean
+- `fecha_verificacion`: DateTimeField nullable
+- **Método `es_valido()`**: Token válido solo por 24 horas
+- **Método `generar_token()`**: Genera token de 48 bytes en base64url
+
+**PerfilUsuario (ampliado)**
+- Nuevo campo: `pais` con choices (CHILE, COLOMBIA, PERU)
+
+#### 2. Utilidades de Validación
+
+Archivo: `Backend/src/utils_registro.py`
+
+**`validar_telefonico(numero, pais)`**
+- Valida números según patrones por país
+- Chile: 9 dígitos, comienza con 2-9
+- Colombia: 10-11 dígitos
+- Perú: 8-9 dígitos
+- Normaliza: agrega prefijo internacional (+56, +57, +51)
+- Retorna: (es_valido, numero_normalizado)
+
+**`enviar_email_verificacion(usuario, email, token)`**
+- Crea enlace: `{FRONTEND_URL}/verificar-email?token={token}`
+- Envía HTML con botón clickeable
+- Token expira en 24 horas
+- Usa Django email backend (configurable)
+
+**`enviar_email_rol_asignado(usuario, rol)`**
+- Notifica al usuario sobre su rol asignado
+- Enviado después de verificación exitosa
+
+#### 3. Vistas API
+
+Archivo: `Backend/src/views/auth.py`
+
+**RegistroView (POST)**
+```
+POST /api/registro-completo/
+{
+  "username": "juan123",
+  "first_name": "Juan",
+  "last_name": "Pérez",
+  "email": "juan@mail.com",
+  "password": "securepass123",
+  "password_confirm": "securepass123",
+  "pais": "CHILE",
+  "telefono": "912345678",
+  "rol": "CORREDOR"
+}
+```
+
+Validaciones:
+- Username: 4+ caracteres
+- Password: 8+ caracteres, deben coincidir
+- Teléfono: validado según país
+- Email: no debe existir
+- Usuario: no debe existir
+- Rol: debe ser válido
+
+Proceso:
+1. Crea User (is_active=False)
+2. Crea PerfilUsuario con rol y país
+3. Crea CorreoAdicional como principal
+4. Genera token de verificación (24h)
+5. Envía email con enlace
+6. Audita creación
+
+**VerificarEmailView (POST)**
+```
+POST /api/verificar-email/
+{ "token": "..." }
+```
+
+Validaciones:
+- Token debe existir
+- No debe estar ya verificado
+- No debe estar expirado (24h)
+
+Proceso:
+1. Activa usuario (is_active=True)
+2. Marca como verificado en VerificacionEmail
+3. Marca correo como verificado en CorreoAdicional
+4. Envía email de rol asignado
+5. Audita verificación
+
+**ReenviarVerificacionView (POST)**
+```
+POST /api/reenviar-verificacion/
+{ "email": "..." }
+```
+
+Genera nuevo token si el anterior expiró.
+
+#### 4. Configuración Django
+
+En `Backend/Django/settings.py`:
+
+```python
+# Email
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'  # o console para dev
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'tu-email@gmail.com'
+EMAIL_HOST_PASSWORD = 'app-password'
+DEFAULT_FROM_EMAIL = 'noreply@ev3pi.com'
+
+# Frontend URL para enlaces
+FRONTEND_URL = 'http://localhost:5173'
+```
+
+#### 5. Frontend - Página de Registro
+
+Archivo: `FrontEnd/src/pages/Registro.jsx`
+
+**Step 1: Formulario de Registro**
+- Campos: username, nombre, apellido, email, país, teléfono, rol, contraseña
+- Validaciones cliente
+- Muestra prefijo telefónico según país
+- Submit → crear usuario
+
+**Step 2: Verificación de Email**
+- Input para pegar token del email
+- Botón "Verificar Email"
+- Botón "Reenviar Email"
+- Botón "Volver"
+
+**Estilos**: 
+- Tailwind dark mode compatible
+- Gradient background
+- Responsive
+
+#### 6. Frontend - Página de Verificación
+
+Archivo: `FrontEnd/src/pages/VerificarEmail.jsx`
+
+Ruta: `/verificar-email?token=...`
+
+Estados:
+- Verificando: spinner + mensaje
+- Éxito: checkmark + redirect a login (3s)
+- Error: X + link volver
+
+#### 7. Rutas API
+
+```
+POST /api/registro-completo/          # Crear usuario
+POST /api/verificar-email/            # Verificar con token
+POST /api/reenviar-verificacion/      # Reenviar email
+```
+
+#### 8. Flujo Completo
+
+```
+1. Usuario rellena formulario
+   ↓
+2. POST /registro-completo/ 
+   ↓
+3. Backend valida y envía email con token
+   ↓
+4. Usuario recibe email y copia token
+   ↓
+5. Frontend → /verificar-email?token=...
+   ↓
+6. POST /verificar-email/ con token
+   ↓
+7. Usuario activado ✅
+   ↓
+8. Puede iniciar sesión
+```
+
+#### 9. Migraciones
+
+`0013_perfilusuario_pais_verificacionemail.py`:
+- Agrega `pais` a PerfilUsuario
+- Crea modelo VerificacionEmail
+
+---
+
 ## Actualización 15/12/2025 - Perfil Completo + MFA
 
 ### 🎯 Sistema de Perfil de Usuario Completo
