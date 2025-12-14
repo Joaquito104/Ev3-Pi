@@ -179,3 +179,16 @@ class Auditoria(models.Model):
 
     def __str__(self):
         return f"[{self.fecha}] {self.accion} - {self.modelo}"
+
+class Feedback(models.Model):
+    usuario = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True
+    )
+    mensaje = models.TextField()
+    fecha = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Feedback {self.id}"

@@ -1,5 +1,8 @@
 from django.contrib import admin
 from django.urls import path, include
+from src.views.perfil import PerfilUsuarioView
+from src.views.feedback import FeedbackView
+from src.views.auth import mi_perfil, registrar_usuario
 from rest_framework.routers import DefaultRouter
 from rest_framework_simplejwt.views import (
     TokenObtainPairView,
@@ -57,11 +60,16 @@ router.register(r"registros", RegistroViewSet, basename="registros")
 
 urlpatterns = [
     path("admin/", admin.site.urls),
+    path("api/perfil/editar/", PerfilUsuarioView.as_view()),
+    path("api/feedback/", FeedbackView.as_view()),
 
     # ---------- AUTH ----------
     path("api/token/", TokenObtainPairView.as_view(), name="token_obtain_pair"),
     path("api/token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
     path("api/perfil/", mi_perfil, name="mi_perfil"),
+    path("api/registro/", registrar_usuario),
+
+
 
     # ---------- MÓDULOS ----------
     path("api/certificados/", CargaCertificadosView.as_view()),

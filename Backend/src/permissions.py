@@ -17,7 +17,8 @@ class PermisoRegistro(BasePermission):
         if request.user.is_superuser:
             return True
 
-        return True  # El detalle se controla por objeto
+        # El detalle se controla a nivel de objeto
+        return True
 
 
     def has_object_permission(self, request, view, obj):
@@ -35,7 +36,7 @@ class PermisoRegistro(BasePermission):
 
         # ----- ANALISTA -----
         if rol == ROLES["ANALISTA"]:
-            # Puede ver, crear, editar
+            # Puede ver, crear y editar
             return True
 
         # ----- ADMIN TI -----
@@ -59,10 +60,11 @@ class TieneRol(BasePermission):
     """
 
     def has_permission(self, request, view):
+        # Debe estar autenticado
         if not request.user or not request.user.is_authenticated:
             return False
 
-        # Admin global
+        # Superusuario pasa siempre
         if request.user.is_superuser:
             return True
 
@@ -70,5 +72,11 @@ class TieneRol(BasePermission):
         if not perfil:
             return False
 
+        rol_usuario = perfil.rol
         roles_permitidos = getattr(view, "roles_permitidos", [])
-        return perfil.rol in roles_permitidos
+
+        # DEBUG (puedes borrar luego)
+        print("ROL DEL USUARIO:", rol_usuario)
+        print("ROLES PERMITIDOS:", roles_permitidos)
+
+        return rol_usuario in roles_permitidos

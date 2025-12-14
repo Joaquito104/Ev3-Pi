@@ -1,19 +1,30 @@
 import { Routes, Route } from "react-router-dom";
+
 import Home from "./pages/Home";
 import Login from "./pages/Login";
+import Registro from "./pages/Registro";
+import Perfil from "./pages/Perfil";
+import Feedback from "./pages/Feedback";
+import NoAutorizado from "./pages/NoAutorizado";
+
 import CertificatesUpload from "./pages/CertificatesUpload";
 import TaxManagement from "./pages/TaxManagement";
 import AuditPanel from "./pages/AuditPanel";
 import AdministracionNuam from "./pages/AdministracionNuam";
 import Registros from "./pages/Registros";
 import ValidationInbox from "./pages/ValidationInbox";
-import CorredorDashboard from "./pages/CorredorDashboard";
 import AdminGlobal from "./pages/AdminGlobal";
-import NoAutorizado from "./pages/NoAutorizado";
+
+import CorredorDashboard from "./pages/CorredorDashboard";
+import DashboardAnalista from "./pages/DashboardAnalista";
+import DashboardAuditor from "./pages/DashboardAuditor";
+import DashboardAdminTI from "./pages/DashboardAdminTI";
 
 import Navbar from "./components/layout/Navbar";
 import Footer from "./components/layout/Footer";
 import ProtectedRoute from "./auth/ProtectedRoute";
+
+import DetalleCalificacion from "./pages/DetalleCalificacion";
 
 const LayoutWrapper = ({ children }) => (
   <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}>
@@ -26,25 +37,69 @@ const LayoutWrapper = ({ children }) => (
 export default function Router() {
   return (
     <Routes>
-      {/* LOGIN */}
-      <Route path="/iniciar-sesion" element={<Login />} />
-
-      {/* PÚBLICA */}
+      {/* ===== PÚBLICAS ===== */}
       <Route path="/" element={<Home />} />
+      <Route path="/iniciar-sesion" element={<Login />} />
+      <Route path="/registro" element={<Registro />} />
+      <Route path="/no-autorizado" element={<NoAutorizado />} />
 
-      {/* REGISTROS */}
+      {/* ===== DASHBOARDS POR ROL ===== */}
       <Route
-        path="/registros"
+        path="/dashboard/corredor"
         element={
+          <ProtectedRoute roles={["CORREDOR", "TI"]}>
+            <LayoutWrapper>
+              <CorredorDashboard />
+            </LayoutWrapper>
+          </ProtectedRoute>
+        }
+      />
+           {/* ===== DETALLE DE CALIFICACIÓN ===== */}
+       <Route
+         path="/certificados/:id"
+          element={
           <ProtectedRoute roles={["CORREDOR", "ANALISTA", "AUDITOR", "TI"]}>
             <LayoutWrapper>
-              <Registros />
+             <DetalleCalificacion />
+             </LayoutWrapper>
+           </ProtectedRoute>
+           }
+        />
+
+      <Route
+        path="/dashboard/analista"
+        element={
+          <ProtectedRoute roles={["ANALISTA", "TI"]}>
+            <LayoutWrapper>
+              <DashboardAnalista />
             </LayoutWrapper>
           </ProtectedRoute>
         }
       />
 
-      {/* CERTIFICADOS */}
+      <Route
+        path="/dashboard/auditor"
+        element={
+          <ProtectedRoute roles={["AUDITOR", "TI"]}>
+            <LayoutWrapper>
+              <DashboardAuditor />
+            </LayoutWrapper>
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/dashboard/admin-ti"
+        element={
+          <ProtectedRoute roles={["TI"]}>
+            <LayoutWrapper>
+              <DashboardAdminTI />
+            </LayoutWrapper>
+          </ProtectedRoute>
+        }
+      />
+
+      {/* ===== FUNCIONALES ===== */}
       <Route
         path="/certificates-upload"
         element={
@@ -56,19 +111,6 @@ export default function Router() {
         }
       />
 
-      {/* CORREDOR DASHBOARD */}
-      <Route
-        path="/corredor-dashboard"
-        element={
-          <ProtectedRoute roles={["CORREDOR", "TI"]}>
-            <LayoutWrapper>
-              <CorredorDashboard />
-            </LayoutWrapper>
-          </ProtectedRoute>
-        }
-      />
-
-      {/* GESTIÓN TRIBUTARIA */}
       <Route
         path="/tax-management"
         element={
@@ -80,7 +122,6 @@ export default function Router() {
         }
       />
 
-      {/* VALIDACIÓN — SOLO AUDITOR / TI */}
       <Route
         path="/validacion"
         element={
@@ -92,7 +133,6 @@ export default function Router() {
         }
       />
 
-      {/* AUDITORÍA */}
       <Route
         path="/audit-panel"
         element={
@@ -104,7 +144,40 @@ export default function Router() {
         }
       />
 
-      {/* ADMIN TI */}
+      <Route
+        path="/registros"
+        element={
+          <ProtectedRoute roles={["CORREDOR", "ANALISTA", "AUDITOR", "TI"]}>
+            <LayoutWrapper>
+              <Registros />
+            </LayoutWrapper>
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/perfil"
+        element={
+          <ProtectedRoute roles={["CORREDOR", "ANALISTA", "AUDITOR", "TI"]}>
+            <LayoutWrapper>
+              <Perfil />
+            </LayoutWrapper>
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/feedback"
+        element={
+          <ProtectedRoute roles={["CORREDOR", "ANALISTA", "AUDITOR", "TI"]}>
+            <LayoutWrapper>
+              <Feedback />
+            </LayoutWrapper>
+          </ProtectedRoute>
+        }
+      />
+
+      {/* ===== ADMIN ===== */}
       <Route
         path="/system-settings"
         element={
@@ -116,20 +189,16 @@ export default function Router() {
         }
       />
 
-      {/* ADMIN GLOBAL — SOLO SUPERUSUARIOS */}
       <Route
         path="/admin-global"
         element={
-          <ProtectedRoute roles={["TI"]} requireSuperuser={true}>
+          <ProtectedRoute roles={["TI"]} requireSuperuser>
             <LayoutWrapper>
               <AdminGlobal />
             </LayoutWrapper>
           </ProtectedRoute>
         }
       />
-
-      {/* NO AUTORIZADO */}
-      <Route path="/no-autorizado" element={<NoAutorizado />} />
     </Routes>
   );
 }

@@ -3,7 +3,7 @@ import { useContext } from "react";
 import { ThemeContext, AuthContext } from "../../App";
 import ThemeToggle from "../common/ThemeToggle";
 
-export default function Navbar({ onToggleSidebar }) {
+export default function Navbar() {
   const { theme } = useContext(ThemeContext);
   const { user, logout } = useContext(AuthContext);
   const location = useLocation();
@@ -14,7 +14,6 @@ export default function Navbar({ onToggleSidebar }) {
   const navColor = dark ? "#e6eef8" : "#0b1220";
   const activeBg = dark ? "#1e3a4c" : "#e0e0e0";
   const btnBg = dark ? "#0b1220" : "#111827";
-  const btnColor = "#ffffff";
   const danger = "#ef4444";
 
   const isActive = (path) => location.pathname === path;
@@ -28,11 +27,13 @@ export default function Navbar({ onToggleSidebar }) {
     fontWeight: isActive(path) ? 700 : 500,
   });
 
-  // RBAC visual
-  const canSee = (allowedRoles = []) => {
-    if (!user) return false;
-    if (user.is_superuser) return true;
-    return allowedRoles.includes(user.rol);
+  const goDashboard = () => {
+    if (!user) return "/";
+    if (user.rol === "CORREDOR") return "/dashboard/corredor";
+    if (user.rol === "ANALISTA") return "/dashboard/analista";
+    if (user.rol === "AUDITOR") return "/dashboard/auditor";
+    if (user.rol === "TI") return "/dashboard/admin-ti";
+    return "/";
   };
 
   const handleLogout = () => {
@@ -48,68 +49,58 @@ export default function Navbar({ onToggleSidebar }) {
         color: navColor,
         display: "flex",
         alignItems: "center",
-        gap: "12px",
+        justifyContent: "space-between",
         boxShadow: "0 2px 8px rgba(2,6,23,0.08)",
-        position: "sticky",
-        top: 0,
-        zIndex: 50,
       }}
     >
-      {onToggleSidebar && (
-        <button
-          onClick={onToggleSidebar}
-          style={{
-            width: 40,
-            height: 40,
-            borderRadius: 10,
-            border: "none",
-            background: "transparent",
-            cursor: "pointer",
-            fontSize: 20,
-            color: navColor,
-          }}
-        >
-          ☰
-        </button>
-      )}
-
-      <div style={{ display: "flex", gap: 10, flexWrap: "wrap", flex: 1 }}>
+      <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
         <Link to="/" style={linkStyle("/")}>Home</Link>
 
-        {user && canSee(["CORREDOR", "TI"]) && (
-          <Link to="/corredor-dashboard" style={linkStyle("/corredor-dashboard")}>
+        {user && (
+          <Link to={goDashboard()} style={linkStyle(goDashboard())}>
             📊 Dashboard
           </Link>
         )}
 
-        {user && canSee(["CORREDOR", "TI"]) && (
+        {user?.rol === "CORREDOR" && (
           <Link to="/certificates-upload" style={linkStyle("/certificates-upload")}>
             Certificados
           </Link>
         )}
 
-        {user && canSee(["ANALISTA", "AUDITOR", "TI"]) && (
+        {["ANALISTA", "AUDITOR", "TI"].includes(user?.rol) && (
           <Link to="/tax-management" style={linkStyle("/tax-management")}>
-            Gestión tributaria
+            Gestión Tributaria
           </Link>
         )}
 
-        {user && canSee(["AUDITOR", "TI"]) && (
+        {["AUDITOR", "TI"].includes(user?.rol) && (
           <Link to="/validacion" style={linkStyle("/validacion")}>
             Validación
           </Link>
         )}
 
-        {/* ✅ AUDITORÍA */}
-        {user && canSee(["AUDITOR", "TI"]) && (
+        {["AUDITOR", "TI"].includes(user?.rol) && (
           <Link to="/audit-panel" style={linkStyle("/audit-panel")}>
             Auditoría
           </Link>
         )}
 
-        {user && canSee(["CORREDOR", "ANALISTA", "AUDITOR", "TI"]) && (
+        {user && (
           <Link to="/registros" style={linkStyle("/registros")}>
             Registros
+          </Link>
+        )}
+
+        {user && (
+          <Link to="/perfil" style={linkStyle("/perfil")}>
+            Mi Perfil
+          </Link>
+        )}
+
+        {user && (
+          <Link to="/feedback" style={linkStyle("/feedback")}>
+            Feedback
           </Link>
         )}
 
@@ -120,12 +111,15 @@ export default function Navbar({ onToggleSidebar }) {
         )}
 
         {user?.is_superuser && (
-          <Link to="/admin-global" style={{
-            ...linkStyle("/admin-global"),
-            background: isActive("/admin-global") ? "#991b1b" : danger,
-            color: "#fff",
-            fontWeight: 700,
-          }}>
+          <Link
+            to="/admin-global"
+            style={{
+              ...linkStyle("/admin-global"),
+              background: danger,
+              color: "#fff",
+              fontWeight: 700,
+            }}
+          >
             🚨 Admin Global
           </Link>
         )}
@@ -135,20 +129,22 @@ export default function Navbar({ onToggleSidebar }) {
         <ThemeToggle variant="inline" />
 
         {!user ? (
-          <Link to="/iniciar-sesion" style={{ color: navColor }}>
-            Iniciar sesión
-          </Link>
+          <>
+            <Link to="/iniciar-sesion">Iniciar sesión</Link>
+            <Link to="/registro" style={{ fontWeight: 700 }}>
+              Registrarse
+            </Link>
+          </>
         ) : (
           <>
             <span style={{ fontSize: 13 }}>
               {user.username} — <b>{user.is_superuser ? "SUPER" : user.rol}</b>
             </span>
-
             <button
               onClick={handleLogout}
               style={{
                 background: btnBg,
-                color: btnColor,
+                color: "#fff",
                 border: "none",
                 padding: "8px 12px",
                 borderRadius: 8,
