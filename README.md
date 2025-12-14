@@ -133,7 +133,31 @@ $env:ADMIN_PASSWORD="TuPasswordSegura123!"
 & .\ven\Scripts\python.exe manage.py cargar_datos_iniciales
 ```
 
-9) Arrancar el servidor
+9) **Iniciar Redis** (Para blacklist de tokens)
+
+Redis se ejecuta como servicio en Windows o via Docker:
+
+**Opción A: Servicio Windows (si está instalado)**
+```powershell
+redis-server
+# O si está registrado como servicio
+net start Redis
+```
+
+**Opción B: Docker (recomendado)**
+```powershell
+docker run --name ev3pi-redis -p 6379:6379 -d redis:7-alpine
+```
+
+**Verificar que funciona:**
+```powershell
+redis-cli ping
+# Respuesta esperada: PONG
+```
+
+> ℹ️ Si Redis no está disponible, el sistema sigue funcionando pero sin revocación de tokens en logout (fallback en memoria)
+
+10) Arrancar el servidor
 
 ```powershell
 & .\ven\Scripts\python.exe manage.py runserver 127.0.0.1:8000
@@ -141,7 +165,7 @@ $env:ADMIN_PASSWORD="TuPasswordSegura123!"
 
 Abrir en navegador: http://127.0.0.1:8000/
 
-8) Solución de problemas rápidos
+11) Solución de problemas rápidos
 
 - "could not translate host name '127.0.0.1 '" → revisar `.env` y quitar espacios finales.
 - UnicodeDecodeError (psycopg2) → asegurarse de tener `PGCLIENTENCODING=UTF8` en `.env` y comprobar `server_encoding`:
@@ -201,6 +225,10 @@ pip install -r requirements.txt
 | djangorestframework-simplejwt | 5.5.1 | Autenticación JWT |
 | python-dotenv | 1.2.1 | Variables de entorno (.env) |
 | psycopg2-binary | 2.9.11 | Conector PostgreSQL |
+| redis | 5.0.1 | Blacklist de tokens JWT |
+| pyotp | 2.9.0 | TOTP para MFA (Autenticación Multifactor) |
+| qrcode | 8.0 | Generación de códigos QR para MFA |
+| Pillow | 11.1.0 | Procesamiento de imágenes |
 
 ### Backend - Dependencias Automáticas (instaladas por pip)
 - `asgiref` - Soporte async para Django
@@ -524,10 +552,46 @@ python manage.py crear_superusuario_global --username emergencia --password Emer
 4. Token se envía en headers de requests: `Authorization: Bearer {token}`
 5. Backend valida token en cada petición
 
-### Tokens
-- Access Token: 60 minutos de validez
-- Refresh Token: 1 día de validez
-- Renovación automática de tokens
+### Tokens y Rotación
+- **Access Token**: 15 minutos de validez (corto para seguridad)
+- **Refresh Token**: 7 días de validez
+- **Rotación automática**: Cada refresh genera nuevos tokens
+- El refresh token anterior se añade a blacklist (no puede reutilizarse)
+- **Renovación automática en frontend**: Cada 14 minutos
+
+### 🔴 ¿Por Qué Redis para Blacklist?
+
+JWT es **sin estado** (stateless) - una vez generado, un token es válido hasta expirar. Sin embargo, necesitamos revocar tokens en casos como:
+- **Logout**: El usuario cierra sesión pero el token aún sería válido
+- **Rotación**: Generamos nuevo token, el anterior debe invalidarse
+- **Token robado**: Necesitamos revocarlo sin esperar a que expire
+
+#### Solución: Redis Blacklist
+
+```
+Flujo de Logout:
+1. Usuario hace clic en "Cerrar Sesión"
+2. Refresh token se agrega a Redis: blacklist:token_xxx (expira en 7 días)
+3. Próximo request con ese token
+4. Se verifica Redis: ¿está en blacklist? → SÍ → ❌ Rechazado
+
+Redis también expira la entrada automáticamente cuando el token expira
+```
+
+#### ¿Por qué Redis y no PostgreSQL?
+
+| Aspecto | Redis | PostgreSQL |
+|--------|-------|-----------|
+| **Velocidad** | Nanosegundos (en memoria) | Milisegundos (disco) |
+| **Caso de uso** | Cache/Sesiones temporales | Datos permanentes |
+| **Expiration automática** | ✅ TTL nativo | ❌ Necesita cleanup |
+| **Sobrecarga** | Mínima | Alto (cada query a DB) |
+
+**Redis es ideal para blacklist porque:**
+- Búsquedas **ultrarrápidas** (se ejecutan en cada request)
+- Datos **temporales** (máximo 7 días)
+- Soporte nativo de **expiración automática**
+- No contamina la BD principal
 
 ---
 
