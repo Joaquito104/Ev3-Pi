@@ -429,40 +429,6 @@ buttonHover:  dark ? "#2d3748" : "#d1d5db"
 
 ---
 
-### 📋 Archivos Modificados
-
-```
-✅ FrontEnd/src/components/common/button.jsx       (+50 líneas, 3 variantes)
-✅ FrontEnd/src/components/common/input.jsx        (+40 líneas, validación)
-✅ FrontEnd/src/components/common/Modal.jsx        (+30 líneas, dark mode)
-✅ FrontEnd/src/components/layout/Navbar.jsx       (+80 líneas, hover states)
-✅ FrontEnd/src/components/layout/Sidebar.jsx      (+70 líneas, active states)
-✅ FrontEnd/src/components/layout/Footer.jsx       (+60 líneas, responsive)
-📄 FrontEnd/src/utils/darkModeClasses.jsx         (40+ utilidades)
-```
-
----
-
-### 📊 Progreso
-
-**Completados**: 6/17 componentes (35%)
-**Pendientes**: 11/17 componentes (65%)
-
-**Tiempo estimado para 100%**: 2-3 horas
-
----
-
-### 🚀 Siguientes Pasos
-
-1. ~~Componentes comunes~~ ✅
-2. ~~Layouts (Navbar, Sidebar, Footer)~~ ✅
-3. **Tablas** (ValidationInbox, Registros) - SIGUIENTE
-4. Formularios (CertificatesUpload, AuditPanel)
-5. Dashboards (todos los variants)
-6. Testing final
-
----
-
 ### 💡 Mejores Prácticas Aplicadas
 
 ✅ **Variables de color** - Todas definidas al inicio de cada componente  

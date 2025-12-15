@@ -2,150 +2,9 @@
 
 Sistema integral de gestión tributaria y certificados digitales con autenticación JWT, roles basados en permisos y auditoría completa.
 
-## Últimas Actualizaciones
+## Hashing de contraseñas
 
-Este contenido se trasladó a [CHANGELOG.md](CHANGELOG.md).
-
-### ✨ Nuevas Features
-- 🔔 **Notificaciones en Tiempo Real** - Sistema de polling cada 10s para auditorías y calificaciones
-- ⚡ **Optimización de Performance** - 5 estrategias de caching (TTL, Session, LocalStorage, Debounce, Infinite Scroll)
-- ✅ **Validaciones Avanzadas** - 12 validadores (email, RUT, phone, password, fileSize, etc.)
-- 🎨 **Dark Mode Perfecto** - Paleta unificada en todos los componentes con transiciones suaves
-- 📱 **Mobile Responsive** - Typography y layouts con `clamp()` para escalado adaptativo
-- 🚨 **Error Handling Mejorado** - Componentes unificados (LoadingSpinner, ErrorAlert, SuccessAlert)
-
-### 📦 Nuevos Hooks y Componentes
-- `useNotifications.jsx` - Polling con NotificationToast y NotificationContainer
-- `useCache.jsx` - useCache, useCachedRequest, useLocalStorage, useSessionCache, useInfiniteScroll
-- `useValidation.jsx` - useFormValidation con 12 validadores
-- `FormField.jsx` - Componente reutilizable con validación integrada
-- `darkModeClasses.jsx` - 40+ utilidades de dark mode + 3 componentes (DarkModeButton, DarkModeInput, DarkModeCard)
-
-### 🎨 Componentes Actualizados
-- ✅ Button.jsx - 3 variantes (primary, danger, secondary) con dark mode
-- ✅ Input.jsx - Validación, focus states, error handling con dark mode
-- ✅ Modal.jsx - Backdrop adaptativo, borders, hover effects
-- ✅ Navbar.jsx - Active states, hover, dropdown mejorado
-- ✅ Sidebar.jsx - Navegación con estados activos, info de usuario
-- ✅ Footer.jsx - Responsive, botones interactivos, links con hover
-- ✅ ReportesAuditoria.jsx - Mobile responsive + session caching + debouncing
-- ✅ ValidationInbox.jsx - Error/success alerts con auto-dismiss
-- ✅ AuditPanel.jsx - LoadingSpinner y ErrorAlert integrados
-- ✅ Registros.jsx - Consistent loading/error handling
-
-### 📚 Documentación Nueva
-- `DARK_MODE_GUIDE.md` - Guía completa de implementación de dark mode
-- `DARK_MODE_STATUS.md` - Checklist de componentes con dark mode
-- `DARK_MODE_COMPLETED.md` - Resumen detallado de cambios
-
----
-
-## 📁 Estructura del Proyecto
-
-```
-Proyecto/
-├── Backend/
-│   ├── Django/                          # Configuración Django
-│   │   ├── __init__.py
-│   │   ├── settings.py                  # Settings (DB, JWT, CORS, seguridad)
-│   │   ├── urls.py                      # URLs principales
-│   │   ├── asgi.py
-│   │   └── wsgi.py
-│   ├── src/                             # Aplicación principal
-│   │   ├── models.py                    # Modelos (Registro, Calificación, Auditoría)
-│   │   ├── serializers.py               # Serializers DRF
-│   │   ├── permissions.py               # Permisos RBAC (4 roles)
-│   │   ├── rbac.py                      # Configuración roles
-│   │   ├── validators.py                # Validadores (RUT, SQL injection, XSS) ✨ NUEVO
-│   │   ├── throttling.py                # Rate limiting (5 niveles) ✨ NUEVO
-│   │   ├── admin.py                     # Admin panel
-│   │   ├── views/                       # Vistas por funcionalidad
-│   │   │   ├── auth.py                  # Login, registro, MFA
-│   │   │   ├── jwt_auth.py              # Refresh token, logout
-│   │   │   ├── calificaciones_mongo.py  # CRUD calificaciones + carga masiva CSV
-│   │   │   ├── exportar.py              # Exportar PDF/Excel/CSV
-│   │   │   ├── auditoria.py             # Logs de auditoría
-│   │   │   ├── certificados.py          # Gestión certificados
-│   │   │   └── ...
-│   │   ├── migrations/                  # Migraciones BD
-│   │   ├── management/commands/         # Comandos custom
-│   │   │   ├── cargar_datos_iniciales.py
-│   │   │   └── crear_superusuario_global.py
-│   │   └── signals.py                   # Señales Django (auditoría automática)
-│   ├── scripts/                         # Scripts de seguridad ✨ NUEVO
-│   │   ├── check_security.py            # Auditor automático (31 checks)
-│   │   └── cambiar_credenciales.py      # Gestor de credenciales débiles
-│   ├── logs/                            # Logs de seguridad ✨ NUEVO
-│   │   └── security.log
-│   ├── manage.py
-│   ├── requirements.txt                 # Dependencias Python
-│   └── .env.example                     # Template configuración ✨ NUEVO
-│
-├── FrontEnd/
-│   ├── src/
-│   │   ├── pages/                       # Páginas principales
-│   │   │   ├── Home.jsx                 # Landing page
-│   │   │   ├── Login.jsx                # Autenticación
-│   │   │   ├── Registro.jsx             # Registro usuarios
-│   │   │   ├── Perfil.jsx               # Perfil usuario + MFA
-│   │   │   ├── Dashboard.jsx            # Dashboard
-│   │   │   ├── AuditPanel.jsx           # Panel auditoría
-│   │   │   ├── Registros.jsx            # Listado registros
-│   │   │   ├── CertificatesUpload.jsx   # Carga certificados
-│   │   │   ├── TaxManagement.jsx        # Gestión tributaria
-│   │   │   └── SystemSettings.jsx       # Configuración sistema
-│   │   ├── components/
-│   │   │   ├── layout/                  # Componentes layout
-│   │   │   │   ├── Navbar.jsx
-│   │   │   │   ├── Sidebar.jsx
-│   │   │   │   └── Footer.jsx
-│   │   │   ├── common/                  # Componentes reutilizables
-│   │   │   │   ├── Button.jsx           # 3 variantes + dark mode
-│   │   │   │   ├── Input.jsx            # Con validación
-│   │   │   │   ├── Modal.jsx
-│   │   │   │   └── ThemeToggle.jsx
-│   │   │   └── ProtectedRoute.jsx       # Rutas protegidas JWT
-│   │   ├── hooks/                       # Custom hooks
-│   │   │   ├── useForm.js               # Manejo formularios
-│   │   │   ├── useCache.js              # 5 estrategias caching ✨ NUEVO
-│   │   │   └── useValidation.js         # 12 validadores ✨ NUEVO
-│   │   ├── App.jsx
-│   │   ├── router.jsx                   # Rutas React Router
-│   │   ├── App.css
-│   │   └── index.css
-│   ├── package.json                     # Dependencias Node.js
-│   ├── vite.config.js                   # Config Vite
-│   └── eslint.config.js
-│
-├── README.md                            # Este archivo
-├── CHANGELOG.md                         # Historial de cambios
-├── SECURITY.md                          # 📋 Resumen ejecutivo + detalles seguridad OWASP/NIST ✨ NUEVO
-├── DEPLOY.md                            # 🚀 Guía de despliegue producción ✨ NUEVO
-├── CHECKLIST_DEPLOY.md                  # ✅ Checklist 50 items para deploy ✨ NUEVO
-├── MODO_OSCURO.md                       # Dark mode implementation
-├── .gitignore                           # Git ignore actualizado ✨ MEJORADO
-└── .env                                 # Variables de entorno (NO subir a Git)
-```
-
-### 🔐 Características Principales
-
-**Backend:**
-- JWT + MFA (TOTP/QR code)
-- RBAC con 4 roles (TI, Auditor, Analista, Corredor)
-- MongoDB + PostgreSQL
-- Carga masiva CSV con validación
-- Exportar a PDF/Excel/CSV
-- Rate limiting (5 niveles)
-- Validadores OWASP (SQL injection, XSS, RUT)
-- Logging auditoría automático
-
-**Frontend:**
-- React 19 + Vite
-- Dark mode completo
-- Mobile responsive
-- Validaciones en tiempo real
-- Caching inteligente
-- Notificaciones en tiempo real (polling)
+El backend usa **Argon2** como hasher primario recomendado por OWASP, con **PBKDF2 SHA256** y **BCrypt** como fallback para compatibilidad. No es necesario instalar nada adicional: viene configurado en `Backend/Django/settings.py` y se activa al ejecutar el proyecto.
 
 ---
 
@@ -168,14 +27,14 @@ Sigue estos pasos en Windows para iniciar el backend (comandos listos para copia
 PowerShell:
 
 ```powershell
-cd 'C:\Users\ESTEBAN\Desktop\Proyecto\Backend'
+cd 'C:\Users\[Nombre_Usuario]\Desktop\Proyecto\Backend'
 .\ven\Scripts\Activate.ps1
 ```
 
 cmd.exe:
 
 ```cmd
-cd C:\Users\ESTEBAN\Desktop\Proyecto\Backend
+cd C:\Users\[Nombre_Usuario]\Desktop\Proyecto\Backend
 .\ven\Scripts\activate.bat
 ```
 
@@ -368,12 +227,19 @@ pip install -r requirements.txt
 | djangorestframework | 3.16.1 | API REST |
 | django-cors-headers | 4.9.0 | Soporte CORS para React |
 | djangorestframework-simplejwt | 5.5.1 | Autenticación JWT |
+| argon2-cffi | 23.1.0 | Hasher de contraseñas (primario) |
+| bcrypt | 4.3.0 | Hasher alternativo (fallback) |
 | python-dotenv | 1.2.1 | Variables de entorno (.env) |
 | psycopg2-binary | 2.9.11 | Conector PostgreSQL |
+| pymongo | 4.12.1 | Conector MongoDB |
 | redis | 5.0.1 | Blacklist de tokens JWT |
 | pyotp | 2.9.0 | TOTP para MFA (Autenticación Multifactor) |
 | qrcode | 8.0 | Generación de códigos QR para MFA |
 | Pillow | 11.1.0 | Procesamiento de imágenes |
+| openpyxl | 3.1.2 | Exportación a Excel |
+| reportlab | 4.0.9 | Generación de PDFs |
+| gunicorn | 21.2.0 | Servidor WSGI para producción |
+| whitenoise | 6.6.0 | Servir estáticos en producción |
 
 ### Backend - Dependencias Automáticas (instaladas por pip)
 - `asgiref` - Soporte async para Django
@@ -383,17 +249,10 @@ pip install -r requirements.txt
 - `pycparser` - Parser de C (para cffi)
 - `cffi` - Interfaz C Foreign Function
 
-### Backend - Librerías NO Utilizadas (pueden desinstalarse)
-```bash
-pip uninstall argon2-cffi argon2-cffi-bindings mysqlclient openpyxl pytube -y
-```
-
-| Librería | Por qué está | Estado |
-|----------|--------------|--------|
-| argon2-cffi | Hasher de contraseñas (no usado) | No necesaria |
-| mysqlclient | Conector MySQL (usamos PostgreSQL) | No necesaria |
-| openpyxl | Manejo de Excel (no implementado) | No necesaria |
-| pytube | Descarga de YouTube (no usado) | No necesaria |
+### Backend - Notas de dependencias
+- `argon2-cffi` se usa como hasher principal (requerido) y ya está en `requirements.txt`.
+- `openpyxl` se usa para exportar Excel y ya está en `requirements.txt`.
+- `mysqlclient` y `pytube` no se utilizan actualmente; pueden removerse si se desea un entorno mínimo.
 
 ### Frontend - Dependencias Principales
 
@@ -466,22 +325,22 @@ CORS_ALLOWED_ORIGINS=http://localhost:5173,http://localhost:5174
 ```
 
 **Instrucciones para completar .env:**
-- `SECRET_KEY` - Generar una clave segura
+- `SECRET_KEY` - Generar una clave segura (50+ chars)
 - `DEBUG` - `False` en producción, `True` en desarrollo
-- `DB_NAME` - Nombre de la BD PostgreSQL
-- `USER` - Usuario de PostgreSQL
-- `PASSWORD` - Contraseña de PostgreSQL
-- `DB_HOST` - Host de PostgreSQL (localhost en desarrollo)
-- `DB_PORT` - Puerto PostgreSQL (5432 por defecto)
-- `ALLOWED_HOSTS` - Hosts permitidos
-- `CORS_ALLOWED_ORIGINS` - Orígenes CORS permitidos
+- `DB_NAME`, `DB_USER`, `PASSWORD`, `DB_HOST`, `DB_PORT`, `PGCLIENTENCODING` - Config de PostgreSQL
+- `MONGODB_HOST`, `MONGODB_PORT`, `MONGODB_DB`, `MONGODB_USER`, `MONGODB_PASSWORD`, `MONGODB_URI` (opcional) - Config de MongoDB
+- `ALLOWED_HOSTS` - Hosts permitidos (csv)
+- `CORS_ALLOWED_ORIGINS` - Orígenes CORS permitidos (csv)
+- `FRONTEND_URL` - URL del frontend para emails/CORS
+- `EMAIL_*`, `DEFAULT_FROM_EMAIL` - SMTP
+- `REDIS_*` (opcional) - Host/puerto/clave para blacklist JWT
 
 Seguridad:
 - `.env` está en `.gitignore` (NO se commitea)
 - `.env.example` SÍ se commitea (sin credenciales)
-- Credenciales de BD en `.env` (variables de entorno)
+- Credenciales en `.env` (PostgreSQL, MongoDB, Redis, SMTP)
 - `SECRET_KEY` en `.env` (seguro)
-- CORS restringido a localhost en desarrollo
+- CORS restringido a dominios autorizados
 
 ---
 
@@ -747,94 +606,75 @@ Proyecto/
 ├── Backend/
 │   ├── Django/
 │   │   ├── __init__.py
-│   │   ├── settings.py (Configuración con dotenv)
-│   │   ├── urls.py
+│   │   ├── settings.py            # Config (DB, JWT, CORS, seguridad, hashers Argon2/PBKDF2/BCrypt)
+│   │   ├── urls.py                # Rutas Django/DRF
 │   │   ├── asgi.py
 │   │   └── wsgi.py
 │   ├── src/
 │   │   ├── __init__.py
-│   │   ├── models.py (Registros, Certificado, PerfilUsuario)
-│   │   ├── serializers.py (Serialización JSON)
-│   │   ├── permissions.py (Control de permisos RBAC)
-│   │   ├── rbac.py (Lógica de roles)
-│   │   ├── signals.py (Auto-auditoría)
+│   │   ├── models.py              # Registros, Certificado, PerfilUsuario
+│   │   ├── serializers.py         # Serialización DRF
+│   │   ├── permissions.py         # Permisos RBAC (4 roles)
+│   │   ├── rbac.py                # Lógica de roles
+│   │   ├── validators.py          # Validadores (RUT, SQLi, XSS, CSV, password)
+│   │   ├── throttling.py          # Rate limiting (login, registro, auditoría)
+│   │   ├── signals.py             # Auto-auditoría
 │   │   ├── admin.py
-│   │   ├── views.py (ViewSets)
-│   │   ├── views/ (Vistas organizadas por módulo)
+│   │   ├── views.py               # ViewSets core
+│   │   ├── views/
 │   │   │   ├── __init__.py
-│   │   │   ├── auth.py (Autenticación JWT, Registro, MFA)
-│   │   │   ├── registros.py (Gestión registros)
-│   │   │   ├── calificaciones.py (Gestión calificaciones)
-│   │   │   ├── certificados.py (Upload y gestión)
-│   │   │   ├── auditoria.py (Logs y estadísticas)
-│   │   │   ├── reglas.py (CRUD reglas de negocio)
-│   │   │   └── validacion.py (Validación de datos)
-│   │   ├── management/
-│   │   │   └── commands/
-│   │   │       └── cargar_datos_iniciales.py
+│   │   │   ├── auth.py            # Login, registro, MFA
+│   │   │   ├── registros.py       # Gestión registros
+│   │   │   ├── calificaciones.py  # Gestión calificaciones
+│   │   │   ├── calificaciones_mongo.py # CRUD + carga masiva CSV Mongo
+│   │   │   ├── certificados.py    # Upload y gestión
+│   │   │   ├── auditoria.py       # Logs y estadísticas
+│   │   │   ├── reglas.py          # CRUD reglas de negocio
+│   │   │   ├── exportar.py        # Exportar PDF/Excel/CSV
+│   │   │   └── validacion.py      # Validaciones varias
+│   │   ├── management/commands/
+│   │   │   ├── cargar_datos_iniciales.py
+│   │   │   └── crear_superusuario_global.py
 │   │   ├── migrations/
 │   │   └── utils/
-│   │       ├── utils_registro.py (Validación telefónica, emails)
-│   │       └── mongodb_utils.py (Conexión MongoDB)
-│   ├── media/ (archivos subidos)
-│   ├── manage.py
+│   │       ├── utils_registro.py  # Emails, teléfono, mensajes
+│   │       └── mongodb_utils.py   # Conexión MongoDB
+│   ├── scripts/
+│   │   ├── check_security.py      # Auditor automático (31 checks)
+│   │   └── cambiar_credenciales.py# Gestor de credenciales débiles
+│   ├── logs/                      # Logs de seguridad
+│   │   └── security.log
+│   ├── media/                     # Archivos subidos
+│   ├── .env.example               # Plantilla de variables
 │   ├── requirements.txt
-│   ├── .env (credenciales)
-│   └── .venv/ (entorno virtual)
+│   ├── manage.py
+│   └── .venv/                     # Entorno virtual (local)
 │
 ├── FrontEnd/
 │   ├── src/
-│   │   ├── App.jsx (ThemeContext, Router)
-│   │   ├── router.jsx (Rutas protegidas)
+│   │   ├── App.jsx                # ThemeContext, Router
+│   │   ├── router.jsx             # Rutas protegidas
 │   │   ├── main.jsx
 │   │   ├── components/
-│   │   │   ├── layout/
-│   │   │   │   ├── Navbar.jsx (Dark mode, active states)
-│   │   │   │   ├── Sidebar.jsx (Dark mode, navegación)
-│   │   │   │   └── Footer.jsx (Dark mode, responsive)
-│   │   │   ├── common/
-│   │   │   │   ├── ThemeToggle.jsx (Switch light/dark)
-│   │   │   │   ├── Modal.jsx (Dark mode)
-│   │   │   │   ├── button.jsx (3 variantes + dark)
-│   │   │   │   └── input.jsx (Validación + dark)
-│   │   │   └── auth/
-│   │   │       └── ProtectedRoute.jsx (RBAC)
-│   │   ├── pages/
-│   │   │   ├── Home.jsx
-│   │   │   ├── Login.jsx
-│   │   │   ├── Registro.jsx (Verificación email)
-│   │   │   ├── VerificarEmail.jsx
-│   │   │   ├── Perfil.jsx (MFA, cambio rol)
-│   │   │   ├── Dashboard.jsx
-│   │   │   ├── CorredorDashboard.jsx
-│   │   │   ├── DashboardAnalista.jsx
-│   │   │   ├── DashboardAuditor.jsx
-│   │   │   ├── CertificatesUpload.jsx
-│   │   │   ├── AuditPanel.jsx
-│   │   │   ├── Registros.jsx
-│   │   │   ├── ReportesAuditoria.jsx
-│   │   │   ├── AdminGlobal.jsx
-│   │   │   └── NoAutorizado.jsx
-│   │   ├── hooks/
-│   │   │   ├── useForm.js
-│   │   │   ├── useNotifications.jsx (Polling)
-│   │   │   ├── useCache.jsx (Optimizaciones)
-│   │   │   ├── useValidation.jsx (12 validadores)
-│   │   │   └── useOptimizations.jsx (Loading/Error)
-│   │   ├── services/
-│   │   │   └── validacionService.js
-│   │   └── utils/
-│   │       └── darkModeClasses.jsx (40+ utilidades)
-│   ├── public/ (iconos WebP)
+│   │   │   ├── layout/            # Navbar, Sidebar, Footer
+│   │   │   ├── common/            # ThemeToggle, Modal, button, input
+│   │   │   └── auth/              # ProtectedRoute
+│   │   ├── pages/                 # Home, Login, Registro, Perfil, Dashboards...
+│   │   ├── hooks/                 # useForm, useNotifications, useCache, useValidation, useOptimizations
+│   │   ├── services/              # validacionService, otros servicios
+│   │   └── utils/                 # darkModeClasses 
+│   ├── public/                    # Iconos WebP
 │   ├── package.json
 │   ├── vite.config.js
 │   ├── tailwind.config.js
 │   └── postcss.config.js
 │
-├── .gitignore
 ├── README.md
-├── CHANGELOG.md (historial de cambios)
-└── MODO_OSCURO.md (guía dark mode)
+├── CHANGELOG.md
+├── SECURITY.md
+├── DEPLOY.md
+├── MODO_OSCURO.md
+└── .gitignore
 ```
 
 ---
@@ -956,7 +796,139 @@ La funcionalidad principal es la búsqueda de registros disponible para todos lo
 
 ---
 
-## Documentación Adicional
+## Documentación Adicional---
+
+## 🚀 CI/CD y Containerización
+
+### Docker
+
+El proyecto incluye una configuración completa de Docker para desarrollo y producción:
+
+**Ejecutar con Docker Compose:**
+
+```bash
+# Copiar el archivo de variables de entorno
+cp .env.docker .env
+
+# Construir e iniciar todos los servicios
+docker-compose up -d
+
+# Ver logs
+docker-compose logs -f
+
+# Detener servicios
+docker-compose down
+```
+
+**Servicios incluidos:**
+- PostgreSQL 15
+- Redis 7
+- MongoDB 7 (opcional)
+- Backend Django (gunicorn)
+- Frontend React (nginx)
+
+**Comandos útiles:**
+
+```bash
+# Ejecutar migraciones
+docker-compose exec backend python manage.py migrate
+
+# Crear superusuario
+docker-compose exec backend python manage.py crear_superusuario_global
+
+# Ver estado de servicios
+docker-compose ps
+
+# Reiniciar un servicio específico
+docker-compose restart backend
+
+# Ver logs de un servicio
+docker-compose logs -f backend
+```
+
+### GitHub Actions
+
+El proyecto tiene dos pipelines automatizados:
+
+#### Pipeline CI (`.github/workflows/ci.yml`)
+
+Se ejecuta en cada push/PR a `main` o `develop`:
+
+- ✅ **Backend**: Lint (pylint), tests (pytest), análisis de seguridad (bandit, safety)
+- ✅ **Frontend**: Lint (eslint), build, auditoría de npm
+- ✅ **Docker**: Construcción de imágenes y push a Docker Hub
+- ✅ **Cobertura**: Reportes automáticos con Codecov
+
+#### Pipeline CD (`.github/workflows/deploy.yml`)
+
+Deploy automático o manual:
+
+- 🔄 **Staging**: Auto-deploy en push a `main`
+- 🎯 **Production**: Deploy manual con aprobación + backup automático
+- 🚨 **Rollback**: Automático en caso de fallo
+- 💬 **Notificaciones**: Slack/Discord (configurable)
+
+**Configurar secrets en GitHub:**
+
+```
+DOCKER_USERNAME          # Usuario de Docker Hub
+DOCKER_PASSWORD          # Token de Docker Hub
+STAGING_SSH_KEY          # Clave SSH para servidor staging
+STAGING_USER             # Usuario SSH staging
+STAGING_HOST             # Host staging
+PRODUCTION_SSH_KEY       # Clave SSH para producción
+PRODUCTION_USER          # Usuario SSH producción
+PRODUCTION_HOST          # Host producción
+```
+
+**Ejecutar deploy manual:**
+
+1. Ve a "Actions" en GitHub
+2. Selecciona "CD Pipeline"
+3. Click en "Run workflow"
+4. Elige ambiente: staging o production
+
+### Testing Local
+
+**Backend:**
+
+```bash
+cd Backend
+
+# Instalar dependencias de testing
+pip install pytest pytest-django coverage bandit safety
+
+# Ejecutar tests
+pytest
+
+# Con cobertura
+coverage run -m pytest
+coverage report
+coverage html  # Ver reporte en htmlcov/index.html
+
+# Análisis de seguridad
+bandit -r src/ Django/
+safety check
+```
+
+**Frontend:**
+
+```bash
+cd FrontEnd
+
+# Lint
+npm run lint
+
+# Build
+npm run build
+
+# Auditoría de seguridad
+npm audit
+```
+
+---
+
+## 📚 Documentación
 
 - [CHANGELOG.md](CHANGELOG.md) - Historial completo de cambios
 - [MODO_OSCURO.md](MODO_OSCURO.md) - Guía de implementación de dark mode

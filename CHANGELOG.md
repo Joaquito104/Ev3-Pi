@@ -6,6 +6,26 @@ Todos los cambios notables del proyecto se documentan en este archivo.
 
 ## [2.1.0] - Diciembre 14, 2024
 
+### ✨ Nuevas Features
+- Notificaciones en tiempo real por polling cada 10s para auditorías y calificaciones.
+- Optimizaciones de performance con caching (TTL, sesión, localStorage, debounce, infinite scroll).
+- Validaciones avanzadas en frontend (12 validadores: email, RUT, phone, password, fileSize, etc.).
+- Dark mode unificado con transiciones suaves y tipografía responsive.
+- Manejo de errores consistente con componentes Loading/Error/Success.
+
+### 📦 Nuevos Hooks y Componentes
+- `useNotifications.jsx`, `useCache.jsx`, `useValidation.jsx`.
+- `FormField.jsx` reutilizable con validación.
+- Utilidades de dark mode (`darkModeClasses.jsx`) y componentes temáticos.
+
+### 🎨 Componentes Actualizados
+- Button, Input, Modal, Navbar, Sidebar, Footer con dark mode y estados mejorados.
+- ReportesAuditoria, ValidationInbox, AuditPanel, Registros con manejo de carga/errores consistente.
+
+### 📚 Documentación
+- Guías de dark mode y checklists de componentes.
+
+
 ### 🔐 Seguridad (OWASP/NIST Compliance)
 
 #### Rate Limiting

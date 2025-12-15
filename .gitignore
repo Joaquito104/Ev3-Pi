@@ -164,6 +164,53 @@ web_modules/
 .DS_Store
 .env.prod
 .env.production
+.env.staging
+.env.development
 *.secrets
 config/secrets/
 debug*.py
+
+# Archivos pesados (para CI/CD)
+*.tar.gz
+*.zip
+*.rar
+dist.tar.gz
+
+# Archivos de OS
+.DS_Store
+.AppleDouble
+.LSOverride
+Desktop.ini
+
+# Archivos temporales del editor
+*~
+*.swp
+*.swo
+*#
+
+# IDE local
+.vscode/settings.json
+.idea/runConfigurations/
+
+# Archivos de prueba con credenciales
+test_credentials.json
+test_secrets.env
+
+# Carpetas de caché grandes
+.pytest_cache/
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Compilados Python
+build/
+*.egg-info/
+dist/
+
+# Docker compose override (local)
+docker-compose.override.yml
+
+# Backups de configuración
+*.conf.bak
+*.yml.bak
+*.yaml.bak

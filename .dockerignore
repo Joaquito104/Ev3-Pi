@@ -1,0 +1,81 @@
+# syntax=docker/dockerfile:1
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+dist/
+build/
+*.egg
+
+# Virtual environments
+ven/
+venv/
+env/
+ENV/
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Backend específico
+Backend/logs/*
+Backend/media/*
+Backend/staticfiles/*
+!Backend/logs/.gitkeep
+!Backend/media/.gitkeep
+*.sqlite3
+*.db
+
+# Frontend
+FrontEnd/node_modules/
+FrontEnd/dist/
+FrontEnd/build/
+FrontEnd/.vite/
+FrontEnd/.cache/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Tests
+.coverage
+htmlcov/
+.pytest_cache/
+.tox/
+
+# Backups
+*.sql
+*.dump
+backups/
+
+# Documentación generada
+docs/_build/
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# CI/CD
+.github/
+.gitlab-ci.yml
+
+# Varios
+*.log
+*.tmp
+*.bak
+README.md
+CHANGELOG.md
+LICENSE

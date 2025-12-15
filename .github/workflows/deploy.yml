@@ -1,0 +1,126 @@
+name: CD Pipeline
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Ambiente de despliegue'
+        required: true
+        type: choice
+        options:
+          - staging
+          - production
+  
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+
+jobs:
+  deploy-staging:
+    if: github.event.inputs.environment == 'staging' || (github.event_name == 'push' && github.ref == 'refs/heads/main')
+    runs-on: ubuntu-latest
+    environment:
+      name: staging
+      url: https://staging.gestion-tributaria.com
+
+    steps:
+      - name: Checkout código
+        uses: actions/checkout@v4
+
+      - name: Configurar SSH
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.STAGING_SSH_KEY }}
+
+      - name: Deploy a Staging
+        run: |
+          ssh -o StrictHostKeyChecking=no ${{ secrets.STAGING_USER }}@${{ secrets.STAGING_HOST }} << 'EOF'
+            cd /var/www/gestion-tributaria
+            git pull origin main
+            docker-compose pull
+            docker-compose up -d --remove-orphans
+            docker-compose exec -T backend python manage.py migrate --noinput
+            docker-compose exec -T backend python manage.py collectstatic --noinput
+            docker image prune -f
+          EOF
+
+      - name: Health Check
+        run: |
+          sleep 10
+          curl --fail https://staging.gestion-tributaria.com/api/health || exit 1
+
+      - name: Notificar éxito
+        if: success()
+        run: echo "✅ Deploy a staging completado"
+
+  deploy-production:
+    if: github.event.inputs.environment == 'production'
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+      url: https://gestion-tributaria.com
+
+    steps:
+      - name: Checkout código
+        uses: actions/checkout@v4
+
+      - name: Configurar SSH
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.PRODUCTION_SSH_KEY }}
+
+      - name: Crear backup
+        run: |
+          ssh -o StrictHostKeyChecking=no ${{ secrets.PRODUCTION_USER }}@${{ secrets.PRODUCTION_HOST }} << 'EOF'
+            cd /var/www/gestion-tributaria
+            docker-compose exec -T postgres pg_dump -U $POSTGRES_USER $POSTGRES_DB > backup_$(date +%Y%m%d_%H%M%S).sql
+          EOF
+
+      - name: Deploy a Producción
+        run: |
+          ssh -o StrictHostKeyChecking=no ${{ secrets.PRODUCTION_USER }}@${{ secrets.PRODUCTION_HOST }} << 'EOF'
+            cd /var/www/gestion-tributaria
+            git pull origin main
+            docker-compose pull
+            docker-compose up -d --remove-orphans
+            docker-compose exec -T backend python manage.py migrate --noinput
+            docker-compose exec -T backend python manage.py collectstatic --noinput
+            docker image prune -f
+          EOF
+
+      - name: Health Check
+        run: |
+          sleep 10
+          curl --fail https://gestion-tributaria.com/api/health || exit 1
+
+      - name: Rollback en caso de fallo
+        if: failure()
+        run: |
+          ssh -o StrictHostKeyChecking=no ${{ secrets.PRODUCTION_USER }}@${{ secrets.PRODUCTION_HOST }} << 'EOF'
+            cd /var/www/gestion-tributaria
+            git reset --hard HEAD~1
+            docker-compose up -d --force-recreate
+          EOF
+          echo "⚠️ Rollback ejecutado"
+
+      - name: Notificar éxito
+        if: success()
+        run: echo "✅ Deploy a producción completado"
+
+  notify:
+    needs: [deploy-staging, deploy-production]
+    if: always()
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Notificar en Slack (opcional)
+        if: always()
+        run: |
+          # Configurar webhook de Slack
+          # curl -X POST -H 'Content-type: application/json' \
+          # --data '{"text":"Deploy completado"}' \
+          # ${{ secrets.SLACK_WEBHOOK_URL }}
+          echo "Notificación enviada"
