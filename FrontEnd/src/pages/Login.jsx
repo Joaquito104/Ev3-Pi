@@ -1,8 +1,8 @@
 // src/pages/Login.jsx
 import { useContext, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import Input from "../components/common/Input";
-import Button from "../components/common/Button";
+import Input from "../components/common/input";
+import Button from "../components/common/button";
 import useForm from "../hooks/useForm";
 import { ThemeContext, AuthContext } from "../App";
 import axios from "axios";
