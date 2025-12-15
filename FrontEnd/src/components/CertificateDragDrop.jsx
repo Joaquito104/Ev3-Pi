@@ -1,5 +1,5 @@
 import { useState, useContext, useRef } from "react";
-import { ThemeContext } from "../../App";
+import { ThemeContext } from "../App";
 import axios from "axios";
 
 /**
@@ -20,13 +20,13 @@ export default function CertificateDragDrop({ onUploadComplete }) {
   const textColor = dark ? "text-gray-300" : "text-gray-600";
 
   const ALLOWED_TYPES = {
-    "application/pdf": { label: "PDF", icon: "📄" },
-    "application/vnd.ms-excel": { label: "Excel", icon: "📊" },
+    "application/pdf": { label: "PDF", icon: <img src="/Documentos.webp" alt="PDF" style={{width: '24px', height: '24px', display: 'inline-block'}} /> },
+    "application/vnd.ms-excel": { label: "Excel", icon: "" },
     "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": {
       label: "Excel",
-      icon: "📊",
+      icon: "",
     },
-    "text/csv": { label: "CSV", icon: "📋" },
+    "text/csv": { label: "CSV", icon: <img src="/Documentos.webp" alt="CSV" style={{width: '24px', height: '24px', display: 'inline-block'}} /> },
   };
 
   const handleDragOver = (e) => {
@@ -142,7 +142,7 @@ export default function CertificateDragDrop({ onUploadComplete }) {
       }
 
       alert(
-        `✅ ${results.length} archivo(s) subido(s) correctamente`
+        `${results.length} archivo(s) subido(s) correctamente`
       );
     } catch (error) {
       console.error("Error durante carga:", error);
@@ -176,7 +176,9 @@ export default function CertificateDragDrop({ onUploadComplete }) {
           className="hidden"
         />
 
-        <div className="text-4xl mb-3">📂</div>
+        <div className="text-4xl mb-3">
+          <img src="/Carpeta.webp" alt="Carpeta" style={{ width: '48px', height: '48px', margin: '0 auto' }} />
+        </div>
         <h3 className={`text-lg font-semibold mb-1 ${textColor}`}>
           {isDragging ? "¡Suelta los archivos aquí!" : "Arrastra certificados aquí"}
         </h3>

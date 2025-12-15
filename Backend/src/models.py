@@ -69,6 +69,7 @@ class Calificacion(models.Model):
     )
 
     comentario = models.TextField(blank=True)
+    solicitar_auditoria = models.BooleanField(default=False)
     fecha_creacion = models.DateTimeField(auto_now_add=True)
     fecha_actualizacion = models.DateTimeField(auto_now=True)
 
@@ -311,6 +312,7 @@ class Auditoria(models.Model):
         return f"[{self.fecha}] {self.accion} - {self.modelo}"
 
 class Feedback(models.Model):
+    """Retroalimentación general del sistema"""
     usuario = models.ForeignKey(
         User,
         on_delete=models.SET_NULL,
@@ -320,8 +322,94 @@ class Feedback(models.Model):
     mensaje = models.TextField()
     fecha = models.DateTimeField(auto_now_add=True)
 
+    class Meta:
+        ordering = ['-fecha']
+        verbose_name_plural = "Feedback"
+
     def __str__(self):
-        return f"Feedback {self.id}"
+        return f"Feedback {self.id} - {self.fecha.strftime('%Y-%m-%d')}"
+
+
+class CasoSoporte(models.Model):
+    """Casos de soporte/ayuda generados por usuarios"""
+    
+    PRIORIDAD_CHOICES = [
+        ('BAJA', 'Baja'),
+        ('MEDIA', 'Media'),
+        ('ALTA', 'Alta'),
+        ('CRÍTICA', 'Crítica'),
+    ]
+    
+    ESTADO_CHOICES = [
+        ('ABIERTO', 'Abierto'),
+        ('EN_PROGRESO', 'En Progreso'),
+        ('RESUELTO', 'Resuelto'),
+        ('CERRADO', 'Cerrado'),
+    ]
+    
+    TIPO_CHOICES = [
+        ('CONSULTA', 'Consulta'),
+        ('PROBLEMA', 'Problema'),
+        ('MOLESTIA', 'Molestia'),
+        ('SUGERENCIA', 'Sugerencia'),
+    ]
+    
+    # Datos básicos
+    id_caso = models.CharField(max_length=20, unique=True, editable=False)  # CASE-001, CASE-002, etc
+    usuario = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name="casos_soporte"
+    )
+    email = models.EmailField()
+    nombre = models.CharField(max_length=150)
+    
+    # Detalles del caso
+    titulo = models.CharField(max_length=200)
+    descripcion = models.TextField()
+    tipo = models.CharField(max_length=20, choices=TIPO_CHOICES, default='CONSULTA')
+    prioridad = models.CharField(max_length=20, choices=PRIORIDAD_CHOICES, default='MEDIA')
+    estado = models.CharField(max_length=20, choices=ESTADO_CHOICES, default='ABIERTO')
+    
+    # Timestamps
+    fecha_creacion = models.DateTimeField(auto_now_add=True)
+    fecha_actualizacion = models.DateTimeField(auto_now=True)
+    fecha_resolucion = models.DateTimeField(null=True, blank=True)
+    
+    # Seguimiento
+    email_contacto_enviado = models.BooleanField(default=False)
+    respuesta_admin = models.TextField(blank=True, null=True)
+    respondido_por = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="casos_respondidos"
+    )
+    
+    class Meta:
+        ordering = ['-fecha_creacion']
+        indexes = [
+            models.Index(fields=['estado', '-fecha_creacion']),
+            models.Index(fields=['id_caso']),
+        ]
+    
+    def __str__(self):
+        return f"{self.id_caso} - {self.titulo}"
+    
+    def save(self, *args, **kwargs):
+        """Generar ID único del caso si no existe"""
+        if not self.id_caso:
+            # Obtener último ID y incrementar
+            last_case = CasoSoporte.objects.order_by('-id')[:1]
+            if last_case:
+                last_num = int(last_case[0].id_caso.split('-')[1])
+                self.id_caso = f"CASE-{last_num + 1:06d}"
+            else:
+                self.id_caso = "CASE-000001"
+        
+        super().save(*args, **kwargs)
 
 
 # ===============================

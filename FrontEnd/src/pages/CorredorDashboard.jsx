@@ -133,7 +133,10 @@ const CorredorDashboard = () => {
         <div className={`mb-8 p-6 rounded-2xl shadow-lg ${cardBg}`}>
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div>
-              <h1 className="text-3xl font-bold mb-2">📊 Dashboard - Corredor de Inversión</h1>
+              <h1 className="text-3xl font-bold mb-2 flex items-center gap-2">
+                <img src="/dashboard.webp" alt="Dashboard" className="w-9 h-9" />
+                <span>Dashboard - Corredor de Inversión</span>
+              </h1>
               <p className="text-gray-600 dark:text-gray-400">
                 Visualiza y gestiona tus certificados y calificaciones
               </p>
@@ -141,15 +144,17 @@ const CorredorDashboard = () => {
             <div className="flex gap-3 flex-wrap">
               <button
                 onClick={cargarDatos}
-                className="px-4 py-2 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-white transition"
+                className="px-4 py-2 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-white transition inline-flex items-center gap-2"
               >
-                🔄 Refrescar
+                <img src="/IconoRefrescar.webp" alt="Refrescar" className="w-5 h-5" />
+                <span>Refrescar</span>
               </button>
               <button
                 onClick={irASubirCertificado}
-                className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg font-semibold shadow-lg"
+                className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg font-semibold shadow-lg inline-flex items-center gap-2"
               >
-                ➕ Subir Certificado
+                <img src="/masIcono.webp" alt="Subir" className="w-5 h-5" />
+                <span>Subir Certificado</span>
               </button>
             </div>
           </div>
@@ -172,7 +177,9 @@ const CorredorDashboard = () => {
                   </p>
                   <p className="text-3xl font-bold text-blue-500">{estadisticas.total || 0}</p>
                 </div>
-                <div className="text-4xl">📄</div>
+                <div className="flex justify-center">
+                  <img src="/Documentos.webp" alt="Documentos" style={{width: '48px', height: '48px'}} />
+                </div>
               </div>
             </div>
 
@@ -184,7 +191,9 @@ const CorredorDashboard = () => {
                   </p>
                   <p className="text-3xl font-bold text-gray-500">{estadisticas.por_estado?.BORRADOR || 0}</p>
                 </div>
-                <div className="text-4xl">✏️</div>
+                <div className="flex justify-center">
+                  <img src="/LapizIcono.webp" alt="Borrador" style={{width: '48px', height: '48px'}} />
+                </div>
               </div>
             </div>
 
@@ -196,7 +205,7 @@ const CorredorDashboard = () => {
                   </p>
                   <p className="text-3xl font-bold text-yellow-500">{estadisticas.por_estado?.PENDIENTE || 0}</p>
                 </div>
-                <div className="text-4xl">⏳</div>
+                <div className="flex justify-center"></div>
               </div>
             </div>
 
@@ -208,7 +217,7 @@ const CorredorDashboard = () => {
                   </p>
                   <p className="text-3xl font-bold text-green-500">{estadisticas.por_estado?.APROBADA || 0}</p>
                 </div>
-                <div className="text-4xl">✅</div>
+                <div className="flex justify-center"></div>
               </div>
             </div>
           </div>
@@ -216,7 +225,10 @@ const CorredorDashboard = () => {
 
         {/* FILTROS */}
         <div className={`p-6 rounded-2xl shadow mb-8 ${cardBg}`}>
-          <h2 className="text-xl font-bold mb-4">🔍 Filtros</h2>
+          <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
+            <img src="/lupa.webp" alt="Filtros" className="w-6 h-6" />
+            <span>Filtros</span>
+          </h2>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div>
               <label className={`block text-sm mb-2 ${theme === "dark" ? "text-gray-300" : "text-gray-700"}`}>
@@ -301,7 +313,10 @@ const CorredorDashboard = () => {
 
         {/* TABLA DE CALIFICACIONES */}
         <div className={`p-6 rounded-2xl shadow ${cardBg}`}>
-          <h2 className="text-xl font-bold mb-4">📋 Mis Certificados</h2>
+          <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
+            <img src="/ListadoIcono.webp" alt="Mis Certificados" className="w-6 h-6" />
+            <span>Mis Certificados</span>
+          </h2>
           {loading ? (
             <div className="text-center py-8">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto"></div>

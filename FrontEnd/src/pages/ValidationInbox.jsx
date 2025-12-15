@@ -1,6 +1,7 @@
 import { useEffect, useState, useContext } from "react";
 import axios from "axios";
 import { ThemeContext } from "../App";
+import { LoadingSpinner, ErrorAlert, SuccessAlert } from "../hooks/useOptimizations.jsx";
 
 const API_BASE_URL = "http://127.0.0.1:8000/api";
 
@@ -66,15 +67,29 @@ const ValidationInbox = () => {
         </div>
 
         {error && (
-          <div className="mb-4 p-4 bg-blue-100 border border-blue-400 text-blue-700 rounded">{error}</div>
+          <div className="mb-4">
+            <ErrorAlert 
+              error={new Error(error)} 
+              theme={theme} 
+              onClose={() => setError(null)}
+            />
+          </div>
         )}
+
         {accionMsg && (
-          <div className="mb-4 p-4 bg-blue-100 border border-blue-400 text-blue-700 rounded">{accionMsg}</div>
+          <div className="mb-4">
+            <SuccessAlert 
+              message={accionMsg}
+              theme={theme}
+              onClose={() => setAccionMsg(null)}
+              duration={4000}
+            />
+          </div>
         )}
 
         {loading ? (
-          <div className="text-center py-10">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto"></div>
+          <div className="flex justify-center py-10">
+            <LoadingSpinner theme={theme} size="lg" />
           </div>
         ) : items.length === 0 ? (
           <p className={theme === "dark" ? "text-gray-300" : "text-gray-700"}>No hay validaciones pendientes.</p>

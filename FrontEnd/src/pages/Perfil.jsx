@@ -66,7 +66,7 @@ export default function Perfil() {
           'Content-Type': 'multipart/form-data'
         }
       });
-      alert('✅ Perfil actualizado');
+      alert('Perfil actualizado');
       setEditando(false);
       cargarPerfil();
     } catch (error) {
@@ -83,7 +83,7 @@ export default function Perfil() {
       );
       setNuevoCorreo('');
       cargarPerfil();
-      alert('✅ Correo agregado');
+      alert('Correo agregado');
     } catch (error) {
       alert(error.response?.data?.detail || '❌ Error');
     }
@@ -120,7 +120,7 @@ export default function Perfil() {
         { codigo: codigoMFA },
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      alert('✅ MFA activado');
+      alert('MFA activado');
       setMfaQR(null);
       setCodigoMFA('');
       cargarPerfil();
@@ -139,7 +139,7 @@ export default function Perfil() {
         data: { codigo },
         headers: { Authorization: `Bearer ${token}` }
       });
-      alert('✅ MFA deshabilitado');
+      alert('MFA deshabilitado');
       cargarPerfil();
     } catch (error) {
       alert(error.response?.data?.detail || '❌ Error');
@@ -168,7 +168,7 @@ export default function Perfil() {
         { rol_solicitado: rolSolicitado, justificacion },
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      alert('✅ Solicitud enviada');
+      alert('Solicitud enviada');
       setRolSolicitado('');
       setJustificacion('');
       cargarSolicitudRol();
@@ -231,9 +231,14 @@ export default function Perfil() {
           <div className="border-b border-gray-200 dark:border-gray-700">
             <nav className="flex -mb-px">
               {[
-                { id: 'info', label: '📋 Info' },
+                { id: 'info', label: (
+                  <span className="inline-flex items-center gap-2">
+                    <img src="/ListadoIcono.webp" alt="Info" className="w-5 h-5" />
+                    <span>Info</span>
+                  </span>
+                ) },
                 { id: 'correos', label: '📧 Correos' },
-                { id: 'mfa', label: '🔐 MFA' },
+                { id: 'mfa', label: 'MFA' },
                 { id: 'cambio-rol', label: '🔄 Rol' }
               ].map(tab => (
                 <button
@@ -290,14 +295,17 @@ export default function Perfil() {
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Correos adicionales</h3>
                 <div className="flex gap-2">
                   <input type="email" value={nuevoCorreo} onChange={(e) => setNuevoCorreo(e.target.value)} placeholder="nuevo@correo.com" className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"/>
-                  <button onClick={agregarCorreo} className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">➕ Agregar</button>
+                  <button onClick={agregarCorreo} className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 inline-flex items-center gap-2">
+                    <img src="/masIcono.webp" alt="Agregar" className="w-4 h-4" />
+                    <span>Agregar</span>
+                  </button>
                 </div>
                 <div className="space-y-2">
                   {correos.map(c => (
                     <div key={c.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
                       <div>
                         <p className="text-gray-900 dark:text-white">{c.email}</p>
-                        <p className="text-sm text-gray-500">{c.verificado ? '✅ Verificado' : '⏳ Pendiente'} {c.principal && '🌟'}</p>
+                        <p className="text-sm text-gray-500">{c.verificado ? 'Verificado' : 'Pendiente'} {c.principal && ''}</p>
                       </div>
                       {!c.principal && <button onClick={() => eliminarCorreo(c.id)} className="text-red-500 hover:text-red-700">🗑️</button>}
                     </div>
@@ -312,20 +320,20 @@ export default function Perfil() {
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white">MFA</h3>
                 {perfil?.mfa_habilitado ? (
                   <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
-                    <p className="text-green-800 dark:text-green-200">✅ MFA habilitado</p>
+                    <p className="text-green-800 dark:text-green-200">MFA habilitado</p>
                     <button onClick={deshabilitarMFA} className="mt-4 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600">Deshabilitar</button>
                   </div>
                 ) : (
                   <>
                     {!mfaQR ? (
-                      <button onClick={generarMFAQR} className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">🔐 Habilitar MFA</button>
+                      <button onClick={generarMFAQR} className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">Habilitar MFA</button>
                     ) : (
                       <div className="space-y-4">
                         <p className="text-gray-700 dark:text-gray-300">Escanea con tu app</p>
                         <img src={mfaQR} alt="QR" className="mx-auto"/>
                         <code className="block p-2 bg-gray-100 dark:bg-gray-700 rounded text-sm">{mfaSecret}</code>
                         <input type="text" value={codigoMFA} onChange={(e) => setCodigoMFA(e.target.value)} maxLength={6} placeholder="Código 6 dígitos" className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"/>
-                        <button onClick={activarMFA} className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600">✅ Verificar</button>
+                        <button onClick={activarMFA} className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600">Verificar</button>
                       </div>
                     )}
                   </>
@@ -336,8 +344,9 @@ export default function Perfil() {
             {/* CAMBIO ROL */}
             {activeTab === 'cambio-rol' && (
               <div className="space-y-4">
-                <div className="p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg">
-                  <p className="text-yellow-800 dark:text-yellow-200">⚠️ Solo 1 solicitud de cambio de rol</p>
+                <div className="p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg flex items-center gap-2">
+                  <img src="/advertenciaIcono.webp" alt="Advertencia" className="w-5 h-5" />
+                  <p className="text-yellow-800 dark:text-yellow-200">Solo 1 solicitud de cambio de rol</p>
                 </div>
                 {solicitudRol?.tiene_solicitud_pendiente ? (
                   <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">

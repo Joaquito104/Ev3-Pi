@@ -239,11 +239,47 @@ const Login = () => {
         )}
 
         {!mfaRequired && (
-          <div style={{ marginTop: "16px", textAlign: "center" }}>
-            <Link to="/" style={{ color: mutedText, textDecoration: "none" }}>
+          <>
+            <div style={{ marginTop: "20px", textAlign: "center", fontSize: "14px" }}>
+              <span style={{ color: mutedText }}>¿No tiene una cuenta? </span>
+              <Link 
+                to="/registro" 
+                style={{ 
+                  color: "#0084ff", 
+                  fontWeight: 700, 
+                  textDecoration: "none",
+                  borderBottom: "2px solid #0084ff"
+                }}
+              >
+                Regístrese
+              </Link>
+            </div>
+            <Link 
+              to="/" 
+              style={{ 
+                display: "block",
+                width: "100%",
+                marginTop: "12px",
+                padding: "10px",
+                background: dark ? "#1f2937" : "#f3f4f6",
+                color: mutedText,
+                textDecoration: "none",
+                fontSize: "14px",
+                textAlign: "center",
+                borderRadius: "6px",
+                border: `1px solid ${dark ? "#374151" : "#d1d5db"}`,
+                transition: "all 0.2s"
+              }}
+              onMouseEnter={(e) => {
+                e.target.style.background = dark ? "#374151" : "#e5e7eb";
+              }}
+              onMouseLeave={(e) => {
+                e.target.style.background = dark ? "#1f2937" : "#f3f4f6";
+              }}
+            >
               Volver al inicio
             </Link>
-          </div>
+          </>
         )}
       </form>
     </div>

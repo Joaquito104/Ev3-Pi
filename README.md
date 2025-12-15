@@ -2,6 +2,42 @@
 
 Sistema integral de gestión tributaria y certificados digitales con autenticación JWT, roles basados en permisos y auditoría completa.
 
+## Últimas Actualizaciones
+
+Este contenido se trasladó a [CHANGELOG.md](CHANGELOG.md).
+
+### ✨ Nuevas Features
+- 🔔 **Notificaciones en Tiempo Real** - Sistema de polling cada 10s para auditorías y calificaciones
+- ⚡ **Optimización de Performance** - 5 estrategias de caching (TTL, Session, LocalStorage, Debounce, Infinite Scroll)
+- ✅ **Validaciones Avanzadas** - 12 validadores (email, RUT, phone, password, fileSize, etc.)
+- 🎨 **Dark Mode Perfecto** - Paleta unificada en todos los componentes con transiciones suaves
+- 📱 **Mobile Responsive** - Typography y layouts con `clamp()` para escalado adaptativo
+- 🚨 **Error Handling Mejorado** - Componentes unificados (LoadingSpinner, ErrorAlert, SuccessAlert)
+
+### 📦 Nuevos Hooks y Componentes
+- `useNotifications.jsx` - Polling con NotificationToast y NotificationContainer
+- `useCache.jsx` - useCache, useCachedRequest, useLocalStorage, useSessionCache, useInfiniteScroll
+- `useValidation.jsx` - useFormValidation con 12 validadores
+- `FormField.jsx` - Componente reutilizable con validación integrada
+- `darkModeClasses.jsx` - 40+ utilidades de dark mode + 3 componentes (DarkModeButton, DarkModeInput, DarkModeCard)
+
+### 🎨 Componentes Actualizados
+- ✅ Button.jsx - 3 variantes (primary, danger, secondary) con dark mode
+- ✅ Input.jsx - Validación, focus states, error handling con dark mode
+- ✅ Modal.jsx - Backdrop adaptativo, borders, hover effects
+- ✅ Navbar.jsx - Active states, hover, dropdown mejorado
+- ✅ Sidebar.jsx - Navegación con estados activos, info de usuario
+- ✅ Footer.jsx - Responsive, botones interactivos, links con hover
+- ✅ ReportesAuditoria.jsx - Mobile responsive + session caching + debouncing
+- ✅ ValidationInbox.jsx - Error/success alerts con auto-dismiss
+- ✅ AuditPanel.jsx - LoadingSpinner y ErrorAlert integrados
+- ✅ Registros.jsx - Consistent loading/error handling
+
+### 📚 Documentación Nueva
+- `DARK_MODE_GUIDE.md` - Guía completa de implementación de dark mode
+- `DARK_MODE_STATUS.md` - Checklist de componentes con dark mode
+- `DARK_MODE_COMPLETED.md` - Resumen detallado de cambios
+
 ---
 
 ## Cómo Ejecutar el Proyecto
@@ -601,59 +637,95 @@ Redis también expira la entrada automáticamente cuando el token expira
 Ev3-Pi/
 ├── Backend/
 │   ├── Django/
+│   │   ├── __init__.py
 │   │   ├── settings.py (Configuración con dotenv)
 │   │   ├── urls.py
+│   │   ├── asgi.py
 │   │   └── wsgi.py
 │   ├── src/
-│   │   ├── models.py (Registros, PerfilUsuario, ReglaNegocio)
-│   │   ├── views.py (ViewSets y endpoints)
-│   │   ├── views/ (Vistas organizadas por módulo)
-│   │   │   ├── auth.py (Autenticación)
-│   │   │   ├── registros.py (Gestión registros)
-│   │   │   ├── usuarios.py (CRUD usuarios)
-│   │   │   ├── reglas_negocio.py (CRUD reglas)
-│   │   │   └── auditoria.py (Auditoría)
+│   │   ├── __init__.py
+│   │   ├── models.py (Registros, Certificado, PerfilUsuario)
 │   │   ├── serializers.py (Serialización JSON)
-│   │   ├── permissions.py (Control de permisos)
-│   │   └── admin.py
-│   ├── migrations/
+│   │   ├── permissions.py (Control de permisos RBAC)
+│   │   ├── rbac.py (Lógica de roles)
+│   │   ├── signals.py (Auto-auditoría)
+│   │   ├── admin.py
+│   │   ├── views.py (ViewSets)
+│   │   ├── views/ (Vistas organizadas por módulo)
+│   │   │   ├── __init__.py
+│   │   │   ├── auth.py (Autenticación JWT, Registro, MFA)
+│   │   │   ├── registros.py (Gestión registros)
+│   │   │   ├── calificaciones.py (Gestión calificaciones)
+│   │   │   ├── certificados.py (Upload y gestión)
+│   │   │   ├── auditoria.py (Logs y estadísticas)
+│   │   │   ├── reglas.py (CRUD reglas de negocio)
+│   │   │   └── validacion.py (Validación de datos)
+│   │   ├── management/
+│   │   │   └── commands/
+│   │   │       └── cargar_datos_iniciales.py
+│   │   ├── migrations/
+│   │   └── utils/
+│   │       ├── utils_registro.py (Validación telefónica, emails)
+│   │       └── mongodb_utils.py (Conexión MongoDB)
+│   ├── media/ (archivos subidos)
 │   ├── manage.py
-│   ├── .env (credenciales PostgreSQL)
-│   └── venv/ (entorno virtual)
+│   ├── requirements.txt
+│   ├── .env (credenciales)
+│   └── .venv/ (entorno virtual)
 │
 ├── FrontEnd/
 │   ├── src/
-│   │   ├── App.jsx (Contextos y rutas)
+│   │   ├── App.jsx (ThemeContext, Router)
+│   │   ├── router.jsx (Rutas protegidas)
+│   │   ├── main.jsx
 │   │   ├── components/
 │   │   │   ├── layout/
-│   │   │   │   ├── Navbar.jsx (Nav con active routing)
-│   │   │   │   ├── Sidebar.jsx
-│   │   │   │   └── Footer.jsx
+│   │   │   │   ├── Navbar.jsx (Dark mode, active states)
+│   │   │   │   ├── Sidebar.jsx (Dark mode, navegación)
+│   │   │   │   └── Footer.jsx (Dark mode, responsive)
 │   │   │   ├── common/
-│   │   │   │   ├── ThemeToggle.jsx (Light/Dark mode)
-│   │   │   │   ├── Modal.jsx
-│   │   │   │   ├── button.jsx
-│   │   │   │   └── input.jsx
+│   │   │   │   ├── ThemeToggle.jsx (Switch light/dark)
+│   │   │   │   ├── Modal.jsx (Dark mode)
+│   │   │   │   ├── button.jsx (3 variantes + dark)
+│   │   │   │   └── input.jsx (Validación + dark)
 │   │   │   └── auth/
-│   │   │       └── ProtectedRoute.jsx
+│   │   │       └── ProtectedRoute.jsx (RBAC)
 │   │   ├── pages/
 │   │   │   ├── Home.jsx
 │   │   │   ├── Login.jsx
+│   │   │   ├── Registro.jsx (Verificación email)
+│   │   │   ├── VerificarEmail.jsx
+│   │   │   ├── Perfil.jsx (MFA, cambio rol)
 │   │   │   ├── Dashboard.jsx
-│   │   │   ├── CertificatesUpload.jsx (Centrado)
-│   │   │   ├── TaxManagement.jsx (Centrado)
-│   │   │   ├── AuditPanel.jsx (Centrado)
-│   │   │   ├── Registros.jsx (Búsqueda)
-│   │   │   ├── AdministracionNuam.jsx (Panel Admin TI)
+│   │   │   ├── CorredorDashboard.jsx
+│   │   │   ├── DashboardAnalista.jsx
+│   │   │   ├── DashboardAuditor.jsx
+│   │   │   ├── CertificatesUpload.jsx
+│   │   │   ├── AuditPanel.jsx
+│   │   │   ├── Registros.jsx
+│   │   │   ├── ReportesAuditoria.jsx
+│   │   │   ├── AdminGlobal.jsx
 │   │   │   └── NoAutorizado.jsx
-│   │   └── hooks/
-│   │       └── useForm.js
-│   ├── .env
+│   │   ├── hooks/
+│   │   │   ├── useForm.js
+│   │   │   ├── useNotifications.jsx (Polling)
+│   │   │   ├── useCache.jsx (Optimizaciones)
+│   │   │   ├── useValidation.jsx (12 validadores)
+│   │   │   └── useOptimizations.jsx (Loading/Error)
+│   │   ├── services/
+│   │   │   └── validacionService.js
+│   │   └── utils/
+│   │       └── darkModeClasses.jsx (40+ utilidades)
+│   ├── public/ (iconos WebP)
 │   ├── package.json
-│   └── vite.config.js
+│   ├── vite.config.js
+│   ├── tailwind.config.js
+│   └── postcss.config.js
 │
 ├── .gitignore
-└── README.md
+├── README.md
+├── CHANGELOG.md (historial de cambios)
+└── MODO_OSCURO.md (guía dark mode)
 ```
 
 ---
@@ -766,10 +838,40 @@ La funcionalidad principal es la búsqueda de registros disponible para todos lo
 ## Notas Importantes
 
 - PostgreSQL debe estar corriendo localmente
+- Redis requerido para blacklist de tokens JWT
 - Credenciales de BD en `Backend/.env`
 - Frontend se conecta a `http://127.0.0.1:8000`
 - Tokens JWT se almacenan en localStorage
 - Superusuarios bypasean todas las restricciones de rol
+- Dark mode activado por defecto (toggle en navbar)
+
+---
+
+## Documentación Adicional
+
+- [CHANGELOG.md](CHANGELOG.md) - Historial completo de cambios
+- [MODO_OSCURO.md](MODO_OSCURO.md) - Guía de implementación de dark mode
+- [SECURITY.md](SECURITY.md) - **Informe de seguridad OWASP/NIST (incluye resumen ejecutivo + detalles técnicos)**
+- [DEPLOY.md](DEPLOY.md) - **Guía de despliegue en producción**
+- [CHECKLIST_DEPLOY.md](CHECKLIST_DEPLOY.md) - **Checklist paso a paso para producción (50 items)**
+
+---
+
+## 🔒 Seguridad
+
+EV3-Pi implementa múltiples capas de seguridad siguiendo estándares OWASP y NIST:
+
+- **Autenticación**: JWT con refresh tokens + MFA (TOTP)
+- **Autorización**: RBAC con 4 roles granulares
+- **Cifrado**: Argon2 para contraseñas (OWASP recomendado)
+- **Rate Limiting**: Protección contra brute force y DDoS
+- **Validaciones**: SQL injection, XSS, contraseñas fuertes
+- **Security Headers**: HSTS, CSP, X-Frame-Options, X-Content-Type-Options
+- **Auditoría**: Logs de seguridad y trazabilidad completa
+
+**Puntuación actual**: 71% (desarrollo) → 95%+ (producción con checklist)
+
+Para más detalles, ver [SECURITY.md](SECURITY.md) y [DEPLOY.md](DEPLOY.md).
 
 ---
 
@@ -779,693 +881,10 @@ Para más información, revisar la documentación de:
 - Django: https://docs.djangoproject.com/
 - React: https://react.dev/
 - JWT: https://jwt.io/
+- Tailwind CSS: https://tailwindcss.com/
+- **OWASP Top 10**: https://owasp.org/Top10/
+- **NIST 800-63B**: https://pages.nist.gov/800-63-3/sp800-63b.html
 
 ---
 
-**Última actualización**: 14 de diciembre de 2025
-
-## Cambios Recientes (14/12/2025)
-
-### Backend - MongoDB & Django
-- ✅ **Corrección de errores MongoDB Authentication**
-  - Implementado manejo de `OperationFailure` en [Backend/src/mongodb_utils.py](Backend/src/mongodb_utils.py)
-  - Fallback automático a conexión sin credenciales para localhost
-  - Validación con `ping()` para detectar errores de autenticación anticipadamente
-  - Soluciona 500 errors al crear índices en MongoDB
-
-- ✅ **Corrección de rutas conflictivas en Django**
-  - Reordenadas rutas en [Backend/Django/urls.py](Backend/Django/urls.py)
-  - Ruta `/calificaciones-corredor/estadisticas/` ahora procesada ANTES de `<str:calificacion_id>`
-  - Evita que "estadisticas" sea interpretado como ID inválido (error 400)
-
-### Frontend - Tailwind CSS & Modo Oscuro
-- ✅ **Instalación de Tailwind CSS v3.4.1**
-  - Configurado [FrontEnd/tailwind.config.js](FrontEnd/tailwind.config.js) con `darkMode: 'class'`
-  - Configurado [FrontEnd/postcss.config.js](FrontEnd/postcss.config.js)
-  - Actualizado [FrontEnd/src/index.css](FrontEnd/src/index.css) con directivas Tailwind
-
-- ✅ **Sistema de Modo Oscuro Funcional**
-  - Actualizado [App.jsx](FrontEnd/src/App.jsx) para aplicar clase `dark` al HTML
-  - Sincronización de tema con localStorage
-  - Componentes responden automáticamente al cambio de tema
-
-- ✅ **Estilización de Páginas Principales**
-  - [CorredorDashboard.jsx](FrontEnd/src/pages/CorredorDashboard.jsx)
-    - Header con botón refrescar y subir certificado
-    - Tarjetas de estadísticas con gradientes en dark mode
-    - Filtros temáticos y tabla de certificados
-    - Badges de estado con paleta oscura
-    - Soporte completo para modo oscuro
-
-  - [CertificatesUpload.jsx](FrontEnd/src/pages/CertificatesUpload.jsx)
-    - 4 modos de carga: Manual, PDF, CSV, Excel
-    - Inputs de archivo con validaciones específicas
-    - Botones de modo con estados visuales
-    - Estilos responsive con modo oscuro
-
-  - [Registros.jsx](FrontEnd/src/pages/Registros.jsx)
-    - Conversión completa a Tailwind CSS
-    - Tarjetas de registros con hover effects
-    - Botones de acción (editar, eliminar, crear, enviar)
-    - Badges de estado con colores temáticos
-    - Estado de carga con spinner
-
-  - [AuditPanel.jsx](FrontEnd/src/pages/AuditPanel.jsx)
-    - Tabla de validación con estilos oscuros
-    - Header descriptivo con botón refrescar
-    - Badges de estado para calificaciones
-    - Estado vacío con ícono
-    - Manejo visual de errores
-
-### Características Implementadas
-✅ Modo oscuro funcional en todas las páginas principales  
-✅ Degradados y sombras adaptadas al tema  
-✅ Badges de estado con paleta coherente  
-✅ Hover effects y transiciones suaves  
-✅ Manejo de estados de carga y error  
-✅ Resolución completa de conflictos de rutas Django  
-✅ Solución de autenticación MongoDB para localhost  
-✅ Framework CSS completo con Tailwind v3
-
-### Cambios Recientes (13/12/2025)
-
-### Backend
-- ✅ Implementado CRUD completo para **Usuarios** (`/api/usuarios/`)
-- ✅ Implementado CRUD completo para **Reglas de Negocio** (`/api/reglas-negocio/`)
-
-### Frontend
-- ✅ Implementado panel **Administración Nuam**
-
----
-📅 Resumen de Avances – 14 de diciembre de 2025
-
-
-
-1. Conexión y validación de MongoDB
-
-Se verificó correctamente la conexión con MongoDB Compass.
-
-Se confirmó la lectura y escritura de calificaciones desde MongoDB.
-
-Se validó que las colecciones se crean y consultan correctamente.
-
-2. Implementación de dashboards por rol (RBAC)
-
-Se dejó funcionando la separación correcta de vistas por rol, cumpliendo RBAC:
-
-/dashboard/corredor
-
-/dashboard/analista
-
-/dashboard/auditor
-
-/dashboard/admin-ti
-
-se validó que:
-
-Un analista no puede entrar al dashboard de corredor
-
-Un auditor no puede acceder a vistas no autorizadas
-
-El bloqueo muestra “No autorizado” correctamente
-
-3.Dashboard Corredor (funcional)
-
-Visualización de certificados propios
-
-Estados visibles: BORRADOR, PENDIENTE, OBSERVADA, APROBADA
-
-Estadísticas:
-
-Total de certificados
-
-Conteo por estado
-
-Filtros por:
-
-Estado
-
-Período
-
-Tipo de certificado
-
-Navegación a detalle del certificado
-
-
-4. Dashboard Analista (funcional)
-
-Visualización de todas las calificaciones
-
-Cambio de estado:
-
-BORRADOR → PENDIENTE
-
-Aplicación de filtros
-
-Validación del flujo correcto antes de pasar a auditoría
-
-5. Dashboard Auditor (funcional)
-
-Visualización de calificaciones en estado PENDIENTE
-
-Resolución de calificaciones:
-
-APROBADA
-
-RECHAZADA
-
-OBSERVADA
-
-Registro de observaciones/comentarios
-
-
-6. Flujo completo de estados validado
-
-Se comprobó el flujo real del sistema:
-
-Corredor crea certificado → BORRADOR
-
-Analista revisa → PENDIENTE
-
-Auditor:
-
-Aprueba → APROBADA
-
-Rechaza → RECHAZADA
-
-Observa → OBSERVADA
-
-Corredor visualiza observación
-
-El flujo funciona correctamente a nivel de lógica y permisos.
-
-7. Vista Detalle de Calificación
-
-Se implementó DetalleCalificacion.jsx
-
-Se logró:
-
-Ver detalle completo del certificado
-
-Mostrar comentario del auditor
-
-Mostrar estado actual
-
-
-8.Router y protección de rutas (Frontend)
-
-Se configuró correctamente router.jsx
-
-Uso de ProtectedRoute por rol
-
-Layout común con Navbar y Footer
-
-Rutas protegidas correctamente por permisos
-
----
-
-## Actualización 15/12/2025 - Sistema Crítico de Registro con Email Verificado
-
-### 🎯 Registro Completo con Verificación de Email
-
-#### 1. Modelos
-
-**VerificacionEmail (nuevo)**
-- `usuario`: OneToOne FK a User
-- `token`: CharField(64) único, generado con secrets.token_urlsafe()
-- `email_a_verificar`: EmailField 
-- `fecha_creacion`: DateTimeField
-- `verificado`: Boolean
-- `fecha_verificacion`: DateTimeField nullable
-- **Método `es_valido()`**: Token válido solo por 24 horas
-- **Método `generar_token()`**: Genera token de 48 bytes en base64url
-
-**PerfilUsuario (ampliado)**
-- Nuevo campo: `pais` con choices (CHILE, COLOMBIA, PERU)
-
-#### 2. Utilidades de Validación
-
-Archivo: `Backend/src/utils_registro.py`
-
-**`validar_telefonico(numero, pais)`**
-- Valida números según patrones por país
-- Chile: 9 dígitos, comienza con 2-9
-- Colombia: 10-11 dígitos
-- Perú: 8-9 dígitos
-- Normaliza: agrega prefijo internacional (+56, +57, +51)
-- Retorna: (es_valido, numero_normalizado)
-
-**`enviar_email_verificacion(usuario, email, token)`**
-- Crea enlace: `{FRONTEND_URL}/verificar-email?token={token}`
-- Envía HTML con botón clickeable
-- Token expira en 24 horas
-- Usa Django email backend (configurable)
-
-**`enviar_email_rol_asignado(usuario, rol)`**
-- Notifica al usuario sobre su rol asignado
-- Enviado después de verificación exitosa
-
-#### 3. Vistas API
-
-Archivo: `Backend/src/views/auth.py`
-
-**RegistroView (POST)**
-```
-POST /api/registro-completo/
-{
-  "username": "juan123",
-  "first_name": "Juan",
-  "last_name": "Pérez",
-  "email": "juan@mail.com",
-  "password": "securepass123",
-  "password_confirm": "securepass123",
-  "pais": "CHILE",
-  "telefono": "912345678",
-  "rol": "CORREDOR"
-}
-```
-
-Validaciones:
-- Username: 4+ caracteres
-- Password: 8+ caracteres, deben coincidir
-- Teléfono: validado según país
-- Email: no debe existir
-- Usuario: no debe existir
-- Rol: debe ser válido
-
-Proceso:
-1. Crea User (is_active=False)
-2. Crea PerfilUsuario con rol y país
-3. Crea CorreoAdicional como principal
-4. Genera token de verificación (24h)
-5. Envía email con enlace
-6. Audita creación
-
-**VerificarEmailView (POST)**
-```
-POST /api/verificar-email/
-{ "token": "..." }
-```
-
-Validaciones:
-- Token debe existir
-- No debe estar ya verificado
-- No debe estar expirado (24h)
-
-Proceso:
-1. Activa usuario (is_active=True)
-2. Marca como verificado en VerificacionEmail
-3. Marca correo como verificado en CorreoAdicional
-4. Envía email de rol asignado
-5. Audita verificación
-
-**ReenviarVerificacionView (POST)**
-```
-POST /api/reenviar-verificacion/
-{ "email": "..." }
-```
-
-Genera nuevo token si el anterior expiró.
-
-#### 4. Configuración Django
-
-En `Backend/Django/settings.py`:
-
-```python
-# Email
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'  # o console para dev
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'tu-email@gmail.com'
-EMAIL_HOST_PASSWORD = 'app-password'
-DEFAULT_FROM_EMAIL = 'noreply@ev3pi.com'
-
-# Frontend URL para enlaces
-FRONTEND_URL = 'http://localhost:5173'
-```
-
-#### 5. Frontend - Página de Registro
-
-Archivo: `FrontEnd/src/pages/Registro.jsx`
-
-**Step 1: Formulario de Registro**
-- Campos: username, nombre, apellido, email, país, teléfono, rol, contraseña
-- Validaciones cliente
-- Muestra prefijo telefónico según país
-- Submit → crear usuario
-
-**Step 2: Verificación de Email**
-- Input para pegar token del email
-- Botón "Verificar Email"
-- Botón "Reenviar Email"
-- Botón "Volver"
-
-**Estilos**: 
-- Tailwind dark mode compatible
-- Gradient background
-- Responsive
-
-#### 6. Frontend - Página de Verificación
-
-Archivo: `FrontEnd/src/pages/VerificarEmail.jsx`
-
-Ruta: `/verificar-email?token=...`
-
-Estados:
-- Verificando: spinner + mensaje
-- Éxito: checkmark + redirect a login (3s)
-- Error: X + link volver
-
-#### 7. Rutas API
-
-```
-POST /api/registro-completo/          # Crear usuario
-POST /api/verificar-email/            # Verificar con token
-POST /api/reenviar-verificacion/      # Reenviar email
-```
-
-#### 8. Flujo Completo
-
-```
-1. Usuario rellena formulario
-   ↓
-2. POST /registro-completo/ 
-   ↓
-3. Backend valida y envía email con token
-   ↓
-4. Usuario recibe email y copia token
-   ↓
-5. Frontend → /verificar-email?token=...
-   ↓
-6. POST /verificar-email/ con token
-   ↓
-7. Usuario activado ✅
-   ↓
-8. Puede iniciar sesión
-```
-
-#### 9. Migraciones
-
-`0013_perfilusuario_pais_verificacionemail.py`:
-- Agrega `pais` a PerfilUsuario
-- Crea modelo VerificacionEmail
-
----
-
-## Actualización 15/12/2025 - Perfil Completo + MFA
-
-### 🎯 Sistema de Perfil de Usuario Completo
-
-#### 1. Modelos Extendidos
-
-**PerfilUsuario (ampliado)**
-- `foto_perfil`: ImageField para subida de foto (upload_to="perfiles/%Y/%m/")
-- `biografia`: TextField para descripción personal
-- `telefono`: CharField(20) para contacto
-- `mfa_habilitado`: Boolean para MFA
-- `mfa_secret`: CharField(32) para TOTP secret (pyotp)
-- `cambio_rol_solicitado`: Boolean (solo 1 vez por usuario)
-
-**CorreoAdicional (nuevo modelo)**
-- `usuario`: FK a User
-- `email`: EmailField único per usuario
-- `verificado`: Boolean (para validación futura)
-- `principal`: Boolean (para marcar email principal)
-- `fecha_agregado`: DateTimeField
-- Meta: unique_together['usuario', 'email'], ordering por principal + fecha
-
-**SolicitudCambioRol (nuevo modelo)**
-- `usuario`: FK a User
-- `rol_actual`: CharField (guardado para historial)
-- `rol_solicitado`: CharField con choices
-- `justificacion`: TextField (mínimo 50 caracteres requeridos)
-- `estado`: PENDIENTE | APROBADA | RECHAZADA
-- `fecha_solicitud`, `fecha_respuesta`: DateTimeField
-- `respondido_por`: FK a User (admin que aprueba/rechaza)
-- `comentario_admin`: TextField (motivo de rechazo)
-- Meta: ordering por -fecha_solicitud
-
-#### 2. Vistas API Backend
-
-Archivo: `Backend/src/views/perfil_completo.py`
-
-**PerfilUsuarioView (GET/PUT)**
-- GET: Obtener perfil completo con correos, estado MFA, solicitudes
-- PUT: Actualizar nombre, apellido, biografía, teléfono, foto (multipart/form-data)
-- Validación: foto máximo 5MB
-- Auto-auditoría de cambios
-
-**CorreoAdicionalView (GET/POST/DELETE)**
-- GET: Listar correos adicionales
-- POST: Agregar nuevo correo (validación de duplicados)
-- DELETE: Eliminar (no permite eliminar principal)
-- Auto-auditoría
-
-**SolicitudCambioRolView (GET/POST)**
-- GET: Ver solicitud actual e historial
-- POST: Crear solicitud (solo 1 vez por usuario)
-- Validación: justificación mínimo 50 caracteres
-- Bloquea si rol_solicitado == rol_actual
-- Marca flag `cambio_rol_solicitado = True` después de primera solicitud
-
-**MFAConfigView (GET/POST/PUT/DELETE)**
-- GET: Ver estado MFA
-- POST: Generar secret + código QR (base64)
-- PUT: Verificar código e INSIMPLIFICAR MFA
-- DELETE: Deshabilitar MFA (requiere código válido)
-- Usa `pyotp.TOTP` con valid_window=1 (30 segundos)
-- Retorna QR code en base64 para renderear en frontend
-
-**GestionSolicitudesRolView (GET/PATCH)**
-- Solo TI/ADMIN
-- GET: Listar solicitudes por estado
-- PATCH: Aprobar/rechazar solicitud (solo PENDIENTE)
-- Al APROBAR: actualiza rol en PerfilUsuario
-- Auto-auditoría con acción RESOLUCION
-- Metadata con rol_anterior y rol_nuevo
-
-#### 3. Rutas API
-```
-GET    /api/perfil-completo/                  # Ver perfil
-PUT    /api/perfil-completo/                  # Editar perfil
-
-GET    /api/correos-adicionales/              # Listar correos
-POST   /api/correos-adicionales/              # Agregar correo
-DELETE /api/correos-adicionales/              # Eliminar correo
-
-GET    /api/solicitud-cambio-rol/             # Ver solicitud
-POST   /api/solicitud-cambio-rol/             # Crear solicitud
-
-GET    /api/mfa-config/                       # Estado MFA
-POST   /api/mfa-config/                       # Generar QR
-PUT    /api/mfa-config/                       # Activar MFA
-DELETE /api/mfa-config/                       # Deshabilitar MFA
-
-GET    /api/admin/solicitudes-rol/            # Listar (TI/ADMIN)
-PATCH  /api/admin/solicitudes-rol/<id>/       # Aprobar/rechazar
-```
-
-#### 4. Página de Perfil Frontend
-
-Archivo: `FrontEnd/src/pages/Perfil.jsx`
-
-**Tabs:**
-1. **📋 Información**
-   - Mostrar: email, teléfono, biografía
-   - Botón "Editar" → modo edición inline
-   - Subida de foto con preview
-   - Validación cliente (5MB max)
-
-2. **📧 Correos Adicionales**
-   - Lista de correos con estado (verificado/pendiente, principal)
-   - Input para agregar nuevo correo
-   - Botón 🗑️ para eliminar (no principal)
-   - Validación duplicados
-
-3. **🔐 MFA (Autenticación Multi-Factor)**
-   - Estado: habilitado/deshabilitado
-   - Si deshabilitado:
-     * Botón "Habilitar" → generar QR
-     * Mostrar QR + secret
-     * Input de 6 dígitos para verificar
-     * Botón "Verificar y Activar"
-   - Si habilitado:
-     * Mostrar ✅ MFA Habilitado
-     * Botón rojo "Deshabilitar" (requiere código)
-
-4. **🔄 Cambio de Rol**
-   - Warning: ⚠️ Solo puedes solicitar 1 vez
-   - Estados:
-     * Si ya solicitó: mostrar solicitud pendiente con estado
-     * Si rechazada: mostrar comentario admin
-     * Si puede solicitar:
-       - Select de roles (excepto rol actual)
-       - Textarea justificación (min 50 chars)
-       - Contador de caracteres
-       - Botón "Enviar" (disabled si < 50 chars)
-   - Mostrar historial de solicitudes
-
-**Header con foto**:
-- Avatar circular con borde azul
-- Botón 📷 para cambiar foto (solo en modo edición)
-
-#### 5. Navbar Modificado
-
-Archivo: `FrontEnd/src/components/layout/Navbar.jsx`
-
-**Cambios:**
-- Quitar "Mi Perfil" de nav links principales
-- Mostrar solo nombre de usuario: `👤 {username} ▼`
-- Dropdown al hacer click:
-  * ⚙️ Configuración de Perfil → link a /perfil
-  * 👤 Mi Perfil → link a /perfil
-  * 🚪 Cerrar Sesión → logout()
-- Dropdown cierra al hacer click en opción
-- Estilos: hover effect en items
-
-#### 6. Dependencias Agregadas
-
-Instaladas en Backend:
-- `pyotp==2.9.0`: TOTP para MFA
-- `qrcode==8.0`: Generación de códigos QR
-- `Pillow==11.1.0`: Procesamiento de imágenes (foto perfil)
-
-#### 7. Migraciones
-
-`0012_perfilusuario_biografia_and_more.py`:
-- Agrega 6 campos a PerfilUsuario
-- Crea modelo CorreoAdicional
-- Crea modelo SolicitudCambioRol
-
----
-
-## Actualización 15/12/2025 (Primera Parte)
-
-### 🎯 Módulo de Certificados Digitales Completo
-
-#### 1. Modelo Certificado (PostgreSQL)
-- **Campos**: tipo (AFP, APV, ISAPRE, etc), archivo (FileField), nombre_archivo, tamaño_bytes, mime_type
-- **Estados**: CARGADO → VALIDADO/RECHAZADO
-- **Relaciones**: FK a Registro, Calificacion (nullable), User (cargado_por, validado_por)
-- **Metadatos**: JSONField para datos extraídos por OCR
-- **Índices**: Optimización en tipo+estado, registro+tipo
-
-#### 2. Vistas de Upload y Gestión
-Archivo: `Backend/src/views/certificados_upload.py`
-
-**CertificadoUploadView (POST)**
-- Multipart/form-data con validación de tamaño (max 10MB)
-- Formatos: PDF, CSV, Excel (.xls, .xlsx)
-- Validación de MIME type vs extensión
-- Permisos: Corredor solo sube a sus registros
-- Auto-auditoría de carga
-
-**CertificadoListView (GET)**
-- Filtros: registro_id, tipo, estado
-- Corredor solo ve sus certificados
-- Serialización completa con URLs
-
-**CertificadoDetailView (GET/PATCH/DELETE)**
-- GET: Detalle completo con metadatos
-- PATCH: Validar/rechazar (solo ANALISTA/AUDITOR/TI)
-- DELETE: Solo creador o TI
-- Auto-auditoría de cambios
-
-#### 3. Configuración Django Storage
-- **MEDIA_ROOT**: `Backend/media/`
-- **MEDIA_URL**: `/media/`
-- Upload path: `certificados/%Y/%m/` (organizados por fecha)
-- Servido en desarrollo con `static()`
-
-#### 4. Rutas API
-```
-POST   /api/certificados-upload/          # Subir certificado
-GET    /api/certificados-list/            # Listar con filtros
-GET    /api/certificados-detail/<id>/     # Ver detalle
-PATCH  /api/certificados-detail/<id>/     # Validar/rechazar
-DELETE /api/certificados-detail/<id>/     # Eliminar
-```
-
-#### 5. Migraciones
-- `0011_certificado_alter_auditoria_options_and_more.py`
-- Índices DB para queries eficientes
-
----
-
-### 📊 Sistema de Auditoría Mejorado
-
-#### 1. Modelo Auditoria Ampliado
-**Nuevas acciones**:
-- `ESTADO_CAMBIO`: Cambios de estado en Calificacion
-- `RESOLUCION`: Decisiones de auditor (aprobar/rechazar/observar)
-- `LOGOUT`: Cierre de sesión
-
-**Nuevos campos**:
-- `ip_address`: CharField(100) para tracking de IP
-- `metadatos`: JSONField para contexto adicional (estado_anterior, estado_nuevo, etc)
-
-**Meta**:
-- Índices en (usuario, fecha) y (accion, modelo)
-- Ordering por -fecha
-
-#### 2. Vista de Auditoría con Filtros
-Archivo: `Backend/src/views/auditoria.py`
-
-**AuditoriaView (GET)**
-- **Filtros**: fecha_desde, fecha_hasta, usuario, accion, modelo, objeto_id, rol
-- **Paginación**: page, page_size (default 50, max 200)
-- **Default**: Últimos 30 días
-- **Permisos**: Solo AUDITOR/TI/ADMIN
-- **Respuesta**: Total, páginas, resultados con relaciones cargadas
-
-**AuditoriaEstadisticasView (GET)**
-- Totales por acción, modelo, rol
-- Top 10 usuarios más activos
-- Periodo: últimos 30 días
-
-#### 3. Auto-auditoría de Cambios de Estado
-Archivo: `Backend/src/signals.py`
-
-**Mecanismo**:
-- `pre_save`: Captura estado anterior en thread local
-- `post_save`: Detecta cambio y crea registro ESTADO_CAMBIO
-- **Metadatos**: { estado_anterior, estado_nuevo }
-- Automático para Calificacion
-
-#### 4. Rutas API
-```
-GET /api/auditoria/                    # Lista con filtros
-GET /api/auditoria/estadisticas/       # Estadísticas 30 días
-```
-
----
-
-### 🔧 Mejoras de Infraestructura
-
-1. **Django FileField Storage**: MEDIA_ROOT configurado para producción
-2. **URL Routing**: Orden correcto (estadisticas antes de <id>)
-3. **Signals**: Auto-tracking de cambios de estado
-4. **Indexes DB**: Optimización de queries en Certificado y Auditoria
-5. **Thread Safety**: Estado anterior capturado con threading.local
-
----
-
-### ⚠️ Pendiente (Backlog Próximo)
-
-**Alta Prioridad**:
-1. **JWT Refresh + MFA**: Implementar refresh token rotation y autenticación multifactor
-2. **PUT/PATCH Corredor**: Permitir correcciones en calificaciones OBSERVADA → BORRADOR
-3. **Frontend Certificados**: Página de upload con drag-drop y preview
-
-**Media Prioridad**:
-4. **RBAC Documentación**: Matriz formal de permisos + diagrama UML
-5. **Calificaciones Model**: Ajustes finales de campos y validaciones
-6. **Reglas de Negocio**: Auto-ejecución en cambio de estado
-
-**Baja Prioridad**:
-7. **Registro Público**: Frontend para usuarios sin cuenta
-8. **Pruebas Unitarias**: Coverage 80%+ en vistas críticas
-9. **CI/CD**: GitHub Actions + Docker
-
----
+**Última actualización**: 14 de diciembre de 2024

@@ -1,6 +1,7 @@
 import { useEffect, useState, useContext } from "react";
 import { ThemeContext } from "../App";
 import { obtenerPendientes } from "../services/validacionService";
+import { LoadingSpinner, ErrorAlert } from "../hooks/useOptimizations.jsx";
 
 export default function AuditPanel() {
   const { theme } = useContext(ThemeContext);
@@ -49,7 +50,7 @@ export default function AuditPanel() {
     return (
       <div className={pageBg}>
         <div className="flex justify-center items-center h-screen">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+          <LoadingSpinner theme={theme} size="lg" />
         </div>
       </div>
     );
@@ -62,36 +63,47 @@ export default function AuditPanel() {
         <div className={`mb-8 p-6 rounded-2xl shadow-lg ${cardBg}`}>
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div>
-              <h1 className="text-3xl font-bold mb-2">🔍 Bandeja de Validación</h1>
+              <h1 className="text-3xl font-bold mb-2 flex items-center gap-2">
+                <img src="/lupa.webp" alt="Bandeja" className="w-8 h-8" />
+                <span>Bandeja de Validación</span>
+              </h1>
               <p className="text-gray-600 dark:text-gray-400">
                 Revisa y valida las calificaciones pendientes
               </p>
             </div>
             <button
               onClick={cargar}
-              className="px-4 py-2 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-white transition"
+              className="px-4 py-2 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-white transition inline-flex items-center gap-2"
             >
-              🔄 Refrescar
+              <img src="/IconoRefrescar.webp" alt="Refrescar" className="w-5 h-5" />
+              <span>Refrescar</span>
             </button>
           </div>
         </div>
 
         {error && (
-          <div className="mb-6 p-4 rounded-lg border bg-red-100 border-red-400 text-red-700 dark:bg-red-900/20 dark:border-red-800 dark:text-red-200">
-            {error}
+          <div className="mb-6">
+            <ErrorAlert 
+              error={new Error(error)} 
+              theme={theme} 
+              onClose={() => setError("")}
+            />
           </div>
         )}
 
         {items.length === 0 ? (
           <div className={`p-12 rounded-2xl shadow text-center ${cardBg}`}>
-            <div className="text-6xl mb-4">📭</div>
+            <div className="text-6xl mb-4"></div>
             <p className="text-lg text-gray-600 dark:text-gray-400">
               No hay calificaciones pendientes de validación
             </p>
           </div>
         ) : (
           <div className={`p-6 rounded-2xl shadow ${cardBg}`}>
-            <h2 className="text-xl font-bold mb-4">📋 Calificaciones Pendientes</h2>
+            <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
+              <img src="/ListadoIcono.webp" alt="Pendientes" className="w-6 h-6" />
+              <span>Calificaciones Pendientes</span>
+            </h2>
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead className="bg-gray-100 dark:bg-gray-700">

@@ -9,6 +9,7 @@ import {
   crearCalificacion,
   enviarValidacion,
 } from "../services/calificacionesService";
+import { LoadingSpinner, ErrorAlert, SuccessAlert } from "../hooks/useOptimizations.jsx";
 
 export default function Registros() {
   const { user } = useContext(AuthContext);
@@ -114,7 +115,7 @@ export default function Registros() {
     return (
       <div className={`min-h-screen ${pageBg}`}>
         <div className="flex justify-center items-center h-screen">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+          <LoadingSpinner theme={theme} size="lg" />
         </div>
       </div>
     );
@@ -127,38 +128,47 @@ export default function Registros() {
         <div className={`mb-8 p-6 rounded-2xl shadow-lg ${cardBg}`}>
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div>
-              <h1 className="text-3xl font-bold mb-2">📋 Registros del Sistema</h1>
+              <h1 className="text-3xl font-bold mb-2 flex items-center gap-2">
+                <img src="/ListadoIcono.webp" alt="Registros" className="w-8 h-8" />
+                <span>Registros del Sistema</span>
+              </h1>
               <p className={theme === "dark" ? "text-gray-400" : "text-gray-600"}>
                 Gestiona los registros base para calificaciones tributarias
               </p>
             </div>
             <button
               onClick={cargarRegistros}
-              className={`px-4 py-2 rounded-lg border transition ${
+              className={`px-4 py-2 rounded-lg border transition inline-flex items-center gap-2 ${
                 theme === "dark"
                   ? "border-gray-700 bg-gray-800 hover:bg-gray-700 text-white"
                   : "border-gray-200 bg-white hover:bg-gray-50"
               }`}
             >
-              🔄 Refrescar
+              <img src="/IconoRefrescar.webp" alt="Refrescar" className="w-5 h-5" />
+              <span>Refrescar</span>
             </button>
           </div>
         </div>
 
         {error && (
-          <div className={`mb-6 p-4 rounded-lg border ${
-            theme === "dark" 
-              ? "bg-red-900/20 border-red-800 text-red-200" 
-              : "bg-red-100 border-red-400 text-red-700"
-          }`}>
-            {error}
+          <div className="mb-6">
+            <ErrorAlert 
+              error={new Error(error)} 
+              theme={theme} 
+              onClose={() => setError("")}
+            />
           </div>
         )}
 
         {registros.length === 0 ? (
           <div className={`p-12 rounded-2xl shadow text-center ${cardBg}`}>
-            <div className="text-6xl mb-4">📭</div>
-            <p className={`text-lg ${theme === "dark" ? "text-gray-400" : "text-gray-600"}`}>
+            <p className={`text-lg ${theme === "dark" ? "text-gray-300" : "text-gray-700"}`} style={{
+              display: 'inline-block',
+              padding: '8px 16px',
+              borderRadius: 9999,
+              border: theme === 'dark' ? '2px solid #93c5fd' : '2px solid #3b82f6',
+              background: theme === 'dark' ? 'rgba(59,130,246,0.12)' : 'rgba(59,130,246,0.08)'
+            }}>
               No hay registros disponibles
             </p>
           </div>
@@ -196,32 +206,35 @@ export default function Registros() {
                       <div className="flex flex-wrap gap-2">
                         <button
                           onClick={() => handleEditar(r)}
-                          className={`px-4 py-2 rounded-lg transition font-medium ${
+                          className={`px-4 py-2 rounded-lg transition font-medium inline-flex items-center gap-2 ${
                             theme === "dark"
                               ? "bg-gray-700 hover:bg-gray-600 text-white"
                               : "bg-gray-200 hover:bg-gray-300 text-gray-800"
                           }`}
                         >
-                          ✏️ Editar
+                          <img src="/LapizIcono.webp" alt="Editar" className="w-5 h-5" />
+                          <span>Editar</span>
                         </button>
 
                         <button
                           onClick={() => handleEliminar(r.id)}
-                          className={`px-4 py-2 rounded-lg transition font-medium ${
+                          className={`px-4 py-2 rounded-lg transition font-medium inline-flex items-center gap-2 ${
                             theme === "dark"
                               ? "bg-red-900/50 hover:bg-red-900/70 text-red-200 border border-red-800"
                               : "bg-red-600 hover:bg-red-700 text-white"
                           }`}
                         >
-                          🗑️ Eliminar
+                          <img src="/BasureroIcono.webp" alt="Eliminar" className="w-5 h-5" />
+                          <span>Eliminar</span>
                         </button>
 
                         {!cal && (
                           <button
                             onClick={() => handleCrearCalificacion(r.id)}
-                            className="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white transition font-medium shadow"
+                            className="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white transition font-medium shadow inline-flex items-center gap-2"
                           >
-                            ➕ Crear calificación
+                            <img src="/masIcono.webp" alt="Crear" className="w-5 h-5" />
+                            <span>Crear calificación</span>
                           </button>
                         )}
 

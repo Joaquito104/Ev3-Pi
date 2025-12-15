@@ -76,6 +76,7 @@ class CalificacionCorredorView(APIView):
             'detalles': request.data.get('detalles', {}),
             'metadata': request.data.get('metadata', {}),
             'comentario': request.data.get('comentario', ''),
+            'solicitar_auditoria': request.data.get('solicitar_auditoria', False),
             'estado': 'BORRADOR'  # Corredor crea como borrador
         }
 
@@ -113,10 +114,44 @@ class CalificacionCorredorView(APIView):
             descripcion=f"Corredor creó calificación {calificacion_id} para RUT {data['rut']}"
         )
 
+        # Si solicita auditoría, crear registro adicional
+        if data.get('solicitar_auditoria'):
+            Auditoria.objects.create(
+                usuario=request.user,
+                rol="CORREDOR",
+                accion="RESOLUCION",
+                modelo="CalificacionMongo",
+                objeto_id=None,
+                descripcion=f"Solicitud de auditoría para calificación {calificacion_id} - RUT: {data['rut']}",
+                metadatos={
+                    "calificacion_id": str(calificacion_id),
+                    "registro_id": data.get('registro_id'),
+                    "tipo": "SOLICITUD_AUDITORIA"
+                }
+            )
+        
+        # 📧 Enviar emails de notificación
+        from src.utils_registro import enviar_email_calificacion_creada, enviar_email_auditoria_solicitada
+        
+        enviar_email_calificacion_creada(
+            usuario=request.user,
+            rut=data['rut'],
+            tipo_certificado=data['tipo_certificado'],
+            solicitar_auditoria=data.get('solicitar_auditoria', False)
+        )
+        
+        if data.get('solicitar_auditoria'):
+            enviar_email_auditoria_solicitada(
+                usuario=request.user,
+                rut=data['rut'],
+                calificacion_id=str(calificacion_id)
+            )
+
         return Response({
             "detail": "Calificación creada exitosamente",
             "id": calificacion_id,
-            "estado": "BORRADOR"
+            "estado": "BORRADOR",
+            "auditoria_solicitada": data.get('solicitar_auditoria', False)
         }, status=status.HTTP_201_CREATED)
 
 
@@ -342,6 +377,9 @@ class CalificacionResolverView(APIView):
         if not ok:
             return Response({"detail": error}, status=status.HTTP_400_BAD_REQUEST)
 
+        # Obtener calificación para enviar email
+        calificacion = self.calificacion_mongo.obtener_por_id(calificacion_id)
+
         Auditoria.objects.create(
             usuario=request.user,
             rol=getattr(request.user.perfil, 'rol', 'AUDITOR'),
@@ -349,6 +387,31 @@ class CalificacionResolverView(APIView):
             modelo="CalificacionMongo",
             descripcion=f"Resolución {nuevo_estado} sobre calificación {calificacion_id}"
         )
+
+        # 📧 Enviar email al corredor
+        if calificacion and calificacion.get('usuario_id'):
+            try:
+                from django.contrib.auth.models import User
+                from src.utils_registro import enviar_email_calificacion_validada
+                
+                usuario_corredor = User.objects.get(id=calificacion['usuario_id'])
+                rut = calificacion.get('rut', 'N/A')
+                
+                # Mapear estado Mongo a nombre legible
+                estado_texto = {
+                    "APROBADA": "VALIDADA",
+                    "OBSERVADA": "OBSERVADA",
+                    "RECHAZADA": "RECHAZADA"
+                }.get(nuevo_estado, nuevo_estado)
+                
+                enviar_email_calificacion_validada(
+                    usuario=usuario_corredor,
+                    rut=rut,
+                    estado=estado_texto,
+                    comentarios=comentario
+                )
+            except Exception as e:
+                print(f"Error enviando email de validación: {e}")
 
         return Response({"detail": "Calificación resuelta", "estado": nuevo_estado})
 

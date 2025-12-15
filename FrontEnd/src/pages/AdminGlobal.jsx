@@ -200,7 +200,7 @@ export default function AdminGlobal() {
               fontSize: 14,
             }}
           >
-            📊 Dashboard
+            Dashboard
           </button>
           <button
             onClick={() => setActiveTab("operaciones")}
@@ -339,7 +339,7 @@ export default function AdminGlobal() {
                     opacity: loading ? 0.6 : 1,
                   }}
                 >
-                  🔐 Resetear contraseña de usuario
+                  Resetear contraseña de usuario
                 </button>
 
                 <button
@@ -375,7 +375,7 @@ export default function AdminGlobal() {
                     opacity: loading ? 0.6 : 1,
                   }}
                 >
-                  ✅ Desbloquear usuario
+                  Desbloquear usuario
                 </button>
 
                 <button

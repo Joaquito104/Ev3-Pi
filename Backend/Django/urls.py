@@ -10,7 +10,7 @@ from src.views.perfil_completo import (
     MFAConfigView,
     GestionSolicitudesRolView,
 )
-from src.views.feedback import FeedbackView
+from src.views.feedback import FeedbackView, CasoSoporteView, CasoSoporteDetailView
 from src.views.auth import mi_perfil, registrar_usuario, RegistroView, VerificarEmailView, ReenviarVerificacionView, LoginMFAView
 from src.views.jwt_auth import LogoutView, RefreshTokenView, TokenStatsView
 from rest_framework.routers import DefaultRouter
@@ -48,6 +48,8 @@ from src.views.calificaciones_mongo import (
 )
 from src.views.calificaciones_update import CalificacionCorredorUpdateView
 from src.views.auditoria import AuditoriaView, AuditoriaEstadisticasView
+from src.views.reportes import ReporteAuditoriaView, ReporteCalificacionesView, ComparativaAuditoriaView
+from src.views.exportar import ExportarPDFView, ExportarExcelView, ExportarCSVView
 from src.views.reglas_negocio import ReglasNegocioView, ReglaNegocioDetailView
 from src.views.historial_reglas import HistorialReglaView, RollbackReglaView, CompararVersionesView
 from src.views.usuarios import UsuariosView, UsuarioDetailView
@@ -78,6 +80,8 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path("api/perfil/editar/", PerfilUsuarioView.as_view()),
     path("api/feedback/", FeedbackView.as_view()),
+    path("api/casos-soporte/", CasoSoporteView.as_view()),
+    path("api/casos-soporte/<str:id_caso>/", CasoSoporteDetailView.as_view()),
 
     # ---------- AUTH ----------
     path("api/token/", TokenObtainPairView.as_view(), name="token_obtain_pair"),
@@ -142,6 +146,16 @@ urlpatterns = [
     # AUDITORÍA
     path("api/auditoria/", AuditoriaView.as_view()),
     path("api/auditoria/estadisticas/", AuditoriaEstadisticasView.as_view()),
+
+    # REPORTES
+    path("api/reportes/auditoria/", ReporteAuditoriaView.as_view()),
+    path("api/reportes/calificaciones/", ReporteCalificacionesView.as_view()),
+    path("api/reportes/comparativa/", ComparativaAuditoriaView.as_view()),
+
+    # EXPORTAR
+    path("api/exportar/pdf/", ExportarPDFView.as_view()),
+    path("api/exportar/excel/", ExportarExcelView.as_view()),
+    path("api/exportar/csv/", ExportarCSVView.as_view()),
 
     # REGLAS
     path("api/reglas-negocio/", ReglasNegocioView.as_view()),

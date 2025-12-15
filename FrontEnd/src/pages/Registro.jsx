@@ -295,7 +295,7 @@ export default function Registro() {
             )}
             {mensaje && (
               <div className="p-3 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300 rounded-lg text-sm">
-                ✅ {mensaje}
+                {mensaje}
               </div>
             )}
 
@@ -305,7 +305,7 @@ export default function Registro() {
               disabled={loading}
               className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 font-medium transition-colors"
             >
-              {loading ? '⏳ Registrando...' : '✅ Registrarse'}
+              {loading ? 'Registrando...' : 'Registrarse'}
             </button>
 
             {/* Link Login */}
@@ -348,7 +348,7 @@ export default function Registro() {
               )}
               {mensaje && (
                 <div className="p-3 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300 rounded-lg text-sm">
-                  ✅ {mensaje}
+                  {mensaje}
                 </div>
               )}
 
@@ -357,7 +357,7 @@ export default function Registro() {
                 disabled={loading}
                 className="w-full px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:bg-gray-400 font-medium transition-colors"
               >
-                {loading ? '⏳ Verificando...' : '✅ Verificar Email'}
+                {loading ? 'Verificando...' : 'Verificar Email'}
               </button>
             </form>
 

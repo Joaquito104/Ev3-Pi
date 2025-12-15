@@ -137,8 +137,9 @@ const DashboardAnalista = () => {
       <div className="max-w-7xl mx-auto p-6">
         {/* HEADER */}
         <div className={`mb-8 p-6 rounded-2xl shadow ${cardBg}`}>
-          <h1 className="text-3xl font-bold mb-2">
-            📊 Dashboard - Analista Tributario
+          <h1 className="text-3xl font-bold mb-2 flex items-center gap-2">
+            <img src="/dashboard.webp" alt="Dashboard" className="w-9 h-9" />
+            <span>Dashboard - Analista Tributario</span>
           </h1>
           <p className="text-gray-600 dark:text-gray-400">
             Revisión y envío de calificaciones a validación
@@ -153,7 +154,10 @@ const DashboardAnalista = () => {
 
         {/* FILTROS */}
         <div className={`p-6 rounded-2xl shadow mb-8 ${cardBg}`}>
-          <h2 className="text-xl font-bold mb-4">🔍 Filtros</h2>
+          <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
+            <img src="/lupa.webp" alt="Filtros" className="w-6 h-6" />
+            <span>Filtros</span>
+          </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <select
               value={filtros.estado}
@@ -188,7 +192,10 @@ const DashboardAnalista = () => {
 
         {/* TABLA */}
         <div className={`p-6 rounded-2xl shadow ${cardBg}`}>
-          <h2 className="text-xl font-bold mb-4">📋 Calificaciones</h2>
+          <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
+            <img src="/ListadoIcono.webp" alt="Calificaciones" className="w-6 h-6" />
+            <span>Calificaciones</span>
+          </h2>
 
           {loading ? (
             <p>Cargando...</p>

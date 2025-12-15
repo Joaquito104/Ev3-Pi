@@ -107,6 +107,40 @@ htmlcov/
 .coverage.*
 
 # ==============================
+#       SEGURIDAD (CRITICAL)
+# ==============================
+
+# Archivos de credenciales generados por scripts
+nuevas_credenciales_CONFIDENCIAL.txt
+credenciales_*.txt
+passwords_*.txt
+
+# Backups de base de datos
+*.sql
+*.dump
+*.bak
+backup/
+backups/
+
+# Certificados SSL/TLS
+*.crt
+*.cert
+*.cer
+*.pem
+*.key
+*.p12
+*.pfx
+
+# Archivos de sesión y tokens
+*.session
+tokens/
+sessions/
+
+# Logs de seguridad con información sensible
+logs/security.log.*
+logs/audit.log.*
+
+# ==============================
 #       OTRAS CONFIGURACIONES
 # ==============================
 
@@ -133,4 +167,3 @@ web_modules/
 *.secrets
 config/secrets/
 debug*.py
-*.dump

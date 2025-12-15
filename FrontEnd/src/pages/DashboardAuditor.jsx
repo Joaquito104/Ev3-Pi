@@ -103,7 +103,7 @@ const DashboardAuditor = () => {
 
         {/* TABLA */}
         <div className={`p-6 rounded-2xl shadow ${cardBg}`}>
-          <h2 className="text-xl font-bold mb-4">⏳ Calificaciones Pendientes</h2>
+          <h2 className="text-xl font-bold mb-4">Calificaciones Pendientes</h2>
 
           {loading ? (
             <p>Cargando...</p>

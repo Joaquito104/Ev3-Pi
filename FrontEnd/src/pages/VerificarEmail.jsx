@@ -49,7 +49,9 @@ export default function VerificarEmail() {
 
         {estado === 'exito' && (
           <>
-            <div className="text-5xl mb-4">✅</div>
+            <div className="mb-4">
+              <img src="/icono correcto.webp" alt="Éxito" style={{width: '80px', height: '80px', margin: '0 auto'}} />
+            </div>
             <h1 className="text-2xl font-bold text-green-600 dark:text-green-400 mb-2">
               ¡Email Verificado!
             </h1>
@@ -60,7 +62,9 @@ export default function VerificarEmail() {
 
         {estado === 'error' && (
           <>
-            <div className="text-5xl mb-4">❌</div>
+            <div className="mb-4">
+              <img src="/Icono incorrecto.webp" alt="Error" style={{width: '80px', height: '80px', margin: '0 auto'}} />
+            </div>
             <h1 className="text-2xl font-bold text-red-600 dark:text-red-400 mb-2">
               Error de Verificación
             </h1>

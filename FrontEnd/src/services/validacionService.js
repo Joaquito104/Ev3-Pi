@@ -2,7 +2,7 @@ import axios from "axios";
 
 const API_URL = "http://127.0.0.1:8000/api";
 
-// ✅ FIX DEFINITIVO: leer token correcto
+// FIX DEFINITIVO: leer token correcto
 const authHeader = () => {
   const token = localStorage.getItem("ev3pi-token");
 

@@ -25,6 +25,7 @@ export default function CertificatesUpload() {
   const [archivoCsv, setArchivoCsv] = useState(null);
   const [uploading, setUploading] = useState(false);
   const [message, setMessage] = useState(null);
+  const [solicitar_auditoria, setSolicitar_auditoria] = useState(false);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -69,6 +70,7 @@ export default function CertificatesUpload() {
         ...formData,
         monto: parseFloat(formData.monto) || 0,
         documentos,
+        solicitar_auditoria,
       };
 
       await axios.post(
@@ -77,7 +79,7 @@ export default function CertificatesUpload() {
         { headers }
       );
 
-      setMessage({ type: "success", text: "✅ Certificado creado como BORRADOR" });
+      setMessage({ type: "success", text: "Certificado creado como BORRADOR" });
       setFormData({
         registro_id: "",
         rut: "",
@@ -98,7 +100,7 @@ export default function CertificatesUpload() {
       console.error("Error al crear certificado:", error);
       setMessage({
         type: "error",
-        text: error.response?.data?.detail || "❌ Error al crear el certificado"
+        text: error.response?.data?.detail || "Error al crear el certificado"
       });
     } finally {
       setUploading(false);
@@ -144,7 +146,7 @@ export default function CertificatesUpload() {
 
         <div className="flex flex-wrap gap-3 mb-4">
           {[
-            { key: "dragdrop", label: "📂 Arrastra & Suelta" },
+            { key: "dragdrop", label: "Arrastra & Suelta", icon: "/Carpeta.webp" },
             { key: "manual", label: "✏️ Ingreso Manual" },
           ].map((op) => (
             <button
@@ -159,7 +161,12 @@ export default function CertificatesUpload() {
                   : "bg-gray-100 text-gray-800 border-gray-200"
               }`}
             >
-              {op.label}
+              <div className="flex items-center gap-2">
+                {op.icon ? (
+                  <img src={op.icon} alt="Carpeta" style={{ width: '20px', height: '20px' }} />
+                ) : null}
+                <span>{op.label}</span>
+              </div>
             </button>
           ))}
         </div>
@@ -415,15 +422,34 @@ export default function CertificatesUpload() {
               />
             </div>
 
+            {/* Checkbox: Solicitar Auditoría */}
+            <div className="flex items-center gap-3 p-4 rounded border border-gray-300 dark:border-gray-600 bg-blue-50 dark:bg-blue-900/20">
+              <input
+                type="checkbox"
+                id="solicitar_auditoria"
+                checked={solicitar_auditoria}
+                onChange={(e) => setSolicitar_auditoria(e.target.checked)}
+                className="w-5 h-5 cursor-pointer accent-blue-600"
+              />
+              <label htmlFor="solicitar_auditoria" className={`cursor-pointer font-medium ${theme === "dark" ? "text-blue-300" : "text-blue-700"}`}>
+                Solicitar auditoría para esta calificación
+              </label>
+            </div>
+
             {message && (
               <div
-                className={`p-4 rounded border ${
+                className={`p-4 rounded border flex items-center gap-3 ${
                   message.type === "success"
-                    ? "bg-green-100 text-green-800 border-green-300"
-                    : "bg-red-100 text-red-800 border-red-300"
+                    ? "bg-green-100 border-green-400 text-green-800"
+                    : "bg-red-100 border-red-400 text-red-800"
                 }`}
               >
-                {message.text}
+                <img 
+                  src={message.type === "success" ? "/icono correcto.webp" : "/Icono incorrecto.webp"} 
+                  alt={message.type} 
+                  style={{width: '24px', height: '24px', flexShrink: 0}}
+                />
+                <span>{message.text}</span>
               </div>
             )}
 
@@ -452,7 +478,6 @@ export default function CertificatesUpload() {
                 Cancelar
               </button>
             </div>
-            </form>
 
             {/* Información */}
             <div className={`mt-6 p-4 rounded border ${
@@ -468,6 +493,7 @@ export default function CertificatesUpload() {
                 <li>El período debe ser del formato YYYY-MM (ej: 2024-01)</li>
               </ul>
             </div>
+            </form>
           )}
         </div>
       </div>

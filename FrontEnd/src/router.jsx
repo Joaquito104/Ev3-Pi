@@ -6,6 +6,8 @@ import Registro from "./pages/Registro";
 import VerificarEmail from "./pages/VerificarEmail";
 import Perfil from "./pages/Perfil";
 import Feedback from "./pages/Feedback";
+import Ayuda from "./pages/Ayuda";
+import GuiaRol from "./pages/GuiaRol";
 import NoAutorizado from "./pages/NoAutorizado";
 
 import CertificatesUpload from "./pages/CertificatesUpload";
@@ -26,6 +28,7 @@ import Footer from "./components/layout/Footer";
 import ProtectedRoute from "./auth/ProtectedRoute";
 
 import DetalleCalificacion from "./pages/DetalleCalificacion";
+import ReportesAuditoria from "./pages/ReportesAuditoria";
 
 const LayoutWrapper = ({ children }) => (
   <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}>
@@ -44,6 +47,9 @@ export default function Router() {
       <Route path="/registro" element={<Registro />} />
       <Route path="/verificar-email" element={<VerificarEmail />} />
       <Route path="/no-autorizado" element={<NoAutorizado />} />
+      <Route path="/feedback" element={<Feedback />} />
+      <Route path="/ayuda" element={<Ayuda />} />
+      <Route path="/guia-rol/:rol" element={<GuiaRol />} />
 
       {/* ===== DASHBOARDS POR ROL ===== */}
       <Route
@@ -198,6 +204,15 @@ export default function Router() {
             <LayoutWrapper>
               <AdminGlobal />
             </LayoutWrapper>
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/reportes"
+        element={
+          <ProtectedRoute roles={["AUDITOR", "TI"]}>
+            <ReportesAuditoria />
           </ProtectedRoute>
         }
       />

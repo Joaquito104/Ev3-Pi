@@ -1,0 +1,9 @@
+
+      <Route
+        path="/reportes"
+        element={
+          <ProtectedRoute roles={["AUDITOR", "TI"]}>
+            <ReportesAuditoria />
+          </ProtectedRoute>
+        }
+      />

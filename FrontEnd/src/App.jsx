@@ -3,6 +3,7 @@ import { createContext, useEffect, useState } from "react";
 import { BrowserRouter } from "react-router-dom";
 import Router from "./router";
 import { useTokenManagement, setupAxiosInterceptors } from "./hooks/useTokenManagement";
+import { useNotifications, NotificationContainer } from "./hooks/useNotifications";
 import axios from "axios";
 
 export const ThemeContext = createContext();
@@ -26,6 +27,7 @@ export default function App() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const tokenMgmt = useTokenManagement();
+  const { notifications, dismissNotification } = useNotifications(true, 10000);
 
   // Setup de interceptors de axios
   useEffect(() => {
@@ -112,6 +114,10 @@ export default function App() {
     <ThemeContext.Provider value={{ theme, setTheme }}>
       <AuthContext.Provider value={{ user, loading, login, logout }}>
         <BrowserRouter>
+          <NotificationContainer 
+            notifications={notifications} 
+            onDismiss={dismissNotification}
+          />
           <Router />
         </BrowserRouter>
       </AuthContext.Provider>
