@@ -52,6 +52,7 @@ export default function AdministracionNuam() {
     } else if (activeTab === "historial" && reglaSeleccionada) {
       cargarHistorial(reglaSeleccionada.id);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeTab, reglaSeleccionada]);
 
   const cargarReglas = async () => {

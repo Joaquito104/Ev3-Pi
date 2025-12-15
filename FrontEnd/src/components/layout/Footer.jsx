@@ -13,8 +13,6 @@ export default function Footer() {
   const accent = dark ? '#0b84ff' : '#3b82f6';
   const accentLight = dark ? '#60a5fa' : '#7c3aed';
   const border = dark ? '#1e3a4c' : '#e5e7eb';
-  const cardBg = dark ? '#13202a' : '#ffffff';
-  const hoverBg = dark ? '#1a2a38' : '#f0f4f8';
   const buttonBg = dark ? '#1f2937' : '#e5e7eb';
   const buttonHover = dark ? '#2d3748' : '#d1d5db';
 

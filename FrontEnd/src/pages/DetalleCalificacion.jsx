@@ -8,7 +8,6 @@ const API_BASE_URL = "http://127.0.0.1:8000/api";
 export default function DetalleCalificacion() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { theme } = useContext(ThemeContext);
   const { user } = useContext(AuthContext);
 
   const [calificacion, setCalificacion] = useState(null);

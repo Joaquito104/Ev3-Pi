@@ -1,3 +1,5 @@
+import { useState } from 'react';
+
 /**
  * Validadores reutilizables para formularios
  */
@@ -83,11 +85,10 @@ export const validators = {
 /**
  * Hook para validación de formularios con realtime feedback
  */
-export const useFormValidation = (initialValues, onSubmit) => {
-  const [values, setValues] = React.useState(initialValues);
-  const [errors, setErrors] = React.useState({});
-  const [touched, setTouched] = React.useState({});
-  const [isSubmitting, setIsSubmitting] = React.useState(false);
+export const useFormValidation = (initialValues) => {
+  const [values, setValues] = useState(initialValues);
+  const [errors, setErrors] = useState({});
+  const [touched, setTouched] = useState({});
 
   const validateField = (name, value, validator) => {
     if (!validator) return null;

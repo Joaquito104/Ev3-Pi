@@ -1,8 +1,6 @@
-import React, { useState, useContext } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { ThemeContext } from '../App';
-import axios from 'axios';
+import React, { useState } from 'react';
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useAsync = (asyncFunction, immediate = true) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -35,6 +33,7 @@ export const useAsync = (asyncFunction, immediate = true) => {
   return { execute, loading, error, data };
 };
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const LoadingSpinner = ({ theme = 'light', size = 'md' }) => {
   const sizes = {
     sm: 'w-4 h-4',
@@ -57,6 +56,7 @@ export const LoadingSpinner = ({ theme = 'light', size = 'md' }) => {
   );
 };
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const ErrorAlert = ({ error, theme = 'light', onClose }) => {
   if (!error) return null;
 
@@ -91,6 +91,7 @@ export const ErrorAlert = ({ error, theme = 'light', onClose }) => {
   );
 };
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const SuccessAlert = ({ message, theme = 'light', onClose, duration = 5000 }) => {
   const [visible, setVisible] = React.useState(true);
 
@@ -132,6 +133,7 @@ export const SuccessAlert = ({ message, theme = 'light', onClose, duration = 500
   );
 };
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useFormWithValidation = (initialValues, onSubmit, validate) => {
   const [values, setValues] = React.useState(initialValues);
   const [errors, setErrors] = React.useState({});
@@ -216,6 +218,7 @@ export const useFormWithValidation = (initialValues, onSubmit, validate) => {
   };
 };
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useRetryableRequest = (requestFn, maxRetries = 3) => {
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState(null);
@@ -249,6 +252,7 @@ export const useRetryableRequest = (requestFn, maxRetries = 3) => {
   return { execute, loading, error, data, retryCount };
 };
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useDebouncedValue = (value, delay = 500) => {
   const [debouncedValue, setDebouncedValue] = React.useState(value);
 
@@ -263,6 +267,7 @@ export const useDebouncedValue = (value, delay = 500) => {
   return debouncedValue;
 };
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useOnlineStatus = () => {
   const [isOnline, setIsOnline] = React.useState(navigator.onLine);
 
@@ -282,6 +287,7 @@ export const useOnlineStatus = () => {
   return isOnline;
 };
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const OfflineIndicator = ({ theme = 'light' }) => {
   const isOnline = useOnlineStatus();
 

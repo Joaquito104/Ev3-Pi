@@ -9,7 +9,6 @@ import axios from "axios";
 
 const Login = () => {
   const { form, handleChange } = useForm({ username: "", password: "" });
-  const { login } = useContext(AuthContext);
   const { theme } = useContext(ThemeContext);
   const navigate = useNavigate();
 

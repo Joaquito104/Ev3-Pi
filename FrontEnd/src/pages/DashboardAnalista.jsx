@@ -87,7 +87,7 @@ const DashboardAnalista = () => {
       );
 
       setCalificaciones(res.data?.calificaciones || []);
-    } catch (err) {
+    } catch (_err) {
       setError("Error al aplicar filtros");
     } finally {
       setLoading(false);

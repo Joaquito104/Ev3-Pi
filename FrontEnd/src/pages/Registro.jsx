@@ -41,7 +41,7 @@ export default function Registro() {
     { code: 'TI', name: 'Administrador TI' }
   ];
 
-  const paisSeleccionado = PAISES.find(p => p.code === formData.pais);
+  // const paisSeleccionado = PAISES.find(p => p.code === formData.pais);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -91,7 +91,7 @@ export default function Registro() {
 
     setLoading(true);
     try {
-      const res = await axios.post(`${API_URL}/registro-completo/`, formData);
+      await axios.post(`${API_URL}/registro-completo/`, formData);
       setMensaje('¡Registro exitoso! Revisa tu email para verificar tu cuenta.');
       setVerificacion({ email: formData.email });
       setStep(2);
@@ -113,7 +113,7 @@ export default function Registro() {
 
     setLoading(true);
     try {
-      const res = await axios.post(`${API_URL}/verificar-email/`, {
+      await axios.post(`${API_URL}/verificar-email/`, {
         token: verificacion.token
       });
       setMensaje('¡Email verificado! Redirigiendo al login...');

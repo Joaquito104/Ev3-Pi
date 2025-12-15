@@ -40,6 +40,7 @@ export default function AdminGlobal() {
     } else if (activeTab === "auditoria") {
       cargarAuditoria();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeTab]);
 
   const cargarEstadoSistema = async () => {

@@ -29,6 +29,7 @@ export default function Perfil() {
 
   useEffect(() => {
     cargarPerfil();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const cargarPerfil = async () => {
@@ -66,10 +67,10 @@ export default function Perfil() {
           'Content-Type': 'multipart/form-data'
         }
       });
-      alert('Perfil actualizado');
+      alert('¡Perfil actualizado');
       setEditando(false);
       cargarPerfil();
-    } catch (error) {
+    } catch (_error) {
       alert('❌ Error al actualizar');
     }
   };
@@ -180,6 +181,7 @@ export default function Perfil() {
 
   useEffect(() => {
     if (activeTab === 'cambio-rol') cargarSolicitudRol();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeTab]);
 
   if (loading) {

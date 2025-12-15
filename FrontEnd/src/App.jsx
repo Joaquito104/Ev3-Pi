@@ -4,7 +4,6 @@ import { BrowserRouter } from "react-router-dom";
 import Router from "./router";
 import { useTokenManagement, setupAxiosInterceptors } from "./hooks/useTokenManagement";
 import { useNotifications, NotificationContainer } from "./hooks/useNotifications";
-import axios from "axios";
 
 export const ThemeContext = createContext();
 export const AuthContext = createContext();
@@ -36,43 +35,48 @@ export default function App() {
 
   // AUTOLOGIN con nuevo sistema de tokens
   useEffect(() => {
-    const accessToken = localStorage.getItem("access_token");
-    if (!accessToken) {
-      setLoading(false);
-      return;
-    }
+    const checkAuth = async () => {
+      const accessToken = localStorage.getItem("access_token");
+      if (!accessToken) {
+        setLoading(false);
+        return;
+      }
 
-    fetch("http://127.0.0.1:8000/api/perfil/", {
-      headers: { Authorization: `Bearer ${accessToken}` },
-    })
-      .then((res) => {
-        if (res.ok) return res.json();
-        // Si 401, intentar refresh
-        if (res.status === 401) {
-          return tokenMgmt.refreshAccessToken().then(() => {
-            const newToken = localStorage.getItem("access_token");
-            return fetch("http://127.0.0.1:8000/api/perfil/", {
-              headers: { Authorization: `Bearer ${newToken}` },
-            }).then(r => r.json());
-          });
-        }
-        return Promise.reject();
+      fetch("http://127.0.0.1:8000/api/perfil/", {
+        headers: { Authorization: `Bearer ${accessToken}` },
       })
-      .then((perfil) => {
-        const userData = {
-          id: perfil.id,
-          username: perfil.username,
-          rol: perfil.rol,
-          is_superuser: perfil.is_superuser,
-        };
-        setUser(userData);
-      })
-      .catch(() => {
-        localStorage.removeItem("access_token");
-        localStorage.removeItem("refresh_token");
-        setUser(null);
-      })
-      .finally(() => setLoading(false));
+        .then((res) => {
+          if (res.ok) return res.json();
+          // Si 401, intentar refresh
+          if (res.status === 401) {
+            return tokenMgmt.refreshAccessToken().then(() => {
+              const newToken = localStorage.getItem("access_token");
+              return fetch("http://127.0.0.1:8000/api/perfil/", {
+                headers: { Authorization: `Bearer ${newToken}` },
+              }).then(r => r.json());
+            });
+          }
+          return Promise.reject();
+        })
+        .then((perfil) => {
+          const userData = {
+            id: perfil.id,
+            username: perfil.username,
+            rol: perfil.rol,
+            is_superuser: perfil.is_superuser,
+          };
+          setUser(userData);
+        })
+        .catch(() => {
+          localStorage.removeItem("access_token");
+          localStorage.removeItem("refresh_token");
+          setUser(null);
+        })
+        .finally(() => setLoading(false));
+    };
+
+    checkAuth();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // LOGIN OFICIAL

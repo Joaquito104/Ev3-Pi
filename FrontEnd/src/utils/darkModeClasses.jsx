@@ -1,8 +1,11 @@
 /**
  * Clases de utilidad para dark mode consistente
  * Usa: darkBg, darkText, darkBorder, darkCard, darkButton, etc.
+ * Nota: Para evitar warnings de fast-refresh, solo exportar componentes React
+ * o mover constantes a archivos separados .js
  */
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const darkModeClasses = {
   // Fondos
   pageBg: "bg-gray-50 dark:bg-slate-950",
@@ -52,6 +55,7 @@ export const darkModeClasses = {
 /**
  * Componente Button reutilizable con dark mode
  */
+// eslint-disable-next-line react-refresh/only-export-components
 export const DarkModeButton = ({
   children,
   variant = 'primary',
@@ -87,6 +91,7 @@ export const DarkModeButton = ({
 /**
  * Componente Input reutilizable con dark mode
  */
+// eslint-disable-next-line react-refresh/only-export-components
 export const DarkModeInput = ({
   label,
   error,
@@ -119,6 +124,7 @@ export const DarkModeInput = ({
 /**
  * Componente Card reutilizable con dark mode
  */
+// eslint-disable-next-line react-refresh/only-export-components
 export const DarkModeCard = ({
   children,
   className = '',
@@ -134,4 +140,5 @@ export const DarkModeCard = ({
   );
 };
 
+// eslint-disable-next-line react-refresh/only-export-components
 export default darkModeClasses;

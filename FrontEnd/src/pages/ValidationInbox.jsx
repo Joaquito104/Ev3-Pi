@@ -20,7 +20,7 @@ const ValidationInbox = () => {
       const res = await axios.get(`${API_BASE_URL}/calificaciones-pendientes/`, { headers });
       setItems(res.data?.calificaciones || []);
       setError(null);
-    } catch (err) {
+    } catch (_err) {
       setError("Nada hasta ahora");
     } finally {
       setLoading(false);

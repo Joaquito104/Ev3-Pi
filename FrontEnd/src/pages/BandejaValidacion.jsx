@@ -21,6 +21,7 @@ export default function BandejaValidacion() {
 
   useEffect(() => {
     cargarPendientes();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleAccion = async (id, estado) => {
@@ -34,7 +35,7 @@ export default function BandejaValidacion() {
     try {
       await validarCalificacion(id, estado, comentario);
       cargarPendientes();
-    } catch (err) {
+    } catch (_err) {
       alert("Error al actualizar la calificación");
     }
   };

@@ -19,8 +19,20 @@ export default function VerificarEmail() {
       return;
     }
 
-    verificarEmail(token);
-  }, [searchParams]);
+    const verificar = async (token) => {
+      try {
+        const res = await axios.post(`${API_URL}/verificar-email/`, { token });
+        setEstado('exito');
+        setMensaje(res.data.detail);
+        setTimeout(() => navigate('/iniciar-sesion'), 3000);
+      } catch (err) {
+        setEstado('error');
+        setMensaje(err.response?.data?.detail || 'Error al verificar');
+      }
+    };
+
+    verificar(token);
+  }, [searchParams, navigate]);
 
   const verificarEmail = async (token) => {
     try {

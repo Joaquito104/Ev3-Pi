@@ -7,6 +7,7 @@ const API_BASE_URL = 'http://127.0.0.1:8000/api';
  * Hook para polling de notificaciones
  * Verifica cambios en auditorías y calificaciones cada X segundos
  */
+// eslint-disable-next-line react-refresh/only-export-components
 export const useNotifications = (enabled = true, interval = 10000) => {
   const [notifications, setNotifications] = useState([]);
   const [isPolling, setIsPolling] = useState(enabled);
@@ -66,7 +67,9 @@ export const useNotifications = (enabled = true, interval = 10000) => {
   useEffect(() => {
     if (!isPolling) return;
 
-    checkNotifications(); // Verificar inmediatamente
+    // Initial check is intentional on mount
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    checkNotifications();
     const timer = setInterval(checkNotifications, interval);
 
     return () => clearInterval(timer);
@@ -92,6 +95,7 @@ export const useNotifications = (enabled = true, interval = 10000) => {
 /**
  * Componente de Notification Toast
  */
+// eslint-disable-next-line react-refresh/only-export-components
 export const NotificationToast = ({ notification, onDismiss }) => {
   const [visible, setVisible] = React.useState(true);
 
@@ -146,6 +150,7 @@ export const NotificationToast = ({ notification, onDismiss }) => {
 /**
  * Contenedor de Notificaciones
  */
+// eslint-disable-next-line react-refresh/only-export-components
 export const NotificationContainer = ({ notifications, onDismiss }) => {
   return (
     <div className="fixed top-20 right-4 z-50 flex flex-col gap-3 max-w-md">

@@ -24,7 +24,7 @@ export const FormField = ({
   const inputClasses = `
     w-full px-4 py-2 rounded-lg border transition-colors
     ${showError
-      ? dark
+      ? theme === 'dark'
         ? 'border-red-500 bg-red-900/10 text-red-100'
         : 'border-red-500 bg-red-50 text-red-900'
       : theme === 'dark'

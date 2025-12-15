@@ -25,15 +25,15 @@ const ReportesAuditoria = () => {
   const [estadoExport, setEstadoExport] = useState('');
   
   // Cache con sesión (30 minutos)
-  const [cachedAuditoria, setCachedAuditoria, clearAuditoria] = useSessionCache('reportes_auditoria', 30 * 60 * 1000);
-  const [cachedCalificaciones, setCachedCalificaciones, clearCalificaciones] = useSessionCache('reportes_calificaciones', 30 * 60 * 1000);
+  const [cachedAuditoria, setCachedAuditoria] = useSessionCache('reportes_auditoria', 30 * 60 * 1000);
+  const [cachedCalificaciones, setCachedCalificaciones] = useSessionCache('reportes_calificaciones', 30 * 60 * 1000);
   
   // Debounce para cambios de período
   const debouncedDias = useDebouncedValue(dias, 500);
 
   const cargarReportes = useCallback(async (diasValue) => {
     // Verificar cache
-    const cacheKey = `reportes_${diasValue}`;
+    // const cacheKey = `reportes_${diasValue}`;
     if (cachedAuditoria && cachedCalificaciones) {
       setReporteAuditoria(cachedAuditoria);
       setReporteCalificaciones(cachedCalificaciones);

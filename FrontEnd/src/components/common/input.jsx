@@ -12,7 +12,6 @@ export default function Input({ label, error, ...props }) {
   const inputBorderFocus = error 
     ? '#ef4444' 
     : dark ? '#0b84ff' : '#007bff';
-  const placeholderColor = dark ? '#6b7280' : '#9ca3af';
   const errorColor = dark ? '#fca5a5' : '#dc2626';
 
   return (

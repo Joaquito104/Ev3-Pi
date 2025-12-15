@@ -14,12 +14,6 @@ const Home = () => {
   const muted = dark ? '#97a6b2' : '#6b7280'
   const accent = '#3b82f6'
 
-  const features = [
-    { icon: '', title: '', desc: '' },
-    { icon: '', title: '', desc: '' },
-    { icon: '', title: '', desc: '' }
-  ]
-
   return (
     <div style={{ minHeight: '100vh', background: bg, color: text, transition: 'background 200ms, color 200ms', display: 'flex', flexDirection: 'column' }}>
       <Navbar />
