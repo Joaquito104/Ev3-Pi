@@ -18,7 +18,7 @@ class FeedbackView(APIView):
         serializer = FeedbackSerializer(data=request.data)
         if serializer.is_valid():
             feedback = serializer.save(usuario=request.user)
-            
+
             # Auditoría
             Auditoria.objects.create(
                 usuario=request.user,
@@ -28,12 +28,12 @@ class FeedbackView(APIView):
                 ip_address=self._obtener_ip(request),
                 descripcion="Nuevo feedback enviado"
             )
-            
+
             return Response({
                 "id": feedback.id,
                 "message": "✅ Gracias por tu feedback, nos ayuda a mejorar"
             }, status=status.HTTP_201_CREATED)
-        
+
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def _obtener_ip(self, request):
@@ -50,7 +50,7 @@ class CasoSoporteView(APIView):
 
     def post(self, request):
         """Crear nuevo caso de soporte"""
-        
+
         # Validar datos requeridos
         required_fields = ['nombre', 'email', 'titulo', 'descripcion', 'tipo']
         for field in required_fields:
@@ -59,7 +59,7 @@ class CasoSoporteView(APIView):
                     {"detail": f"Campo requerido: {field}"},
                     status=status.HTTP_400_BAD_REQUEST
                 )
-        
+
         try:
             # Crear caso
             caso = CasoSoporte.objects.create(
@@ -71,13 +71,13 @@ class CasoSoporteView(APIView):
                 tipo=request.data.get('tipo'),
                 prioridad=request.data.get('prioridad', 'MEDIA'),
             )
-            
+
             # Enviar email de confirmación
             email_enviado = enviar_email_caso_soporte(caso)
             if email_enviado:
                 caso.email_contacto_enviado = True
                 caso.save()
-            
+
             # Auditoría
             if request.user.is_authenticated:
                 Auditoria.objects.create(
@@ -88,14 +88,14 @@ class CasoSoporteView(APIView):
                     ip_address=self._obtener_ip(request),
                     descripcion=f"Nuevo caso de soporte: {caso.id_caso}"
                 )
-            
+
             return Response({
                 "id_caso": caso.id_caso,
                 "mensaje": "✅ Caso creado exitosamente",
                 "detalles": f"Hemos enviado un email a {caso.email} para contactarte",
                 "email_enviado": email_enviado
             }, status=status.HTTP_201_CREATED)
-            
+
         except Exception as e:
             return Response(
                 {"detail": f"Error al crear caso: {str(e)}"},
@@ -109,7 +109,7 @@ class CasoSoporteView(APIView):
                 {"detail": "Debes iniciar sesión para ver tus casos"},
                 status=status.HTTP_401_UNAUTHORIZED
             )
-        
+
         casos = CasoSoporte.objects.filter(usuario=request.user)
         data = [{
             'id_caso': caso.id_caso,
@@ -121,7 +121,7 @@ class CasoSoporteView(APIView):
             'fecha_actualizacion': caso.fecha_actualizacion,
             'respuesta_admin': caso.respuesta_admin,
         } for caso in casos]
-        
+
         return Response(data, status=status.HTTP_200_OK)
 
     def _obtener_ip(self, request):
@@ -140,7 +140,7 @@ class CasoSoporteDetailView(APIView):
         """Obtener detalle de caso por ID"""
         try:
             caso = CasoSoporte.objects.get(id_caso=id_caso)
-            
+
             # Verificar permisos (solo propietario o admin)
             if request.user.is_authenticated and (caso.usuario == request.user or request.user.is_superuser):
                 puede_ver = True
@@ -148,13 +148,13 @@ class CasoSoporteDetailView(APIView):
                 puede_ver = True
             else:
                 puede_ver = False
-            
+
             if not puede_ver:
                 return Response(
                     {"detail": "No tienes permiso para ver este caso"},
                     status=status.HTTP_403_FORBIDDEN
                 )
-            
+
             data = {
                 'id_caso': caso.id_caso,
                 'titulo': caso.titulo,
@@ -167,9 +167,9 @@ class CasoSoporteDetailView(APIView):
                 'respuesta_admin': caso.respuesta_admin,
                 'email_contacto_enviado': caso.email_contacto_enviado,
             }
-            
+
             return Response(data, status=status.HTTP_200_OK)
-            
+
         except CasoSoporte.DoesNotExist:
             return Response(
                 {"detail": "Caso no encontrado"},

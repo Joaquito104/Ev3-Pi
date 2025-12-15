@@ -35,7 +35,7 @@ class CalificacionCorredorView(APIView):
         Query params: estado, periodo, tipo_certificado
         """
         usuario_id = request.user.id
-        
+
         # Filtros opcionales
         filtros = {}
         if request.query_params.get('estado'):
@@ -44,9 +44,9 @@ class CalificacionCorredorView(APIView):
             filtros['periodo'] = request.query_params.get('periodo')
         if request.query_params.get('tipo_certificado'):
             filtros['tipo_certificado'] = request.query_params.get('tipo_certificado')
-        
+
         calificaciones = self.calificacion_mongo.obtener_por_usuario(usuario_id, filtros)
-        
+
         # Serializar (convertir ObjectId a string)
         data = []
         for cal in calificaciones:
@@ -54,7 +54,7 @@ class CalificacionCorredorView(APIView):
             cal['fecha_creacion'] = cal['fecha_creacion'].isoformat()
             cal['fecha_actualizacion'] = cal['fecha_actualizacion'].isoformat()
             data.append(cal)
-        
+
         return Response({
             "total": len(data),
             "calificaciones": data
@@ -129,17 +129,17 @@ class CalificacionCorredorView(APIView):
                     "tipo": "SOLICITUD_AUDITORIA"
                 }
             )
-        
+
         # 📧 Enviar emails de notificación
         from src.utils_registro import enviar_email_calificacion_creada, enviar_email_auditoria_solicitada
-        
+
         enviar_email_calificacion_creada(
             usuario=request.user,
             rut=data['rut'],
             tipo_certificado=data['tipo_certificado'],
             solicitar_auditoria=data.get('solicitar_auditoria', False)
         )
-        
+
         if data.get('solicitar_auditoria'):
             enviar_email_auditoria_solicitada(
                 usuario=request.user,
@@ -213,9 +213,9 @@ class CalificacionEstadisticasView(APIView):
         """Obtener métricas y estadísticas"""
         try:
             usuario_id = request.user.id
-            
+
             stats = self.calificacion_mongo.obtener_estadisticas(usuario_id)
-            
+
             return Response({
                 "usuario": request.user.username,
                 "estadisticas": stats
@@ -255,10 +255,10 @@ class CalificacionAnalistaView(APIView):
         filtros = {}
         if request.query_params.get('estado'):
             filtros['estado'] = request.query_params.get('estado')
-        
+
         # Obtener todas (sin filtro de usuario_id)
         calificaciones = list(self.calificacion_mongo.collection.find(filtros).sort('fecha_creacion', -1).limit(100))
-        
+
         # Serializar
         data = []
         for cal in calificaciones:
@@ -266,7 +266,7 @@ class CalificacionAnalistaView(APIView):
             cal['fecha_creacion'] = cal['fecha_creacion'].isoformat()
             cal['fecha_actualizacion'] = cal['fecha_actualizacion'].isoformat()
             data.append(cal)
-        
+
         return Response({
             "total": len(data),
             "calificaciones": data
@@ -283,26 +283,26 @@ class CalificacionAnalistaView(APIView):
 
             if actual.get('estado') in ['PENDIENTE', 'APROBADA', 'RECHAZADA']:
                 return Response({"detail": "No editable en este estado"}, status=status.HTTP_400_BAD_REQUEST)
-            
+
             if 'estado' in request.data:
                 data_actualizar['estado'] = request.data['estado']
             if 'comentario' in request.data:
                 data_actualizar['comentario'] = request.data['comentario']
             if 'detalles' in request.data:
                 data_actualizar['detalles'] = request.data['detalles']
-            
+
             success = self.calificacion_mongo.actualizar(
                 calificacion_id,
                 data_actualizar,
                 request.user.username
             )
-            
+
             if not success:
                 return Response(
                     {"detail": "Error al actualizar calificación"},
                     status=status.HTTP_404_NOT_FOUND
                 )
-            
+
             # Auditoría
             Auditoria.objects.create(
                 usuario=request.user,
@@ -311,9 +311,9 @@ class CalificacionAnalistaView(APIView):
                 modelo="CalificacionMongo",
                 descripcion=f"Actualizó calificación {calificacion_id}"
             )
-            
+
             return Response({"detail": "Calificación actualizada exitosamente"})
-            
+
         except InvalidId:
             return Response(
                 {"detail": "ID de calificación inválido"},
@@ -393,17 +393,17 @@ class CalificacionResolverView(APIView):
             try:
                 from django.contrib.auth.models import User
                 from src.utils_registro import enviar_email_calificacion_validada
-                
+
                 usuario_corredor = User.objects.get(id=calificacion['usuario_id'])
                 rut = calificacion.get('rut', 'N/A')
-                
+
                 # Mapear estado Mongo a nombre legible
                 estado_texto = {
                     "APROBADA": "VALIDADA",
                     "OBSERVADA": "OBSERVADA",
                     "RECHAZADA": "RECHAZADA"
                 }.get(nuevo_estado, nuevo_estado)
-                
+
                 enviar_email_calificacion_validada(
                     usuario=usuario_corredor,
                     rut=rut,

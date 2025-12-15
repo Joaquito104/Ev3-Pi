@@ -7,13 +7,13 @@ import os
 class Command(BaseCommand):
     help = """
     Crea Administrador Global (Superusuario) para emergencias.
-    
+
     Este superusuario tiene:
     - Acceso completo a Django Admin
     - Bypass de RBAC en todos los endpoints
     - Acceso a operaciones críticas
     - Auditoría especial de todas sus acciones
-    
+
     ⚠️ USO RESTRINGIDO SOLO PARA EMERGENCIAS
     """
 

@@ -111,10 +111,10 @@ class AuditoriaView(APIView):
         # Paginación
         page = int(request.query_params.get('page', 1))
         page_size = min(int(request.query_params.get('page_size', 50)), 200)
-        
+
         start = (page - 1) * page_size
         end = start + page_size
-        
+
         total = auditorias.count()
         auditorias_paginated = auditorias[start:end]
 
@@ -162,7 +162,7 @@ class AuditoriaEstadisticasView(APIView):
 
         # Últimos 30 días
         fecha_desde = datetime.now() - timedelta(days=30)
-        
+
         auditorias = Auditoria.objects.filter(fecha__gte=fecha_desde)
 
         # Totales por acción

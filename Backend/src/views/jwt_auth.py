@@ -93,7 +93,7 @@ class RefreshTokenView(APIView):
         Retorna nuevo access y refresh tokens
         """
         refresh = request.data.get('refresh')
-        
+
         if not refresh:
             return Response(
                 {"detail": "Refresh token requerido"},
@@ -109,7 +109,7 @@ class RefreshTokenView(APIView):
 
         try:
             token = RefreshToken(refresh)
-            
+
             # Blacklist el refresh token anterior
             self._blacklist_token(refresh, token.lifetime)
 

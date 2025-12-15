@@ -24,12 +24,12 @@ class HistorialReglaView(APIView):
                 {"detail": "Regla no encontrada"},
                 status=status.HTTP_404_NOT_FOUND
             )
-        
+
         # Obtener historial ordenado por versión descendente
         historial = HistorialReglaNegocio.objects.filter(
             regla_actual=regla
         ).order_by('-version')
-        
+
         data = [
             {
                 "id": h.id,
@@ -45,7 +45,7 @@ class HistorialReglaView(APIView):
             }
             for h in historial
         ]
-        
+
         return Response({
             "regla_id": regla.id,
             "nombre_actual": regla.nombre,
@@ -74,16 +74,16 @@ class RollbackReglaView(APIView):
                 {"detail": "Regla no encontrada"},
                 status=status.HTTP_404_NOT_FOUND
             )
-        
+
         version_destino = request.data.get("version")
         comentario = request.data.get("comentario", "Rollback sin comentario")
-        
+
         if not version_destino:
             return Response(
                 {"detail": "Debe especificar la versión de destino"},
                 status=status.HTTP_400_BAD_REQUEST
             )
-        
+
         # Buscar snapshot de esa versión
         try:
             snapshot = HistorialReglaNegocio.objects.get(
@@ -95,7 +95,7 @@ class RollbackReglaView(APIView):
                 {"detail": f"No existe snapshot de versión {version_destino}"},
                 status=status.HTTP_404_NOT_FOUND
             )
-        
+
         # Guardar snapshot del estado actual antes de rollback
         HistorialReglaNegocio.objects.create(
             regla_actual=regla,
@@ -108,7 +108,7 @@ class RollbackReglaView(APIView):
             modificado_por=request.user,
             comentario=f"Pre-rollback a v{version_destino}"
         )
-        
+
         # Restaurar datos del snapshot
         regla.nombre = snapshot.nombre
         regla.descripcion = snapshot.descripcion
@@ -117,7 +117,7 @@ class RollbackReglaView(APIView):
         regla.estado = snapshot.estado
         regla.version += 1  # Nueva versión tras rollback
         regla.save()
-        
+
         # Crear nuevo snapshot del estado restaurado
         HistorialReglaNegocio.objects.create(
             regla_actual=regla,
@@ -130,7 +130,7 @@ class RollbackReglaView(APIView):
             modificado_por=request.user,
             comentario=f"Rollback desde v{version_destino}: {comentario}"
         )
-        
+
         # Auditoría del rollback
         Auditoria.objects.create(
             usuario=request.user,
@@ -140,7 +140,7 @@ class RollbackReglaView(APIView):
             objeto_id=regla.id,
             descripcion=f"Rollback de regla '{regla.nombre}' a versión {version_destino}. Nueva versión: {regla.version}"
         )
-        
+
         return Response({
             "detail": f"Rollback exitoso a versión {version_destino}",
             "nueva_version": regla.version,
@@ -167,16 +167,16 @@ class CompararVersionesView(APIView):
                 {"detail": "Regla no encontrada"},
                 status=status.HTTP_404_NOT_FOUND
             )
-        
+
         v1 = request.query_params.get("v1")
         v2 = request.query_params.get("v2")
-        
+
         if not v1 or not v2:
             return Response(
                 {"detail": "Debe especificar v1 y v2 como query params"},
                 status=status.HTTP_400_BAD_REQUEST
             )
-        
+
         try:
             version1 = HistorialReglaNegocio.objects.get(regla_actual=regla, version=v1)
             version2 = HistorialReglaNegocio.objects.get(regla_actual=regla, version=v2)
@@ -185,7 +185,7 @@ class CompararVersionesView(APIView):
                 {"detail": "Una o ambas versiones no existen en el historial"},
                 status=status.HTTP_404_NOT_FOUND
             )
-        
+
         # Comparación simple campo por campo
         diff = {
             "regla_id": regla.id,
@@ -213,5 +213,5 @@ class CompararVersionesView(APIView):
                 "estado": version1.estado != version2.estado,
             }
         }
-        
+
         return Response(diff)

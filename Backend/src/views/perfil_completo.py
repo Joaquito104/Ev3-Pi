@@ -30,7 +30,7 @@ class PerfilUsuarioView(APIView):
         """Obtener perfil completo"""
         user = request.user
         perfil = user.perfil
-        
+
         # Correos adicionales
         correos = CorreoAdicional.objects.filter(usuario=user)
         correos_data = [
@@ -43,13 +43,13 @@ class PerfilUsuarioView(APIView):
             }
             for c in correos
         ]
-        
+
         # Verificar si ya solicitó cambio de rol
         tiene_solicitud_pendiente = SolicitudCambioRol.objects.filter(
             usuario=user,
             estado='PENDIENTE'
         ).exists()
-        
+
         return Response({
             "id": user.id,
             "username": user.username,
@@ -72,11 +72,11 @@ class PerfilUsuarioView(APIView):
         """Actualizar perfil"""
         user = request.user
         perfil = user.perfil
-        
+
         # Actualizar datos básicos
         user.first_name = request.data.get('first_name', user.first_name)
         user.last_name = request.data.get('last_name', user.last_name)
-        
+
         # Email principal (solo si cambia)
         nuevo_email = request.data.get('email')
         if nuevo_email and nuevo_email != user.email:
@@ -87,13 +87,13 @@ class PerfilUsuarioView(APIView):
                     status=status.HTTP_400_BAD_REQUEST
                 )
             user.email = nuevo_email
-        
+
         user.save()
-        
+
         # Actualizar perfil extendido
         perfil.biografia = request.data.get('biografia', perfil.biografia)
         perfil.telefono = request.data.get('telefono', perfil.telefono)
-        
+
         # Foto de perfil (si viene)
         foto = request.FILES.get('foto_perfil')
         if foto:
@@ -104,9 +104,9 @@ class PerfilUsuarioView(APIView):
                     status=status.HTTP_400_BAD_REQUEST
                 )
             perfil.foto_perfil = foto
-        
+
         perfil.save()
-        
+
         # Auditar
         Auditoria.objects.create(
             usuario=user,
@@ -117,7 +117,7 @@ class PerfilUsuarioView(APIView):
             descripcion="Perfil actualizado",
             ip_address=self.get_client_ip(request)
         )
-        
+
         return Response({
             "detail": "Perfil actualizado correctamente",
             "foto_perfil": perfil.foto_perfil.url if perfil.foto_perfil else None
@@ -158,34 +158,34 @@ class CorreoAdicionalView(APIView):
     def post(self, request):
         """Agregar correo adicional"""
         email = request.data.get('email')
-        
+
         if not email:
             return Response(
                 {"detail": "El email es obligatorio"},
                 status=status.HTTP_400_BAD_REQUEST
             )
-        
+
         # Verificar que no exista
         if CorreoAdicional.objects.filter(usuario=request.user, email=email).exists():
             return Response(
                 {"detail": "Este correo ya está agregado"},
                 status=status.HTTP_400_BAD_REQUEST
             )
-        
+
         # Verificar que no esté en uso como email principal de otro usuario
         if User.objects.filter(email=email).exists():
             return Response(
                 {"detail": "Este correo ya está registrado en el sistema"},
                 status=status.HTTP_400_BAD_REQUEST
             )
-        
+
         correo = CorreoAdicional.objects.create(
             usuario=request.user,
             email=email,
             verificado=False,
             principal=False
         )
-        
+
         # Auditar
         Auditoria.objects.create(
             usuario=request.user,
@@ -195,7 +195,7 @@ class CorreoAdicionalView(APIView):
             objeto_id=correo.id,
             descripcion=f"Correo adicional agregado: {email}"
         )
-        
+
         return Response({
             "id": correo.id,
             "email": correo.email,
@@ -206,7 +206,7 @@ class CorreoAdicionalView(APIView):
     def delete(self, request):
         """Eliminar correo adicional"""
         correo_id = request.data.get('correo_id')
-        
+
         try:
             correo = CorreoAdicional.objects.get(id=correo_id, usuario=request.user)
         except CorreoAdicional.DoesNotExist:
@@ -214,17 +214,17 @@ class CorreoAdicionalView(APIView):
                 {"detail": "Correo no encontrado"},
                 status=status.HTTP_404_NOT_FOUND
             )
-        
+
         # No permitir eliminar el principal
         if correo.principal:
             return Response(
                 {"detail": "No puedes eliminar el correo principal"},
                 status=status.HTTP_400_BAD_REQUEST
             )
-        
+
         email = correo.email
         correo.delete()
-        
+
         # Auditar
         Auditoria.objects.create(
             usuario=request.user,
@@ -234,7 +234,7 @@ class CorreoAdicionalView(APIView):
             objeto_id=correo_id,
             descripcion=f"Correo eliminado: {email}"
         )
-        
+
         return Response({"detail": "Correo eliminado correctamente"})
 
 
@@ -248,13 +248,13 @@ class SolicitudCambioRolView(APIView):
     def get(self, request):
         """Ver solicitud actual"""
         solicitudes = SolicitudCambioRol.objects.filter(usuario=request.user).order_by('-fecha_solicitud')
-        
+
         if not solicitudes.exists():
             return Response({
                 "tiene_solicitud": False,
                 "puede_solicitar": not request.user.perfil.cambio_rol_solicitado
             })
-        
+
         ultima = solicitudes.first()
         return Response({
             "tiene_solicitud": True,
@@ -283,48 +283,48 @@ class SolicitudCambioRolView(APIView):
     def post(self, request):
         """Crear solicitud de cambio de rol"""
         perfil = request.user.perfil
-        
+
         # Verificar si ya solicitó alguna vez
         if perfil.cambio_rol_solicitado:
             return Response(
                 {"detail": "Ya has utilizado tu única solicitud de cambio de rol"},
                 status=status.HTTP_403_FORBIDDEN
             )
-        
+
         # Verificar si tiene solicitud pendiente
         if SolicitudCambioRol.objects.filter(usuario=request.user, estado='PENDIENTE').exists():
             return Response(
                 {"detail": "Ya tienes una solicitud pendiente"},
                 status=status.HTTP_400_BAD_REQUEST
             )
-        
+
         rol_solicitado = request.data.get('rol_solicitado')
         justificacion = request.data.get('justificacion', '')
-        
+
         if not rol_solicitado:
             return Response(
                 {"detail": "El rol solicitado es obligatorio"},
                 status=status.HTTP_400_BAD_REQUEST
             )
-        
+
         if rol_solicitado not in dict(PerfilUsuario.ROL_CHOICES):
             return Response(
                 {"detail": "Rol inválido"},
                 status=status.HTTP_400_BAD_REQUEST
             )
-        
+
         if rol_solicitado == perfil.rol:
             return Response(
                 {"detail": "No puedes solicitar tu rol actual"},
                 status=status.HTTP_400_BAD_REQUEST
             )
-        
+
         if not justificacion or len(justificacion) < 50:
             return Response(
                 {"detail": "La justificación debe tener al menos 50 caracteres"},
                 status=status.HTTP_400_BAD_REQUEST
             )
-        
+
         # Crear solicitud
         solicitud = SolicitudCambioRol.objects.create(
             usuario=request.user,
@@ -333,11 +333,11 @@ class SolicitudCambioRolView(APIView):
             justificacion=justificacion,
             estado='PENDIENTE'
         )
-        
+
         # Marcar que ya solicitó
         perfil.cambio_rol_solicitado = True
         perfil.save()
-        
+
         # Auditar
         Auditoria.objects.create(
             usuario=request.user,
@@ -351,7 +351,7 @@ class SolicitudCambioRolView(APIView):
                 "rol_solicitado": rol_solicitado
             }
         )
-        
+
         return Response({
             "detail": "Solicitud enviada correctamente. Será revisada por un administrador",
             "id": solicitud.id,
@@ -370,7 +370,7 @@ class MFAConfigView(APIView):
     def get(self, request):
         """Ver estado MFA"""
         perfil = request.user.perfil
-        
+
         return Response({
             "mfa_habilitado": perfil.mfa_habilitado,
             "tiene_secret": bool(perfil.mfa_secret)
@@ -379,34 +379,34 @@ class MFAConfigView(APIView):
     def post(self, request):
         """Habilitar MFA - generar secret y QR"""
         perfil = request.user.perfil
-        
+
         if perfil.mfa_habilitado:
             return Response(
                 {"detail": "MFA ya está habilitado"},
                 status=status.HTTP_400_BAD_REQUEST
             )
-        
+
         # Generar secret
         secret = pyotp.random_base32()
         perfil.mfa_secret = secret
         perfil.save()
-        
+
         # Generar URI para QR
         totp_uri = pyotp.totp.TOTP(secret).provisioning_uri(
             name=request.user.email,
             issuer_name='Proyecto Sistema'
         )
-        
+
         # Generar código QR
         qr = qrcode.QRCode(version=1, box_size=10, border=4)
         qr.add_data(totp_uri)
         qr.make(fit=True)
-        
+
         img = qr.make_image(fill_color="black", back_color="white")
         buffer = io.BytesIO()
         img.save(buffer, format='PNG')
         qr_code_base64 = base64.b64encode(buffer.getvalue()).decode()
-        
+
         return Response({
             "detail": "MFA configurado. Escanea el código QR con tu app de autenticación",
             "secret": secret,
@@ -418,19 +418,19 @@ class MFAConfigView(APIView):
         """Activar MFA - verificar código"""
         perfil = request.user.perfil
         codigo = request.data.get('codigo')
-        
+
         if not perfil.mfa_secret:
             return Response(
                 {"detail": "Primero debes generar el código QR"},
                 status=status.HTTP_400_BAD_REQUEST
             )
-        
+
         if not codigo:
             return Response(
                 {"detail": "El código es obligatorio"},
                 status=status.HTTP_400_BAD_REQUEST
             )
-        
+
         # Verificar código
         totp = pyotp.TOTP(perfil.mfa_secret)
         if not totp.verify(codigo, valid_window=1):
@@ -438,11 +438,11 @@ class MFAConfigView(APIView):
                 {"detail": "Código inválido"},
                 status=status.HTTP_400_BAD_REQUEST
             )
-        
+
         # Activar MFA
         perfil.mfa_habilitado = True
         perfil.save()
-        
+
         # Auditar
         Auditoria.objects.create(
             usuario=request.user,
@@ -452,7 +452,7 @@ class MFAConfigView(APIView):
             objeto_id=perfil.id,
             descripcion="MFA habilitado"
         )
-        
+
         return Response({
             "detail": "MFA habilitado correctamente",
             "mfa_habilitado": True
@@ -462,19 +462,19 @@ class MFAConfigView(APIView):
         """Deshabilitar MFA"""
         perfil = request.user.perfil
         codigo = request.data.get('codigo')
-        
+
         if not perfil.mfa_habilitado:
             return Response(
                 {"detail": "MFA no está habilitado"},
                 status=status.HTTP_400_BAD_REQUEST
             )
-        
+
         if not codigo:
             return Response(
                 {"detail": "El código es obligatorio para deshabilitar MFA"},
                 status=status.HTTP_400_BAD_REQUEST
             )
-        
+
         # Verificar código antes de deshabilitar
         totp = pyotp.TOTP(perfil.mfa_secret)
         if not totp.verify(codigo, valid_window=1):
@@ -482,12 +482,12 @@ class MFAConfigView(APIView):
                 {"detail": "Código inválido"},
                 status=status.HTTP_400_BAD_REQUEST
             )
-        
+
         # Deshabilitar
         perfil.mfa_habilitado = False
         perfil.mfa_secret = ''
         perfil.save()
-        
+
         # Auditar
         Auditoria.objects.create(
             usuario=request.user,
@@ -497,7 +497,7 @@ class MFAConfigView(APIView):
             objeto_id=perfil.id,
             descripcion="MFA deshabilitado"
         )
-        
+
         return Response({"detail": "MFA deshabilitado correctamente"})
 
 
@@ -513,11 +513,11 @@ class GestionSolicitudesRolView(APIView):
     def get(self, request):
         """Listar solicitudes"""
         estado = request.query_params.get('estado', 'PENDIENTE')
-        
+
         solicitudes = SolicitudCambioRol.objects.select_related(
             'usuario', 'usuario__perfil', 'respondido_por'
         ).filter(estado=estado).order_by('-fecha_solicitud')
-        
+
         data = [
             {
                 "id": s.id,
@@ -534,7 +534,7 @@ class GestionSolicitudesRolView(APIView):
             }
             for s in solicitudes
         ]
-        
+
         return Response({
             "total": len(data),
             "solicitudes": data
@@ -549,35 +549,35 @@ class GestionSolicitudesRolView(APIView):
                 {"detail": "Solicitud no encontrada"},
                 status=status.HTTP_404_NOT_FOUND
             )
-        
+
         if solicitud.estado != 'PENDIENTE':
             return Response(
                 {"detail": "Esta solicitud ya fue procesada"},
                 status=status.HTTP_400_BAD_REQUEST
             )
-        
+
         accion = request.data.get('accion')  # APROBAR | RECHAZAR
         comentario = request.data.get('comentario', '')
-        
+
         if accion not in ['APROBAR', 'RECHAZAR']:
             return Response(
                 {"detail": "Acción inválida. Use APROBAR o RECHAZAR"},
                 status=status.HTTP_400_BAD_REQUEST
             )
-        
+
         if accion == 'APROBAR':
             # Cambiar rol del usuario
             perfil = solicitud.usuario.perfil
             rol_anterior = perfil.rol
             perfil.rol = solicitud.rol_solicitado
             perfil.save()
-            
+
             solicitud.estado = 'APROBADA'
             solicitud.fecha_respuesta = timezone.now()
             solicitud.respondido_por = request.user
             solicitud.comentario_admin = comentario
             solicitud.save()
-            
+
             # Auditar
             Auditoria.objects.create(
                 usuario=request.user,
@@ -592,19 +592,19 @@ class GestionSolicitudesRolView(APIView):
                     "rol_nuevo": solicitud.rol_solicitado
                 }
             )
-            
+
             return Response({
                 "detail": f"Solicitud aprobada. {solicitud.usuario.username} ahora es {solicitud.rol_solicitado}",
                 "estado": "APROBADA"
             })
-        
+
         else:  # RECHAZAR
             solicitud.estado = 'RECHAZADA'
             solicitud.fecha_respuesta = timezone.now()
             solicitud.respondido_por = request.user
             solicitud.comentario_admin = comentario
             solicitud.save()
-            
+
             # Auditar
             Auditoria.objects.create(
                 usuario=request.user,
@@ -619,7 +619,7 @@ class GestionSolicitudesRolView(APIView):
                     "motivo": comentario
                 }
             )
-            
+
             return Response({
                 "detail": "Solicitud rechazada",
                 "estado": "RECHAZADA"

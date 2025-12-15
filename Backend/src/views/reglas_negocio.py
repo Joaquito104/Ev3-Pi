@@ -39,13 +39,13 @@ class ReglasNegocioView(APIView):
         condicion = request.data.get("condicion")
         accion = request.data.get("accion")
         estado = request.data.get("estado", "REVISION")
-        
+
         if not all([nombre, descripcion, condicion, accion]):
             return Response(
                 {"detail": "Todos los campos son requeridos"},
                 status=status.HTTP_400_BAD_REQUEST
             )
-        
+
         regla = ReglaNegocio.objects.create(
             nombre=nombre,
             descripcion=descripcion,
@@ -54,7 +54,7 @@ class ReglasNegocioView(APIView):
             estado=estado,
             creado_por=request.user,
         )
-        
+
         # Crear primer snapshot en historial
         HistorialReglaNegocio.objects.create(
             regla_actual=regla,
@@ -67,7 +67,7 @@ class ReglasNegocioView(APIView):
             modificado_por=request.user,
             comentario="Versión inicial"
         )
-        
+
         # Auditoría de creación
         Auditoria.objects.create(
             usuario=request.user,
@@ -77,7 +77,7 @@ class ReglasNegocioView(APIView):
             objeto_id=regla.id,
             descripcion=f"Creada regla '{regla.nombre}' v{regla.version}"
         )
-        
+
         return Response({
             "detail": "Regla creada",
             "id": regla.id
@@ -121,7 +121,7 @@ class ReglaNegocioDetailView(APIView):
                 {"detail": "Regla no encontrada"},
                 status=status.HTTP_404_NOT_FOUND
             )
-        
+
         # Guardar snapshot del estado anterior
         HistorialReglaNegocio.objects.create(
             regla_actual=regla,
@@ -134,20 +134,20 @@ class ReglaNegocioDetailView(APIView):
             modificado_por=request.user,
             comentario=request.data.get("comentario", "Actualización")
         )
-        
+
         # Actualizar campos
         regla.nombre = request.data.get("nombre", regla.nombre)
         regla.descripcion = request.data.get("descripcion", regla.descripcion)
         regla.condicion = request.data.get("condicion", regla.condicion)
         regla.accion = request.data.get("accion", regla.accion)
         regla.estado = request.data.get("estado", regla.estado)
-        
+
         # Incrementar versión si cambió algo sustancial
         if "condicion" in request.data or "accion" in request.data:
             regla.version += 1
-        
+
         regla.save()
-        
+
         # Auditoría de actualización
         Auditoria.objects.create(
             usuario=request.user,
@@ -157,7 +157,7 @@ class ReglaNegocioDetailView(APIView):
             objeto_id=regla.id,
             descripcion=f"Actualizada regla '{regla.nombre}' a v{regla.version}"
         )
-        
+
         return Response({
             "detail": "Regla actualizada exitosamente",
             "id": regla.id,
@@ -170,7 +170,7 @@ class ReglaNegocioDetailView(APIView):
             regla = ReglaNegocio.objects.get(pk=pk)
             nombre = regla.nombre
             version = regla.version
-            
+
             # Auditoría antes de eliminar
             Auditoria.objects.create(
                 usuario=request.user,
@@ -180,9 +180,9 @@ class ReglaNegocioDetailView(APIView):
                 objeto_id=regla.id,
                 descripcion=f"Eliminada regla '{nombre}' v{version}"
             )
-            
+
             regla.delete()
-            
+
             return Response({
                 "detail": f"Regla '{nombre}' eliminada exitosamente"
             })

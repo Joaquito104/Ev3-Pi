@@ -1,0 +1,53 @@
+[MASTER]
+load-plugins=pylint_django
+django-settings-module=Django.settings
+
+[MESSAGES CONTROL]
+# Deshabilitar warnings molestos de Django
+disable=
+    C0103,  # invalid-name (nombres de módulos Django como 0001_initial.py)
+    C0114,  # missing-module-docstring
+    C0115,  # missing-class-docstring  
+    C0116,  # missing-function-docstring
+    C0303,  # trailing-whitespace (lo arreglamos con autopep8)
+    C0304,  # missing-final-newline
+    C0305,  # trailing-newlines
+    C0411,  # wrong-import-order (lo arreglamos con isort)
+    C0412,  # ungrouped-imports
+    C0413,  # wrong-import-position
+    C0415,  # import-outside-toplevel (necesario en signals/views)
+    E1101,  # no-member (falso positivo con Django ORM)
+    E0611,  # no-name-in-module (falso positivo con __init__.py)
+    R0801,  # duplicate-code (código similar en views es normal)
+    R0901,  # too-many-ancestors (Django viewsets tienen muchos)
+    R0903,  # too-few-public-methods (Meta classes, serializers)
+    R0911,  # too-many-return-statements
+    R0912,  # too-many-branches
+    R0914,  # too-many-locals
+    W0212,  # protected-access
+    W0223,  # abstract-method (Django serializers)
+    W0404,  # reimported
+    W0611,  # unused-import (muchos son para __init__.py)
+    W0612,  # unused-variable (algunos son intencionales)
+    W0613,  # unused-argument (Django signals necesitan todos los args)
+    W0621,  # redefined-outer-name
+    W0702,  # bare-except (algunos try/except genéricos son intencionales)
+    W0707,  # raise-missing-from
+    W0718,  # broad-exception-caught (algunos Exception genéricos son OK)
+    W0719,  # broad-exception-raised
+    W1309,  # f-string-without-interpolation
+
+[FORMAT]
+max-line-length=120
+indent-string='    '
+
+[BASIC]
+good-names=i,j,k,id,pk,e,f,qs,db,r,ip
+
+[DESIGN]
+max-args=10
+max-attributes=15
+max-locals=25
+max-branches=15
+max-returns=10
+max-statements=60

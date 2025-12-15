@@ -67,7 +67,7 @@ class RegistroView(APIView):
 
     def post(self, request):
         """Crear nuevo usuario y enviar email de verificación"""
-        
+
         # Validar datos requeridos
         username = request.data.get('username', '').strip()
         first_name = request.data.get('first_name', '').strip()
@@ -373,7 +373,7 @@ class LoginMFAView(APIView):
         Step 2: Validar código TOTP
         """
         step = request.data.get('step')
-        
+
         if step == 1:
             return self._login_step1(request)
         elif step == 2:
@@ -511,7 +511,7 @@ class LoginMFAView(APIView):
         """Crear sesión temporal para MFA (5 minutos)"""
         import uuid
         session_id = str(uuid.uuid4())
-        
+
         if r:
             r.setex(f"mfa_session:{session_id}", 300, str(user.id))
         else:
@@ -519,7 +519,7 @@ class LoginMFAView(APIView):
             if not hasattr(self, '_mfa_sessions'):
                 self._mfa_sessions = {}
             self._mfa_sessions[session_id] = {'user_id': user.id, 'expires': timezone.now() + timezone.timedelta(minutes=5)}
-        
+
         return session_id
 
     def _obtener_usuario_sesion(self, session_id):

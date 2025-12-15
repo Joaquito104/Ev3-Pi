@@ -98,11 +98,11 @@ class CalificacionMongo:
     Modelo para Calificaciones en MongoDB
     Estructura no rígida para datos tributarios
     """
-    
+
     def __init__(self):
         self.collection = get_mongo_db()['calificaciones']
         self._create_indexes()
-    
+
     def _create_indexes(self):
         """Crear índices para optimizar consultas"""
         # Índice por registro_id (relación con PostgreSQL)
@@ -114,7 +114,7 @@ class CalificacionMongo:
         # Índice compuesto para consultas frecuentes
         self.collection.create_index([('usuario_id', 1), ('estado', 1)])
         self.collection.create_index([('registro_id', 1), ('estado', 1)])
-    
+
     def crear(self, data):
         """
         Crear nueva calificación
@@ -153,21 +153,21 @@ class CalificacionMongo:
             'historial': [],
             'historial_estados': [historial_estado]
         }
-        
+
         result = self.collection.insert_one(documento)
         return str(result.inserted_id)
-    
+
     def obtener_por_id(self, calificacion_id):
         """Obtener calificación por ID de MongoDB"""
         return self.collection.find_one({'_id': ObjectId(calificacion_id)})
-    
+
     def obtener_por_usuario(self, usuario_id, filtros=None):
         """
         Obtener todas las calificaciones de un usuario (Corredor)
         filtros: dict opcional para filtrar por estado, periodo, etc
         """
         query = {'usuario_id': usuario_id}
-        
+
         if filtros:
             if filtros.get('estado'):
                 query['estado'] = filtros['estado']
@@ -175,9 +175,9 @@ class CalificacionMongo:
                 query['periodo'] = filtros['periodo']
             if filtros.get('tipo_certificado'):
                 query['tipo_certificado'] = filtros['tipo_certificado']
-        
+
         return list(self.collection.find(query).sort('fecha_creacion', -1))
-    
+
     def actualizar(self, calificacion_id, data, usuario_modificador):
         """
         Actualizar calificación con historial de cambios
@@ -209,7 +209,7 @@ class CalificacionMongo:
         )
 
         return result.modified_count > 0
-    
+
     def eliminar(self, calificacion_id):
         """Eliminar calificación (soft delete)"""
         result = self.collection.update_one(
@@ -254,7 +254,7 @@ class CalificacionMongo:
 
         result = self.collection.update_one({'_id': ObjectId(calificacion_id)}, update_data)
         return result.modified_count > 0, ""
-    
+
     def obtener_estadisticas(self, usuario_id):
         """
         Obtener estadísticas de calificaciones para dashboard de Corredor
@@ -267,7 +267,7 @@ class CalificacionMongo:
                 'monto_total': {'$sum': '$monto'}
             }}
         ]
-        
+
         resultados = list(self.collection.aggregate(pipeline))
 
         stats = {

@@ -28,7 +28,7 @@ class EstadoSistemaView(APIView):
 
     def get(self, request):
         """Obtener estado general del sistema"""
-        
+
         # Auditoría de acceso
         Auditoria.objects.create(
             usuario=request.user,
@@ -42,19 +42,19 @@ class EstadoSistemaView(APIView):
         total_usuarios = User.objects.count()
         usuarios_activos = User.objects.filter(is_active=True).count()
         superusuarios = User.objects.filter(is_superuser=True).count()
-        
+
         # Actividad reciente (últimas 24h)
         hace_24h = timezone.now() - timedelta(hours=24)
         actividad_reciente = Auditoria.objects.filter(fecha__gte=hace_24h).count()
-        
+
         # Reglas de negocio
         reglas_activas = ReglaNegocio.objects.filter(estado="ACTIVA").count()
         reglas_total = ReglaNegocio.objects.count()
-        
+
         # Registros y calificaciones
         total_registros = Registro.objects.count()
         calificaciones_pendientes = Calificacion.objects.filter(estado="PENDIENTE").count()
-        
+
         # Distribución de roles
         roles_count = {}
         for rol_code, rol_name in PerfilUsuario.ROL_CHOICES:
@@ -182,7 +182,7 @@ class BloquearDesbloquearUsuarioView(APIView):
         else:
             user.is_active = True
             mensaje = f"Usuario '{user.username}' desbloqueado"
-        
+
         user.save()
 
         # Auditoría crítica
@@ -277,7 +277,7 @@ class PurgaDatosView(APIView):
     @transaction.atomic
     def post(self, request):
         """
-        Body: { 
+        Body: {
             "operacion": "purgar_auditoria",
             "dias": 90,
             "confirmar": "PURGAR_DEFINITIVAMENTE"

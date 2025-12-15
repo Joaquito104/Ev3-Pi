@@ -57,7 +57,7 @@ class ExportarPDFView(APIView):
         # Crear PDF
         buffer = BytesIO()
         doc = SimpleDocTemplate(buffer, pagesize=letter, topMargin=0.5*inch)
-        
+
         # Estilos
         styles = getSampleStyleSheet()
         title_style = ParagraphStyle(
@@ -71,7 +71,7 @@ class ExportarPDFView(APIView):
 
         # Elementos del documento
         elements = []
-        
+
         # Título
         title = Paragraph("📊 Reporte de Calificaciones", title_style)
         elements.append(title)
@@ -85,7 +85,7 @@ class ExportarPDFView(APIView):
 
         # Tabla de datos
         data = [['RUT', 'Tipo Cert.', 'Período', 'Estado', 'Auditoría', 'Creado']]
-        
+
         for cal in calificaciones[:100]:  # Limitar a 100 para no sobrecargar el PDF
             auditoria = '✓' if cal.solicitar_auditoria else '-'
             data.append([

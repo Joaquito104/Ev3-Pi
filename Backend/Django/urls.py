@@ -91,12 +91,12 @@ urlpatterns = [
     path("api/token-stats/", TokenStatsView.as_view(), name="token_stats"),
     path("api/perfil/", mi_perfil, name="mi_perfil"),
     path("api/registro/", registrar_usuario),
-    
+
     # NUEVO SISTEMA DE REGISTRO
     path("api/registro-completo/", RegistroView.as_view()),
     path("api/verificar-email/", VerificarEmailView.as_view()),
     path("api/reenviar-verificacion/", ReenviarVerificacionView.as_view()),
-    
+
     # ---------- PERFIL COMPLETO ----------
     path("api/perfil-completo/", PerfilCompletoView.as_view()),
     path("api/correos-adicionales/", CorreoAdicionalView.as_view()),
@@ -109,21 +109,21 @@ urlpatterns = [
 
     # ---------- MÓDULOS ----------
     path("api/certificados/", CargaCertificadosView.as_view()),
-    
+
     # CERTIFICADOS (Upload/Validación)
     path("api/certificados-upload/", CertificadoUploadView.as_view()),
     path("api/certificados-list/", CertificadoListView.as_view()),
     path("api/certificados-detail/<int:certificado_id>/", CertificadoDetailView.as_view()),
-    
+
     path("api/calificaciones/", CalificacionView.as_view()),  # Antigua (PostgreSQL)
     path("api/calificaciones/<int:calificacion_id>/enviar/", EnviarValidacionView.as_view()),
-    
+
     # CALIFICACIONES MONGODB (Corredor)
     path("api/calificaciones-corredor/", CalificacionCorredorView.as_view()),
     path("api/calificaciones-corredor/estadisticas/", CalificacionEstadisticasView.as_view()),
     path("api/calificaciones-corredor/<str:calificacion_id>/", CalificacionCorredorDetailView.as_view()),
     path("api/calificaciones-corredor/<str:calificacion_id>/actualizar/", CalificacionCorredorUpdateView.as_view()),
-    
+
     # CALIFICACIONES MONGODB (Analista)
     path("api/calificaciones-analista/", CalificacionAnalistaView.as_view()),
     path("api/calificaciones-analista/<str:calificacion_id>/", CalificacionAnalistaView.as_view()),

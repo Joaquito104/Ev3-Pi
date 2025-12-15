@@ -20,7 +20,7 @@ User = get_user_model()
 @pytest.mark.unit
 class UserModelTests(TestCase):
     """Tests del modelo User"""
-    
+
     def test_crear_usuario(self):
         """Test creación básica de usuario"""
         user = User.objects.create_user(
@@ -31,7 +31,7 @@ class UserModelTests(TestCase):
         self.assertEqual(user.username, 'testuser')
         self.assertEqual(user.email, 'test@example.com')
         self.assertTrue(user.check_password('TestPass123!'))
-    
+
     def test_usuario_sin_contraseña(self):
         """Test que usuario sin contraseña se crea con contraseña no utilizable"""
         user = User.objects.create_user(
@@ -46,7 +46,7 @@ class UserModelTests(TestCase):
 @pytest.mark.unit
 class ModelValidationTests(TestCase):
     """Tests de validación de modelos"""
-    
+
     def test_usuario_unico(self):
         """Test que username es único"""
         User.objects.create_user(
@@ -54,7 +54,7 @@ class ModelValidationTests(TestCase):
             email='test1@example.com',
             password='TestPass123!'
         )
-        
+
         with self.assertRaises(Exception):  # IntegrityError
             User.objects.create_user(
                 username='testuser',
@@ -66,10 +66,10 @@ class ModelValidationTests(TestCase):
 @pytest.mark.integration
 class APIHealthCheckTests(APITestCase):
     """Tests de health check del API"""
-    
+
     def setUp(self):
         self.client = APIClient()
-    
+
     def test_health_endpoint_exists(self):
         """Test que existe endpoint de health"""
         try:
@@ -79,7 +79,7 @@ class APIHealthCheckTests(APITestCase):
         except Exception:
             # Si la ruta no existe, el test pasa igual
             pass
-    
+
     def test_token_refresh_endpoint(self):
         """Test que existe endpoint de refresh token"""
         try:
@@ -93,7 +93,7 @@ class APIHealthCheckTests(APITestCase):
 @pytest.mark.integration
 class APIIntegrationTests(APITestCase):
     """Tests de integración del API"""
-    
+
     def setUp(self):
         self.client = APIClient()
         self.user = User.objects.create_user(
@@ -101,7 +101,7 @@ class APIIntegrationTests(APITestCase):
             email='test@example.com',
             password='TestPass123!'
         )
-    
+
     def test_crear_usuario_via_api(self):
         """Test creación de usuario (si existe endpoint)"""
         try:
@@ -115,7 +115,7 @@ class APIIntegrationTests(APITestCase):
             self.assertIn(response.status_code, [201, 400, 404])
         except Exception:
             pass
-    
+
     def test_autenticacion_flow(self):
         """Test flujo de autenticación"""
         try:
@@ -135,14 +135,14 @@ class APIIntegrationTests(APITestCase):
 @pytest.mark.unit
 class PermissionTests(TestCase):
     """Tests de permisos RBAC"""
-    
+
     def setUp(self):
         self.user = User.objects.create_user(
             username='testuser',
             email='test@example.com',
             password='TestPass123!'
         )
-    
+
     def test_usuario_creado_con_rol_default(self):
         """Test que usuario tiene rol por defecto"""
         # Verificar que el usuario se creó exitosamente
@@ -157,17 +157,17 @@ class PermissionTests(TestCase):
 @pytest.mark.unit
 class BasicTests(TestCase):
     """Tests básicos sin dependencias"""
-    
+
     def test_django_installed(self):
         """Verificar que Django está instalado"""
         import django
         self.assertIsNotNone(django.__version__)
-    
+
     def test_drf_installed(self):
         """Verificar que DRF está instalado"""
         from rest_framework import __version__
         self.assertIsNotNone(__version__)
-    
+
     def test_pytest_installed(self):
         """Verificar que pytest está instalado"""
         import pytest

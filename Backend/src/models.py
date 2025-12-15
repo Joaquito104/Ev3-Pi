@@ -94,19 +94,19 @@ class PerfilUsuario(models.Model):
         related_name="perfil"
     )
     rol = models.CharField(max_length=20, choices=ROL_CHOICES)
-    
+
     # Perfil extendido
     foto_perfil = models.ImageField(upload_to='perfiles/%Y/%m/', null=True, blank=True)
     biografia = models.TextField(blank=True)
     telefono = models.CharField(max_length=20, blank=True)
-    
+
     # MFA
     mfa_habilitado = models.BooleanField(default=False)
     mfa_secret = models.CharField(max_length=32, blank=True)
-    
+
     # Control de cambio de rol
     cambio_rol_solicitado = models.BooleanField(default=False)
-    
+
     # Ubicación
     pais = models.CharField(max_length=20, choices=PAISES_CHOICES, default='CHILE')
 
@@ -160,7 +160,7 @@ class HistorialReglaNegocio(models.Model):
         on_delete=models.CASCADE,
         related_name="historial_versiones"
     )
-    
+
     # Snapshot de datos en esa versión
     nombre = models.CharField(max_length=150)
     descripcion = models.TextField()
@@ -168,7 +168,7 @@ class HistorialReglaNegocio(models.Model):
     accion = models.TextField()
     version = models.IntegerField()
     estado = models.CharField(max_length=20)
-    
+
     # Metadata del cambio
     modificado_por = models.ForeignKey(
         User,
@@ -178,10 +178,10 @@ class HistorialReglaNegocio(models.Model):
     )
     fecha_snapshot = models.DateTimeField(auto_now_add=True)
     comentario = models.TextField(blank=True, help_text="Razón del cambio")
-    
+
     class Meta:
         ordering = ['-version']
-    
+
     def __str__(self):
         return f"{self.nombre} v{self.version} (snapshot {self.fecha_snapshot.strftime('%Y-%m-%d %H:%M')})"
 
@@ -212,7 +212,7 @@ class Certificado(models.Model):
         on_delete=models.CASCADE,
         related_name="certificados"
     )
-    
+
     calificacion = models.ForeignKey(
         Calificacion,
         on_delete=models.SET_NULL,
@@ -234,20 +234,20 @@ class Certificado(models.Model):
     nombre_archivo = models.CharField(max_length=255)
     tamanio_bytes = models.PositiveIntegerField()
     mime_type = models.CharField(max_length=100, default="application/pdf")
-    
+
     # Metadatos
     metadatos = models.JSONField(
         default=dict,
         blank=True,
         help_text="Información adicional extraída del certificado (OCR, fechas, montos)"
     )
-    
+
     estado = models.CharField(
         max_length=20,
         choices=ESTADO_CHOICES,
         default="CARGADO"
     )
-    
+
     # Auditoría
     fecha_carga = models.DateTimeField(auto_now_add=True)
     fecha_validacion = models.DateTimeField(null=True, blank=True)
@@ -332,28 +332,28 @@ class Feedback(models.Model):
 
 class CasoSoporte(models.Model):
     """Casos de soporte/ayuda generados por usuarios"""
-    
+
     PRIORIDAD_CHOICES = [
         ('BAJA', 'Baja'),
         ('MEDIA', 'Media'),
         ('ALTA', 'Alta'),
         ('CRÍTICA', 'Crítica'),
     ]
-    
+
     ESTADO_CHOICES = [
         ('ABIERTO', 'Abierto'),
         ('EN_PROGRESO', 'En Progreso'),
         ('RESUELTO', 'Resuelto'),
         ('CERRADO', 'Cerrado'),
     ]
-    
+
     TIPO_CHOICES = [
         ('CONSULTA', 'Consulta'),
         ('PROBLEMA', 'Problema'),
         ('MOLESTIA', 'Molestia'),
         ('SUGERENCIA', 'Sugerencia'),
     ]
-    
+
     # Datos básicos
     id_caso = models.CharField(max_length=20, unique=True, editable=False)  # CASE-001, CASE-002, etc
     usuario = models.ForeignKey(
@@ -364,19 +364,19 @@ class CasoSoporte(models.Model):
     )
     email = models.EmailField()
     nombre = models.CharField(max_length=150)
-    
+
     # Detalles del caso
     titulo = models.CharField(max_length=200)
     descripcion = models.TextField()
     tipo = models.CharField(max_length=20, choices=TIPO_CHOICES, default='CONSULTA')
     prioridad = models.CharField(max_length=20, choices=PRIORIDAD_CHOICES, default='MEDIA')
     estado = models.CharField(max_length=20, choices=ESTADO_CHOICES, default='ABIERTO')
-    
+
     # Timestamps
     fecha_creacion = models.DateTimeField(auto_now_add=True)
     fecha_actualizacion = models.DateTimeField(auto_now=True)
     fecha_resolucion = models.DateTimeField(null=True, blank=True)
-    
+
     # Seguimiento
     email_contacto_enviado = models.BooleanField(default=False)
     respuesta_admin = models.TextField(blank=True, null=True)
@@ -387,17 +387,17 @@ class CasoSoporte(models.Model):
         blank=True,
         related_name="casos_respondidos"
     )
-    
+
     class Meta:
         ordering = ['-fecha_creacion']
         indexes = [
             models.Index(fields=['estado', '-fecha_creacion']),
             models.Index(fields=['id_caso']),
         ]
-    
+
     def __str__(self):
         return f"{self.id_caso} - {self.titulo}"
-    
+
     def save(self, *args, **kwargs):
         """Generar ID único del caso si no existe"""
         if not self.id_caso:
@@ -408,7 +408,7 @@ class CasoSoporte(models.Model):
                 self.id_caso = f"CASE-{last_num + 1:06d}"
             else:
                 self.id_caso = "CASE-000001"
-        
+
         super().save(*args, **kwargs)
 
 
@@ -428,11 +428,11 @@ class CorreoAdicional(models.Model):
     verificado = models.BooleanField(default=False)
     principal = models.BooleanField(default=False)
     fecha_agregado = models.DateTimeField(auto_now_add=True)
-    
+
     class Meta:
         unique_together = ['usuario', 'email']
         ordering = ['-principal', '-fecha_agregado']
-    
+
     def __str__(self):
         return f"{self.usuario.username} - {self.email}"
 
@@ -446,7 +446,7 @@ class SolicitudCambioRol(models.Model):
         ('APROBADA', 'Aprobada'),
         ('RECHAZADA', 'Rechazada'),
     ]
-    
+
     usuario = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
@@ -456,7 +456,7 @@ class SolicitudCambioRol(models.Model):
     rol_solicitado = models.CharField(max_length=20, choices=PerfilUsuario.ROL_CHOICES)
     justificacion = models.TextField()
     estado = models.CharField(max_length=20, choices=ESTADO_CHOICES, default='PENDIENTE')
-    
+
     fecha_solicitud = models.DateTimeField(auto_now_add=True)
     fecha_respuesta = models.DateTimeField(null=True, blank=True)
     respondido_por = models.ForeignKey(
@@ -467,10 +467,10 @@ class SolicitudCambioRol(models.Model):
         related_name="solicitudes_respondidas"
     )
     comentario_admin = models.TextField(blank=True)
-    
+
     class Meta:
         ordering = ['-fecha_solicitud']
-    
+
     def __str__(self):
         return f"{self.usuario.username}: {self.rol_actual} → {self.rol_solicitado} ({self.estado})"
 
@@ -493,18 +493,18 @@ class VerificacionEmail(models.Model):
     fecha_creacion = models.DateTimeField(auto_now_add=True)
     verificado = models.BooleanField(default=False)
     fecha_verificacion = models.DateTimeField(null=True, blank=True)
-    
+
     def es_valido(self):
         """Token válido solo por 24 horas"""
         if self.verificado:
             return False
         expiracion = self.fecha_creacion + timedelta(hours=24)
         return timezone.now() < expiracion
-    
+
     @classmethod
     def generar_token(cls):
         """Generar token único de 64 caracteres"""
         return secrets.token_urlsafe(48)
-    
+
     def __str__(self):
         return f"Verificación - {self.usuario.username} ({self.email_a_verificar})"
