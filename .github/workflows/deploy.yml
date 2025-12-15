@@ -20,7 +20,7 @@ on:
 
 jobs:
   deploy-staging:
-    if: github.event.inputs.environment == 'staging' || (github.event_name == 'push' && github.ref == 'refs/heads/main')
+    if: github.event.inputs.environment == 'staging'
     runs-on: ubuntu-latest
     environment:
       name: staging
