@@ -27,7 +27,7 @@ const CorredorDashboard = () => {
   const cargarDatos = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem("ev3pi-token");
+      const token = localStorage.getItem("proyecto-token");
       const headers = { Authorization: `Bearer ${token}` };
 
       // Cargar estadísticas
@@ -55,7 +55,7 @@ const CorredorDashboard = () => {
   const aplicarFiltros = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem("ev3pi-token");
+      const token = localStorage.getItem("proyecto-token");
       const headers = { Authorization: `Bearer ${token}` };
 
       // Construir query params

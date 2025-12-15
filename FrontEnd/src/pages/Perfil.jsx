@@ -25,7 +25,7 @@ export default function Perfil() {
   const [justificacion, setJustificacion] = useState('');
 
   const API_URL = 'http://localhost:8000/api';
-  const token = localStorage.getItem('ev3pi-token');
+  const token = localStorage.getItem('proyecto-token');
 
   useEffect(() => {
     cargarPerfil();

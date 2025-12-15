@@ -15,7 +15,7 @@ const ValidationInbox = () => {
   const loadData = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem("ev3pi-token");
+      const token = localStorage.getItem("proyecto-token");
       const headers = { Authorization: `Bearer ${token}` };
       const res = await axios.get(`${API_BASE_URL}/calificaciones-pendientes/`, { headers });
       setItems(res.data?.calificaciones || []);
@@ -34,7 +34,7 @@ const ValidationInbox = () => {
   const resolver = async (id, estado) => {
     try {
       setAccionMsg(null);
-      const token = localStorage.getItem("ev3pi-token");
+      const token = localStorage.getItem("proyecto-token");
       const headers = { Authorization: `Bearer ${token}` };
       await axios.post(
         `${API_BASE_URL}/calificaciones-pendientes/${id}/resolver/`,

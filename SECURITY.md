@@ -1,12 +1,12 @@
-# 🔒 INFORME DE SEGURIDAD - EV3-Pi
+# 🔒 INFORME DE SEGURIDAD - Proyecto
 
 ---
 
 # 📋 RESUMEN DE SEGURIDAD
 
 **Fecha**: 14 de Diciembre, 2024  
-**Proyecto**: EV3-Pi - Sistema de Gestión Tributaria  
-**Equipo**: Desarrollo EV3-Pi  
+**Proyecto**: Proyecto - Sistema de Gestión Tributaria  
+**Equipo**: Desarrollo Proyecto  
 **Solicitante**: Product Owner
 
 ---
@@ -154,7 +154,7 @@ Implementar controles de seguridad siguiendo estándares **OWASP Top 10 2021**, 
 
 ---
 
-**🏆 Conclusión**: EV3-Pi cumple **79.5% OWASP Top 10** (desarrollo) y **95%+** (producción con checklist). Sistema listo para despliegue seguro.
+**🏆 Conclusión**: Proyecto cumple **79.5% OWASP Top 10** (desarrollo) y **95%+** (producción con checklist). Sistema listo para despliegue seguro.
 
 ---
 ---
@@ -426,4 +426,4 @@ SECURE_HSTS_PRELOAD=True
 ---
 
 **Última actualización**: 14 de Diciembre, 2024  
-**Responsable**: Equipo de Desarrollo EV3-Pi
+**Responsable**: Equipo de Desarrollo Proyecto

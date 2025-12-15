@@ -42,7 +42,7 @@ export default function AdministracionNuam() {
     rol: "",
   });
 
-  const token = localStorage.getItem("ev3pi-token");
+  const token = localStorage.getItem("proyecto-token");
 
   useEffect(() => {
     if (activeTab === "reglas") {

@@ -1,4 +1,4 @@
-# Ev3-Pi - Sistema de Gestión Tributaria
+# Proyecto - Sistema de Gestión Tributaria
 
 Sistema integral de gestión tributaria y certificados digitales con autenticación JWT, roles basados en permisos y auditoría completa.
 
@@ -43,7 +43,7 @@ Este contenido se trasladó a [CHANGELOG.md](CHANGELOG.md).
 ## 📁 Estructura del Proyecto
 
 ```
-Ev3-Pi/
+Proyecto/
 ├── Backend/
 │   ├── Django/                          # Configuración Django
 │   │   ├── __init__.py
@@ -168,14 +168,14 @@ Sigue estos pasos en Windows para iniciar el backend (comandos listos para copia
 PowerShell:
 
 ```powershell
-cd 'C:\Users\ESTEBAN\Desktop\Ev3-Pi\Backend'
+cd 'C:\Users\ESTEBAN\Desktop\Proyecto\Backend'
 .\ven\Scripts\Activate.ps1
 ```
 
 cmd.exe:
 
 ```cmd
-cd C:\Users\ESTEBAN\Desktop\Ev3-Pi\Backend
+cd C:\Users\ESTEBAN\Desktop\Proyecto\Backend
 .\ven\Scripts\activate.bat
 ```
 
@@ -227,7 +227,7 @@ netstat -ano | Select-String ":5432"
 Alternativa: usar Docker (rápido para pruebas):
 
 ```powershell
-docker run --name ev3pi-postgres -e POSTGRES_PASSWORD=postgres -e POSTGRES_USER=postgres -e POSTGRES_DB=postgres -p 5432:5432 -d postgres:15
+docker run --name proyecto-postgres -e POSTGRES_PASSWORD=postgres -e POSTGRES_USER=postgres -e POSTGRES_DB=postgres -p 5432:5432 -d postgres:15
 ```
 
 5) Crear base de datos y usuario (si hace falta)
@@ -291,7 +291,7 @@ net start Redis
 
 **Opción B: Docker (recomendado)**
 ```powershell
-docker run --name ev3pi-redis -p 6379:6379 -d redis:7-alpine
+docker run --name proyecto-redis -p 6379:6379 -d redis:7-alpine
 ```
 
 **Verificar que funciona:**
@@ -743,7 +743,7 @@ Redis también expira la entrada automáticamente cuando el token expira
 ## Estructura del Proyecto
 
 ```
-Ev3-Pi/
+Proyecto/
 ├── Backend/
 │   ├── Django/
 │   │   ├── __init__.py
@@ -968,7 +968,7 @@ La funcionalidad principal es la búsqueda de registros disponible para todos lo
 
 ## 🔒 Seguridad
 
-EV3-Pi implementa múltiples capas de seguridad siguiendo estándares OWASP y NIST:
+Proyecto implementa múltiples capas de seguridad siguiendo estándares OWASP y NIST:
 
 - **Autenticación**: JWT con refresh tokens + MFA (TOTP)
 - **Autorización**: RBAC con 4 roles granulares

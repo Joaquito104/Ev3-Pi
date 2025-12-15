@@ -394,7 +394,7 @@ class MFAConfigView(APIView):
         # Generar URI para QR
         totp_uri = pyotp.totp.TOTP(secret).provisioning_uri(
             name=request.user.email,
-            issuer_name='Ev3-Pi Sistema'
+            issuer_name='Proyecto Sistema'
         )
         
         # Generar código QR

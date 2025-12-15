@@ -16,7 +16,7 @@ export default function DetalleCalificacion() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const token = localStorage.getItem("ev3pi-token");
+  const token = localStorage.getItem("proyecto-token");
   const headers = { Authorization: `Bearer ${token}` };
 
   useEffect(() => {

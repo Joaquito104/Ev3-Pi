@@ -26,7 +26,7 @@ const DashboardAnalista = () => {
   const cargarCalificaciones = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem("ev3pi-token");
+      const token = localStorage.getItem("proyecto-token");
 
       const res = await axios.get(
         `${API_BASE_URL}/calificaciones-analista/`,
@@ -50,7 +50,7 @@ const DashboardAnalista = () => {
   // =============================
   const enviarAValidacion = async (id) => {
     try {
-      const token = localStorage.getItem("ev3pi-token");
+      const token = localStorage.getItem("proyecto-token");
 
       await axios.post(
         `${API_BASE_URL}/calificaciones-analista/${id}/enviar/`,
@@ -73,7 +73,7 @@ const DashboardAnalista = () => {
   const aplicarFiltros = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem("ev3pi-token");
+      const token = localStorage.getItem("proyecto-token");
 
       const params = {};
       if (filtros.estado) params.estado = filtros.estado;

@@ -11,11 +11,11 @@ export const AuthContext = createContext();
 
 export default function App() {
   const [theme, setTheme] = useState(
-    () => localStorage.getItem("ev3pi-theme") || "light"
+    () => localStorage.getItem("proyecto-theme") || "light"
   );
 
   useEffect(() => {
-    localStorage.setItem("ev3pi-theme", theme);
+    localStorage.setItem("proyecto-theme", theme);
     // Aplicar clase 'dark' al HTML para Tailwind
     if (theme === "dark") {
       document.documentElement.classList.add("dark");

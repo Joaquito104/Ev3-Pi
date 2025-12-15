@@ -25,7 +25,7 @@ export default function AdminGlobal() {
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState("dashboard"); // dashboard | operaciones | auditoria
 
-  const token = localStorage.getItem("ev3pi-token");
+  const token = localStorage.getItem("proyecto-token");
 
   // TEMPORAL: Verificación deshabilitada
   // useEffect(() => {

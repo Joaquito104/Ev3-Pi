@@ -74,9 +74,9 @@ def enviar_email_verificacion(usuario, email, token):
     """
     enlace_verificacion = f"{settings.FRONTEND_URL}/verificar-email?token={token}"
     
-    asunto = "Confirma tu email - Ev3-Pi"
+    asunto = "Confirma tu email - Proyecto"
     mensaje_html = f"""
-    <h2>Bienvenido a Ev3-Pi, {usuario.first_name}!</h2>
+    <h2>Bienvenido a Proyecto, {usuario.first_name}!</h2>
     <p>Para completar tu registro, haz clic en el siguiente enlace:</p>
     <p><a href="{enlace_verificacion}" style="background-color: #3b82f6; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block;">
     ✅ Confirmar Email
@@ -104,7 +104,7 @@ def enviar_email_rol_asignado(usuario, rol):
     """
     Notificar al usuario cuando se asigna un rol
     """
-    asunto = "Tu rol ha sido asignado - Ev3-Pi"
+    asunto = "Tu rol ha sido asignado - Proyecto"
     mensaje_html = f"""
     <h2>¡Tu rol ha sido asignado!</h2>
     <p>Hola {usuario.first_name},</p>
@@ -184,7 +184,7 @@ def enviar_email_calificacion_creada(usuario, rut, tipo_certificado, solicitar_a
     """
     Notificar cuando se crea una nueva calificación
     """
-    asunto = "📋 Nueva Calificación Creada - Ev3-Pi"
+    asunto = "Nueva Calificación Creada - Proyecto"
     
     auditoria_html = ""
     if solicitar_auditoria:
@@ -240,7 +240,7 @@ def enviar_email_auditoria_solicitada(usuario, rut, calificacion_id):
     """
     Notificar cuando se solicita auditoría de una calificación
     """
-    asunto = "🔍 Solicitud de Auditoría Registrada - Ev3-Pi"
+    asunto = "Solicitud de Auditoría Registrada - Proyecto"
     
     mensaje_html = f"""
     <div style="font-family: Arial, sans-serif; background-color: #f5f5f5; padding: 20px;">
@@ -288,7 +288,7 @@ def enviar_email_calificacion_validada(usuario, rut, estado, comentarios=""):
     color_estado = "#28a745" if estado == "VALIDADA" else "#dc3545"
     icono_estado = "✅" if estado == "VALIDADA" else "⚠️"
     
-    asunto = f"{icono_estado} Calificación {estado} - Ev3-Pi"
+    asunto = f"{icono_estado} Calificación {estado} - Proyecto"
     
     comentarios_html = ""
     if comentarios:

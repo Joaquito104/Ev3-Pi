@@ -59,7 +59,7 @@ nano Backend/.env
 SECRET_KEY=<generar con get_random_secret_key()>
 DEBUG=False
 ALLOWED_HOSTS=tu-dominio.com,www.tu-dominio.com
-DB_USER=ev3pi_prod
+DB_USER=proyecto_prod
 PASSWORD=<contraseña fuerte 16+ chars>
 MONGODB_PASSWORD=<contraseña fuerte>
 EMAIL_HOST_PASSWORD=<app password de Gmail>
@@ -88,9 +88,9 @@ pip install argon2-cffi
 
 # 4. Configurar PostgreSQL
 sudo -u postgres psql
-CREATE DATABASE ev3pi_production;
-CREATE USER ev3pi_user WITH PASSWORD 'strong_password_here';
-GRANT ALL PRIVILEGES ON DATABASE ev3pi_production TO ev3pi_user;
+CREATE DATABASE proyecto_production;
+CREATE USER proyecto_user WITH PASSWORD 'strong_password_here';
+GRANT ALL PRIVILEGES ON DATABASE proyecto_production TO proyecto_user;
 \q
 
 # 5. Configurar Redis
@@ -98,8 +98,8 @@ sudo systemctl enable redis-server
 sudo systemctl start redis-server
 
 # 6. Clonar repositorio
-git clone <repo-url> /var/www/ev3pi
-cd /var/www/ev3pi
+git clone <repo-url> /var/www/proyecto
+cd /var/www/proyecto
 
 # 7. Crear entorno virtual
 python3.11 -m venv .venv
@@ -123,23 +123,23 @@ python Backend/manage.py crear_superusuario_global
 python Backend/manage.py collectstatic --no-input
 
 # 13. Configurar Gunicorn
-sudo nano /etc/systemd/system/ev3pi.service
+sudo nano /etc/systemd/system/proyecto.service
 ```
 
-**Archivo ev3pi.service:**
+**Archivo proyecto.service:**
 ```ini
 [Unit]
-Description=EV3-Pi Django Backend
+Description=Proyecto Django Backend
 After=network.target
 
 [Service]
 User=www-data
 Group=www-data
-WorkingDirectory=/var/www/ev3pi/Backend
-Environment="PATH=/var/www/ev3pi/.venv/bin"
-ExecStart=/var/www/ev3pi/.venv/bin/gunicorn \
+WorkingDirectory=/var/www/proyecto/Backend
+Environment="PATH=/var/www/proyecto/.venv/bin"
+ExecStart=/var/www/proyecto/.venv/bin/gunicorn \
     --workers 4 \
-    --bind unix:/var/www/ev3pi/Backend/gunicorn.sock \
+    --bind unix:/var/www/proyecto/Backend/gunicorn.sock \
     Django.wsgi:application
 
 [Install]
@@ -148,8 +148,8 @@ WantedBy=multi-user.target
 
 ```bash
 # Habilitar servicio
-sudo systemctl enable ev3pi
-sudo systemctl start ev3pi
+sudo systemctl enable proyecto
+sudo systemctl start proyecto
 ```
 
 ### Opción 2: Docker
@@ -190,8 +190,8 @@ services:
   db:
     image: postgres:15
     environment:
-      POSTGRES_DB: ev3pi_production
-      POSTGRES_USER: ev3pi_user
+      POSTGRES_DB: proyecto_production
+      POSTGRES_USER: proyecto_user
       POSTGRES_PASSWORD: ${DB_PASSWORD}
     volumes:
       - postgres_data:/var/lib/postgresql/data
@@ -204,7 +204,7 @@ services:
   backend:
     build: ./Backend
     environment:
-      - DATABASE_URL=postgresql://ev3pi_user:${DB_PASSWORD}@db:5432/ev3pi_production
+      - DATABASE_URL=postgresql://proyecto_user:${DB_PASSWORD}@db:5432/proyecto_production
     depends_on:
       - db
       - redis
@@ -259,7 +259,7 @@ server {
     limit_req zone=login burst=10 nodelay;
 
     location / {
-        proxy_pass http://unix:/var/www/ev3pi/Backend/gunicorn.sock;
+        proxy_pass http://unix:/var/www/proyecto/Backend/gunicorn.sock;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
@@ -267,11 +267,11 @@ server {
     }
 
     location /static/ {
-        alias /var/www/ev3pi/Backend/static/;
+        alias /var/www/proyecto/Backend/static/;
     }
 
     location /media/ {
-        alias /var/www/ev3pi/Backend/media/;
+        alias /var/www/proyecto/Backend/media/;
     }
 }
 ```
@@ -294,14 +294,14 @@ curl -X POST https://tu-dominio.com/api/login/ \
 ### 2. Monitorear logs
 ```bash
 # Logs Django
-tail -f /var/www/ev3pi/Backend/logs/security.log
+tail -f /var/www/proyecto/Backend/logs/security.log
 
 # Logs Nginx
 tail -f /var/log/nginx/access.log
 tail -f /var/log/nginx/error.log
 
 # Logs Gunicorn
-journalctl -u ev3pi -f
+journalctl -u proyecto -f
 ```
 
 ### 3. Verificar SSL
@@ -319,9 +319,9 @@ https://www.ssllabs.com/ssltest/
 ## 🚨 TROUBLESHOOTING
 
 ### Error: 502 Bad Gateway
-- Verificar que Gunicorn está corriendo: `sudo systemctl status ev3pi`
-- Verificar permisos del socket: `ls -l /var/www/ev3pi/Backend/gunicorn.sock`
-- Revisar logs: `journalctl -u ev3pi -n 50`
+- Verificar que Gunicorn está corriendo: `sudo systemctl status proyecto`
+- Verificar permisos del socket: `ls -l /var/www/proyecto/Backend/gunicorn.sock`
+- Revisar logs: `journalctl -u proyecto -n 50`
 
 ### Error: CORS blocked
 - Verificar `CORS_ALLOWED_ORIGINS` en `.env`
@@ -329,7 +329,7 @@ https://www.ssllabs.com/ssltest/
 
 ### Error: Database connection failed
 - Verificar PostgreSQL: `sudo systemctl status postgresql`
-- Test conexión: `psql -h localhost -U ev3pi_user -d ev3pi_production`
+- Test conexión: `psql -h localhost -U proyecto_user -d proyecto_production`
 
 ---
 

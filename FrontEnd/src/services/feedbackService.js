@@ -8,7 +8,7 @@ export const enviarFeedback = async (mensaje) => {
     { mensaje },
     {
       headers: {
-        Authorization: `Bearer ${localStorage.getItem("ev3pi-token")}`,
+        Authorization: `Bearer ${localStorage.getItem("proyecto-token")}`,
         "Content-Type": "application/json",
       },
     }

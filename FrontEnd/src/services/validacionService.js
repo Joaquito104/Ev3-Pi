@@ -4,7 +4,7 @@ const API_URL = "http://127.0.0.1:8000/api";
 
 // FIX DEFINITIVO: leer token correcto
 const authHeader = () => {
-  const token = localStorage.getItem("ev3pi-token");
+  const token = localStorage.getItem("proyecto-token");
 
   if (!token) {
     console.warn("❌ No hay token JWT en localStorage");

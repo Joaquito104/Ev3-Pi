@@ -22,7 +22,7 @@ const DashboardAuditor = () => {
   const cargarPendientes = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem("ev3pi-token");
+      const token = localStorage.getItem("proyecto-token");
 
       const res = await axios.get(
         `${API_BASE_URL}/calificaciones-pendientes/`,
@@ -46,7 +46,7 @@ const DashboardAuditor = () => {
   // =============================
   const resolver = async (id, estado) => {
     try {
-      const token = localStorage.getItem("ev3pi-token");
+      const token = localStorage.getItem("proyecto-token");
 
       await axios.post(
         `${API_BASE_URL}/calificaciones-resolver/${id}/`,

@@ -3,7 +3,7 @@ import axios from "axios";
 const API_URL = "http://127.0.0.1:8000/api";
 
 const authHeader = () => ({
-  Authorization: `Bearer ${localStorage.getItem("ev3pi-token")}`,
+  Authorization: `Bearer ${localStorage.getItem("proyecto-token")}`,
   "Content-Type": "application/json",
 });
 

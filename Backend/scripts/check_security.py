@@ -436,7 +436,7 @@ class SecurityChecker:
 
 def main():
     print("=" * 60)
-    print("🔒 VERIFICADOR DE SEGURIDAD EV3-PI")
+    print("🔒 VERIFICADOR DE SEGURIDAD PROYECTO")
     print("=" * 60)
     print(f"\nModo: {'🔴 PRODUCCIÓN' if not settings.DEBUG else '🟡 DESARROLLO'}")
     print(f"Django: {django.get_version()}")
