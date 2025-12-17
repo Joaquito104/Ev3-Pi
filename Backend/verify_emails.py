@@ -30,7 +30,6 @@ print(f"  EMAIL_HOST: {settings.EMAIL_HOST}")
 print(f"  EMAIL_PORT: {settings.EMAIL_PORT}")
 print(f"  EMAIL_USE_TLS: {settings.EMAIL_USE_TLS}")
 print(f"  DEFAULT_FROM_EMAIL: {settings.DEFAULT_FROM_EMAIL}")
-# EMAIL_HOST_USER y EMAIL_HOST_PASSWORD deben definirse en .env
 
 # 2. Intentar enviar email de prueba
 print("\n✉️  Enviando email de prueba...")

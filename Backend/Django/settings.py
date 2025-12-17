@@ -13,9 +13,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Cargar variables de .env
 load_dotenv(BASE_DIR / '.env')
 
-SECRET_KEY = os.getenv('SECRET_KEY')  # Debe definirse en .env
+SECRET_KEY = os.getenv('SECRET_KEY')
 
-DEBUG = os.getenv('DEBUG', 'False') == 'True'  # Debe definirse en .env
+DEBUG = os.getenv('DEBUG', 'False') == 'True'
 
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
 
@@ -89,7 +89,7 @@ DATABASES = {
         'NAME': os.getenv('DB_NAME'),
         # Prefer explicit DB_USER to avoid colliding with OS-level USER env on Windows
         'USER': os.getenv('DB_USER', os.getenv('USER')),
-        'PASSWORD': os.getenv('PASSWORD'),  # Debe definirse en .env
+        'PASSWORD': os.getenv('PASSWORD'),
         'HOST': os.getenv('DB_HOST', 'localhost'),
         'PORT': os.getenv('DB_PORT', '5432'),
     }
@@ -192,8 +192,8 @@ MONGODB_CONFIG = {
     'host': os.getenv('MONGODB_HOST', 'localhost'),
     'port': int(os.getenv('MONGODB_PORT', 27017)),
     'db_name': os.getenv('MONGODB_DB', 'nuam_calificaciones'),
-    'username': os.getenv('MONGODB_USER', ''),  # Debe definirse en .env
-    'password': os.getenv('MONGODB_PASSWORD', ''),  # Debe definirse en .env
+    'username': os.getenv('MONGODB_USER', ''),
+    'password': os.getenv('MONGODB_PASSWORD', ''),
     'auth_source': os.getenv('MONGODB_AUTH_SOURCE', 'admin'),
     'auth_mechanism': os.getenv('MONGODB_AUTH_MECHANISM', 'SCRAM-SHA-256'),
     'use_tls': os.getenv('MONGODB_TLS', 'False') == 'True',
@@ -209,8 +209,8 @@ EMAIL_BACKEND = os.getenv('EMAIL_BACKEND', 'django.core.mail.backends.console.Em
 EMAIL_HOST = os.getenv('EMAIL_HOST', 'smtp.gmail.com')
 EMAIL_PORT = int(os.getenv('EMAIL_PORT', 587))
 EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS', 'True') == 'True'
-EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', '')  # Debe definirse en .env
-EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', '')  # Debe definirse en .env
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', '')
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', '')
 DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', 'noreply@proyecto.com')
 
 # URL del frontend para enlaces de verificación
