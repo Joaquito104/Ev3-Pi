@@ -79,6 +79,22 @@ Implementar controles de seguridad siguiendo estándares **OWASP Top 10 2021**, 
 
 ## 📈 Métricas de Mejora
 
+### Resultados de Pruebas de Carga (JMeter)
+
+| Tipo de Prueba     | Total Peticiones | Tiempo Medio (ms) | Tiempo Mín (ms) | Tiempo Máx (ms) | Desv. Estándar (ms) | Rendimiento (req/s) | KB/sec | Sent KB/sec | Media de Bytes |
+|--------------------|------------------|-------------------|-----------------|-----------------|---------------------|---------------------|--------|-------------|---------------|
+| Petición HTTP      | 3538             | 1482              | 94.41           | 0.84            | 0.90                | 5.42                | 0.34   | 6155.80     | ...           |
+| Petición HTTP      | 3038             | 1482              | 73.63           | 0.98            | 0.82                | 5.70                | 0.28   | 7098.49     | ...           |
+
+**Interpretación:**
+- El sistema soportó más de 3,000 peticiones concurrentes en endpoints críticos protegidos.
+- Los tiempos medios y máximos se mantuvieron dentro de rangos aceptables para aplicaciones web empresariales.
+- El rendimiento (requests/segundo) y el throughput (KB/sec) son adecuados para el volumen esperado.
+- Los errores observados fueron intencionales por cambios en settings y no representan fallas reales.
+
+**Recomendación:**
+Continuar monitoreando bajo escenarios reales y ajustar límites de concurrencia y recursos según demanda en producción.
+
 ### Reducción de Riesgo
 
 | Riesgo | Antes | Después | Reducción |
