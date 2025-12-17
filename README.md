@@ -935,6 +935,7 @@ npm audit
 - [SECURITY.md](SECURITY.md) - **Informe de seguridad OWASP/NIST (incluye resumen ejecutivo + detalles técnicos)**
 - [DEPLOY.md](DEPLOY.md) - **Guía de despliegue en producción**
 - [CHECKLIST_DEPLOY.md](CHECKLIST_DEPLOY.md) - **Checklist paso a paso para producción (50 items)**
+- [flujo.md](flujo.md) - **Flujo general del sistema y uso de archivos**
 
 ---
 
