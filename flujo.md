@@ -1,18 +1,23 @@
-# 🗂️ Flujo del Sistema - Proyecto de Gestión Tributaria
 
-Este documento describe el flujo general del sistema, explicando la función de cada archivo principal, las acciones clave y el uso de los módulos en el proyecto.
+# 🗂️ Planificación y Estado Actual del Sistema
+
+Este documento describe la planificación del sistema, su grado de implementación actual y el flujo de funcionamiento de cada módulo y archivo principal.
 
 ---
 
-## 1. Registro y Verificación de Usuario
+---
+
+
+## 1. Registro y Activación de Usuario
 
 - **Archivo:** Backend/src/views/auth.py
-- **Acción:**
-  - El usuario se registra mediante un endpoint de registro.
-  - Se crea un usuario en `auth_user` (modelo User de Django) y un perfil en `PerfilUsuario`.
-  - Se envía un email con token de verificación.
-  - Al verificar el email, se activa el usuario (`is_active=True`) y se marca el correo como verificado.
-  - Se audita la acción en el modelo `Auditoria`.
+- **Flujo:**
+  1. Usuario se registra → se crea en `auth_user` y `PerfilUsuario` (no activo).
+  2. Se envía email con token de verificación.
+  3. Usuario hace clic en el enlace del email.
+  4. El backend activa el usuario (`is_active=True`).
+  5. Se audita el evento de activación en el modelo `Auditoria`.
+  6. No se crea ningún registro tributario en este proceso, solo el usuario y su perfil.
 
 ## 2. Login y Autenticación JWT
 
@@ -84,15 +89,49 @@ Este documento describe el flujo general del sistema, explicando la función de 
 
 ---
 
-## Resumen de Flujo
 
-1. Usuario se registra → recibe email → verifica cuenta (se activa en auth_user).
-2. Inicia sesión → obtiene JWT → accede a funcionalidades según su rol.
-3. Corredor sube certificados → quedan asociados a su usuario.
-4. Auditor/analista revisa registros y certificados, valida o rechaza.
-5. Todas las acciones quedan auditadas.
-6. Seguridad y configuración centralizadas en settings y .env.
+## Resumen de Flujo de Activación de Usuario
+
+1. Usuario se registra en el sistema.
+2. Recibe email de verificación.
+3. Al hacer clic en el enlace, el usuario es activado (`is_active=True`).
+4. Se registra una auditoría del evento de activación.
+5. No se crea ningún registro tributario en este paso.
 
 ---
+
+
+---
+
+## Checklist de Implementación
+
+### Completado
+- Registro y activación de usuarios con email y auditoría.
+- Autenticación JWT y gestión de tokens (incluye blacklist y rotación).
+- Gestión de roles y permisos (RBAC completo).
+- Carga y validación de certificados.
+- Visualización y descarga de archivos por auditores y analistas.
+- Auditoría de todas las acciones críticas.
+- Seguridad: hashing Argon2, validaciones, headers, logs.
+- Documentación técnica y de seguridad.
+- Integración con Docker y pipelines CI/CD.
+
+### Parcialmente Completado
+- Pruebas automatizadas (unitarias y de integración básicas).
+- Monitoreo inicial (logs locales, sin integración externa avanzada).
+- Validaciones avanzadas en algunos endpoints.
+
+### Pendiente
+- Pruebas avanzadas de seguridad y performance (pentesting, fuzzing, monitoreo externo).
+- Integración de monitoreo en tiempo real (Grafana, Prometheus, etc.).
+- Mejoras en la cobertura de tests y escenarios de error.
+
+---
+
+Con esto, el proyecto queda cerrado a nivel documental y listo para:
+
+- Evaluación
+- Defensa técnica
+- O continuación en una siguiente entrega
 
 **Última actualización:** 17 de diciembre de 2025
