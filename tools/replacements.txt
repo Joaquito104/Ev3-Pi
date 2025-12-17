@@ -1,6 +1,6 @@
 TuPasswordSegura123!==><REDACTED_PASSWORD>
 EmergPass2025!==><REDACTED_PASSWORD>
-POSTGRES_PASSWORD=postgres==>POSTGRES_PASSWORD=<REDACTED>
+POSTGRES_PASSWORD='REDACTED_PASSWORD'==>POSTGRES_PASSWORD=<REDACTED>
 CREATE USER test WITH PASSWORD '1234'==>CREATE USER test WITH PASSWORD '<REDACTED_DB_PASS>'
 --password EmergPass2025!==>--password <REDACTED_PASSWORD>
 python manage.py crear_superusuario_global --username emergencia --password EmergPass2025!==>python manage.py crear_superusuario_global --username emergencia --password <REDACTED_PASSWORD>
